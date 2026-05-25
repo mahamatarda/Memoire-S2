@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+*.egg-info/
+.env
+
+# LaTeX
+*.aux
+*.log
+*.out
+*.toc
+*.lof
+*.lot
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.bbl
+*.blg
+*.nav
+*.snm
+*.vrb
+*.mtc*
+*.maf
+*.pdf
+
+# macOS
+.DS_Store
+
+# Data (trop lourde pour GitHub)
+health_lifestyle_dataset.csv
+data_processed.csv

@@ -1,0 +1,134 @@
+% !TEX root = ../manuscript.tex
+\minitoc
+\newpage
+
+\section{Régression~: prédire le taux de cholestérol}
+
+\subsection{Objectif et variable cible}
+
+L'objectif est de prédire le taux de cholestérol (\texttt{cholesterol}, en mg/dL) à partir des habitudes de vie et indicateurs biologiques. Ce choix est médicalement motivé~: le cholestérol est un facteur de risque cardiovasculaire reconnu~\cite{ncep2002}.
+
+\textbf{Note sur le data leakage~:} la variable \texttt{hypercholesterol} ($= 1$ si cholestérol $> 200$) est directement dérivée de la variable cible. L'inclure comme feature constitue un \textit{data leakage}~\cite{kaufman2012} qui gonfle artificiellement le R² à 0.675. Une fois retirée, le R² chute à $\approx 0$ pour tous les modèles, confirmant l'absence de signal prédictif.
+
+\subsection{Protocole expérimental}
+
+\textbf{Split 80/20}~: 80~000 individus en entraînement, 20~000 en test (\texttt{random\_state=42}). Le jeu de test n'intervient qu'à l'évaluation finale~\cite{james2021}.
+
+\textbf{Validation croisée K-Fold ($k=5$)}~\cite{hastie2009}~: le jeu d'entraînement est découpé en 5 plis. Le score moyen est estimé par~:
+\begin{equation}
+\text{CV-score} = \frac{1}{k}\sum_{i=1}^{k} \text{score}_i, \quad k=5
+\end{equation}
+
+\textbf{Métriques d'évaluation}~\cite{james2021}~:
+\begin{align}
+R^2 &= 1 - \frac{\sum(y_i - \hat{y}_i)^2}{\sum(y_i - \bar{y})^2} \\
+\text{RMSE} &= \sqrt{\frac{1}{n}\sum(y_i - \hat{y}_i)^2} \\
+\text{MAE} &= \frac{1}{n}\sum|y_i - \hat{y}_i|
+\end{align}
+
+\subsection{Modèles et justification}
+
+\textbf{Régression linéaire (baseline)}~: référence obligatoire. Si les autres modèles ne font pas mieux, la complexité ajoutée n'est pas justifiée~\cite{james2021}.
+
+\textbf{Ridge (régularisation $L_2$)}~\cite{hoerl1970}~:
+\begin{equation}
+\mathcal{L}_{\text{Ridge}} = \sum(y_i - \hat{y}_i)^2 + \lambda\sum_j w_j^2
+\end{equation}
+
+\textbf{Lasso (régularisation $L_1$)}~\cite{tibshirani1996}~: force certains coefficients à zéro, réalisant une \textbf{sélection automatique de variables}~:
+\begin{equation}
+\mathcal{L}_{\text{Lasso}} = \sum(y_i - \hat{y}_i)^2 + \lambda\sum_j |w_j|
+\end{equation}
+
+\textbf{ElasticNet}~\cite{hastie2009}~: combine $L_1$ et $L_2$ via un paramètre $\rho \in [0,1]$~:
+\begin{equation}
+\mathcal{L}_{\text{EN}} = \sum(y_i - \hat{y}_i)^2 + \lambda\left[\rho\sum_j|w_j| + \frac{1-\rho}{2}\sum_j w_j^2\right]
+\end{equation}
+
+\textbf{Random Forest}~\cite{breiman2001}~: ensemble de $B$ arbres avec prédiction par moyenne~:
+\begin{equation}
+\hat{y} = \frac{1}{B}\sum_{b=1}^{B} T_b(\mathbf{x})
+\end{equation}
+Paramètres~: \texttt{max\_depth=15}, \texttt{max\_samples=0.5}, \texttt{n\_jobs=-1} pour éviter les entraînements de plusieurs heures observés avec les paramètres par défaut.
+
+\textbf{XGBoost}~\cite{chen2016}~: gradient boosting séquentiel avec régularisation intégrée~:
+\begin{equation}
+\hat{y}^{(t)} = \hat{y}^{(t-1)} + \eta \cdot T_t(\mathbf{x})
+\end{equation}
+
+\textbf{Tuning par RandomizedSearchCV}~\cite{bergstra2012}~: tire aléatoirement \texttt{n\_iter=20} combinaisons dans l'espace des hyperparamètres, divisant le temps de calcul par rapport à GridSearch tout en explorant suffisamment l'espace.
+
+\subsection{Résultats et analyse critique}
+
+\begin{table}[h]
+\centering
+\caption{Résultats de régression (variable cible~: \texttt{cholesterol})}
+\label{tab:regression_results}
+\begin{tabular}{lrrrr}
+\toprule
+Modèle & $R^2$ & RMSE (mg/dL) & MAE (mg/dL) & CV-$R^2$ \\
+\midrule
+LinearRegression (baseline) & 0.0001 & 43.33 & 37.59 & $\approx 0$ \\
+Ridge ($\alpha=7197$, tuné) & 0.0001 & 43.33 & 37.59 & $\approx 0$ \\
+Lasso ($\alpha=9.54$, tuné) & $\approx 0$ & 43.33 & 37.60 & $\approx 0$ \\
+ElasticNet & 0.0001 & 43.33 & 37.60 & $\approx 0$ \\
+Random Forest (tuné) & $\approx 0$ & 43.34 & 37.61 & $\approx 0$ \\
+XGBoost (tuné) & 0.0001 & 43.33 & 37.59 & $\approx 0$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{quote}
+\textbf{Analyse critique~:} Aucun modèle ne réussit à prédire le taux de cholestérol ($R^2 \approx 0$). Le Lasso, en fixant tous ses coefficients à zéro, confirme formellement l'absence de signal prédictif linéaire. Ce résultat illustre une \textbf{limite fondamentale du dataset synthétique}~: les variables ont été générées indépendamment, sans relations causales réalistes. Dans des données réelles, l'alimentation, l'activité physique et le tabagisme influencent significativement le cholestérol~\cite{booth2012} --- mais cette relation n'existe pas ici. La valeur de cet exercice réside dans la \textbf{démonstration méthodologique}~: pipeline complet, détection de data leakage, comparaison de 6 modèles avec tuning.
+\end{quote}
+
+\section{Classification~: prédire le risque de maladie}
+
+\subsection{Objectif et contexte}
+
+L'objectif est de prédire si un individu est à risque de maladie (\texttt{disease\_risk} = 1) ou non (\texttt{disease\_risk} = 0). Le dataset présente un \textbf{déséquilibre de classes}~: 75.2\% sans risque, 24.8\% à risque~\cite{japkowicz2002}.
+
+\subsection{Protocole expérimental}
+
+\textbf{Split stratifié 80/20}~: le paramètre \texttt{stratify=y} maintient le ratio 75.2/24.8 dans les deux ensembles~\cite{james2021}.
+
+\textbf{Stratified K-Fold ($k=5$)}~: maintient le ratio de classes dans chaque fold~\cite{japkowicz2002}.
+
+\textbf{Gestion du déséquilibre}~\cite{japkowicz2002}~:
+\begin{equation}
+w_k = \frac{n}{K \cdot n_k}
+\end{equation}
+via \texttt{class\_weight='balanced'} (Logistic Regression, Random Forest) et \texttt{scale\_pos\_weight=3} (XGBoost).
+
+\subsection{Métriques d'évaluation}
+
+\begin{align}
+\text{Précision} &= \frac{TP}{TP+FP}, \quad \text{Rappel} = \frac{TP}{TP+FN} \\
+\text{F1-score} &= \frac{2 \times \text{Précision} \times \text{Rappel}}{\text{Précision} + \text{Rappel}}
+\end{align}
+
+La courbe \textbf{ROC} trace le taux de vrais positifs en fonction du taux de faux positifs. L'\textbf{AUC-ROC}~\cite{james2021} mesure la capacité de discrimination~: AUC = 0.5 équivaut à un tirage aléatoire.
+
+\textbf{Note sur le SVM~:} sa complexité en $\mathcal{O}(n^2)$ à $\mathcal{O}(n^3)$~\cite{cortes1995} le rend impraticable sur 100~000 observations sans infrastructure dédiée. Un test sur 5~000 individus a confirmé des performances similaires aux autres modèles.
+
+\subsection{Résultats}
+
+\begin{table}[h]
+\centering
+\caption{Résultats de classification (variable cible~: \texttt{disease\_risk})}
+\label{tab:classif_results}
+\begin{tabular}{lrrrrr}
+\toprule
+Modèle & Accuracy & Précision & Rappel & F1 & AUC-ROC \\
+\midrule
+Naïf (tout à 0) & 0.752 & --- & 0.000 & 0.000 & 0.500 \\
+Logistic Regression & 0.498 & 0.249 & 0.509 & 0.335 & 0.499 \\
+Random Forest & 0.568 & 0.245 & 0.355 & 0.290 & 0.494 \\
+XGBoost & 0.531 & 0.248 & 0.436 & 0.316 & 0.499 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{quote}
+\textbf{Analyse critique~:} L'\textbf{AUC-ROC~$\approx$~0.5} pour tous les modèles signifie qu'ils n'ont aucun pouvoir discriminant réel~\cite{james2021}~--- équivalent à un tirage à pile ou face. La comparaison avec le modèle naïf est instructive~: avec \texttt{class\_weight='balanced'}, les modèles augmentent leur rappel mais au prix d'une accuracy inférieure à 50\%. Cela démontre concrètement pourquoi l'accuracy seule est trompeuse sur un dataset déséquilibré~\cite{sokolova2009}~: un modèle à 75\% d'accuracy qui ne prédit jamais de risque est inutile en pratique. Les importances de features sont uniformément distribuées, confirmant qu'aucune variable n'est réellement prédictive de \texttt{disease\_risk}.
+\end{quote}

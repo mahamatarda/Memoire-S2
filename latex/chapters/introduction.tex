@@ -1,0 +1,45 @@
+% !TEX root = ../manuscript.tex
+\chapter*{Introduction et contexte}
+
+Aujourd'hui, les données de santé sont partout. Les montres connectées mesurent notre sommeil, les applications comptent nos pas, les bilans sanguins enregistrent notre cholestérol. On génère sans le savoir une quantité massive d'informations sur nos habitudes de vie. Mais avoir des données ne suffit pas : encore faut-il savoir les analyser, les comprendre, et en tirer des conclusions utiles.
+
+C'est exactement ce que permet la data science. À l'intersection des mathématiques, de la statistique et de l'informatique, elle offre des outils concrets pour explorer des jeux de données complexes, construire des modèles prédictifs et surtout, expliquer ce qui se passe derrière les chiffres.
+
+Ce mémoire présente un projet de data science appliqué à la santé et aux modes de vie, réalisé dans le cadre de la première année de master MIASHS. La question centrale qui guide l'ensemble du travail est la suivante :
+
+\begin{center}
+\textit{Quels facteurs du mode de vie influencent le plus l'état de santé d'un individu~--- et peut-on les identifier, les modéliser et les expliquer de manière rigoureuse~?}
+\end{center}
+
+\section*{La data science au service de la santé}
+
+La santé publique constitue l'un des domaines d'application les plus prometteurs de la data science~\cite{obermeyer2016, rajpurkar2022}. L'apprentissage statistique permet aujourd'hui d'aborder des problèmes variés~: prédiction du risque de maladies chroniques, segmentation de populations selon leurs profils de santé, identification des facteurs de risque comportementaux~\cite{booth2012}.
+
+Dans ce projet, l'objectif n'est pas seulement de prédire~--- c'est aussi et surtout de \textbf{comprendre}. Quand on prédit qu'une personne est à risque de maladie, il est crucial de pouvoir expliquer pourquoi~: est-ce à cause de son manque de sommeil~? De son cholestérol élevé~? De son inactivité physique~? Cette dimension explicative est au c\oe ur du travail présenté ici.
+
+\section*{Présentation du jeu de données}
+
+Le projet s'appuie sur le \textit{Health \& Lifestyle Dataset}, un jeu de données synthétique disponible sur Kaggle, composé de \textbf{100~000 individus} décrits par \textbf{15 variables}~:
+
+\begin{itemize}
+  \item \textbf{Habitudes de vie}~: \texttt{daily\_steps}, \texttt{sleep\_hours}, \texttt{water\_intake\_l}, \texttt{calories\_consumed}, \texttt{smoker}, \texttt{alcohol}.
+  \item \textbf{Indicateurs biologiques}~: \texttt{bmi}, \texttt{resting\_hr}, \texttt{systolic\_bp}, \texttt{diastolic\_bp}, \texttt{cholesterol}.
+  \item \textbf{Caractéristiques personnelles}~: \texttt{age}, \texttt{gender}, \texttt{family\_history}.
+\end{itemize}
+
+La variable cible principale est \texttt{disease\_risk}, un indicateur binaire (0/1) indiquant si un individu est considéré à risque de maladie. Bien que synthétique, ce dataset respecte des distributions statistiquement réalistes~\cite{chawla2002}, sans aucune contrainte éthique liée à des données personnelles réelles.
+
+\section*{Lien avec la formation}
+
+Ce projet est directement ancré dans les enseignements du master MIASHS~: réduction de dimension avec l'\textbf{ACP}, \textbf{régression linéaire et logistique}, \textbf{classification supervisée et non supervisée}, \textbf{régularisation et optimisation} (Ridge, Lasso, descente de gradient), et introduction au \textbf{deep learning}. Toutes ces notions sont mises en pratique ici de manière concrète, sur un problème à enjeu sociétal fort.
+
+\section*{Objectifs du projet}
+
+Le projet s'articule autour de quatre axes complémentaires~:
+
+\begin{enumerate}
+  \item \textbf{Analyse exploratoire}~--- comprendre la structure des données, les distributions, les corrélations, et formuler des hypothèses.
+  \item \textbf{Régression}~--- prédire des indicateurs biologiques continus comme le taux de cholestérol.
+  \item \textbf{Classification}~--- prédire le risque de maladie (\texttt{disease\_risk}) et comparer plusieurs algorithmes.
+  \item \textbf{Clustering}~--- découvrir des profils types d'individus selon leur mode de vie.
+\end{enumerate}

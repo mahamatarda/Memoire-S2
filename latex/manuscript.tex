@@ -1,0 +1,103 @@
+\documentclass[12pt, french]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{babel}
+
+%additional packages
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{longtable}
+\graphicspath{{figures/}}
+\usepackage[a4paper,width=160mm,top=25mm,bottom=25mm]{geometry}
+\usepackage{titlesec}
+\linespread{1.2}
+
+\usepackage{amsfonts,cite,array,multirow,graphicx,amsmath,amsthm,tabularx,setspace,amssymb,multirow}
+\usepackage{tikz}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{bbm}
+\usepackage{mathtools}
+\usepackage{textcomp}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{multirow}
+\usepackage{graphicx}
+\usepackage{epigraph}
+\usepackage{minitoc}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{listings}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{gray!10},
+  frame=single,
+  breaklines=true
+}
+
+\title{\Huge{Analyse des facteurs de mode de vie influençant l'état de santé : une approche data science}}
+\author{Ardacham Mahamat Teguene}
+\date{Juin 2026}
+\def\mytitle{Analyse des facteurs de mode de vie influençant l'état de santé}
+\def\myname{Ardacham Mahamat Teguene}
+\def\degree{Master 1}
+\def\mydegree{Mathématiques et Informatique Appliqués aux Sciences Humaines et Sociales}
+\def\mysupervisor{}
+\def\myrollno{}
+\def\mydep{MIASHS}
+
+
+\begin{document}
+
+%Front Matter
+\dominitoc
+ \pagenumbering{roman}
+ \input{front_page}
+ \addstarredchapter{Remerciements}
+ \input{chapters/acknowlegement}
+ \addstarredchapter{Résumé}
+ \input{chapters/abstract}
+
+\tableofcontents
+\addstarredchapter{Liste des figures}
+\listoffigures
+\addstarredchapter{Liste des tables}
+\listoftables
+
+%Chapters
+\clearpage
+\pagenumbering{arabic}
+
+\addstarredchapter{Introduction}
+\input{chapters/introduction}
+
+\chapter{État de l'art}
+\input{chapters/chapter_1}
+
+\chapter{Données et analyse exploratoire}
+\input{chapters/chapter_2}
+
+\chapter{Modélisation supervisée}
+\input{chapters/chapter_3}
+
+\chapter{Clustering et interprétabilité}
+\input{chapters/chapter_4}
+
+\chapter{Organisation, retour d'expérience et perspectives}
+\input{chapters/chapter_5}
+
+\addstarredchapter{Conclusion}
+\input{chapters/conclusion}
+
+\addstarredchapter{Bibliographie}
+\bibliographystyle{unsrt}
+\bibliography{references}
+
+\end{document}

@@ -1,0 +1,163 @@
+% !TEX root = ../manuscript.tex
+\minitoc
+\newpage
+
+\section{Clustering~: identifier des profils de mode de vie}
+
+\subsection{Objectif}
+
+Le clustering est une méthode d'\textbf{apprentissage non supervisé}~: il n'y a pas de variable cible. L'objectif est de regrouper les individus selon leur similarité pour identifier des \textbf{profils types de mode de vie}~\cite{macqueen1967}. La variable \texttt{disease\_risk} est exclue.
+
+\subsection{Préparation des données}
+
+Les 15 variables explicatives sont standardisées (z-score) avant les algorithmes. K-Means et CAH reposent sur la \textbf{distance euclidienne}~\cite{macqueen1967}~:
+\begin{equation}
+d(\mathbf{x}, \mathbf{y}) = \sqrt{\sum_{j=1}^{p}(x_j - y_j)^2}
+\end{equation}
+Sans standardisation, \texttt{daily\_steps} (valeurs jusqu'à 20~000) dominerait \texttt{sleep\_hours} (3--10), faussant le partitionnement~\cite{hastie2009}. La CAH étant de complexité $\mathcal{O}(n^2)$, elle est appliquée sur un sous-échantillon de \textbf{5~000 individus}.
+
+\subsection{Sélection du nombre de clusters}
+
+\textbf{Méthode du coude}~: on trace l'\textbf{inertie intra-cluster} en fonction de $k$~:
+\begin{equation}
+W(k) = \sum_{j=1}^{k}\sum_{\mathbf{x} \in C_j}\|\mathbf{x} - \boldsymbol{\mu}_j\|^2
+\end{equation}
+
+\textbf{Coefficient de silhouette}~\cite{rousseeuw1987}~:
+\begin{equation}
+s(i) = \frac{b(i) - a(i)}{\max(a(i),\, b(i))}
+\end{equation}
+
+\begin{table}[h]
+\centering
+\caption{Inertie et silhouette selon $k$ (K-Means)}
+\label{tab:kmeans_k}
+\begin{tabular}{rrr}
+\toprule
+$k$ & Inertie & Silhouette \\
+\midrule
+2 & 1~346~768 & 0.0979 \\
+\textbf{3} & \textbf{1~238~076} & \textbf{0.1030} \\
+4 & 1~188~303 & 0.0967 \\
+5 & 1~152~260 & 0.0886 \\
+10 & 1~031~548 & 0.0744 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+$k=3$ maximise la silhouette et correspond au coude de la courbe. \textbf{$k=3$ est retenu.}
+
+\subsection{K-Means}
+
+L'algorithme K-Means~\cite{macqueen1967} alterne deux étapes~: affectation de chaque individu au centroïde le plus proche, puis mise à jour des centroïdes~:
+\begin{equation}
+\boldsymbol{\mu}_j = \frac{1}{|C_j|}\sum_{\mathbf{x} \in C_j} \mathbf{x}
+\end{equation}
+
+\begin{table}[h]
+\centering
+\caption{Profils des clusters K-Means ($k=3$)}
+\label{tab:kmeans_profiles}
+\begin{tabular}{llrrl}
+\toprule
+Cluster & Taille & IMC moyen & Syst. (mmHg) & Profil \\
+\midrule
+0 & 32~754 & 35.0 (obèse) & 142 (hypertendu) & Obèse hypertendu \\
+1 & 27~673 & 29.1 (surpoids) & 115 (normotendu) & Surpoids normotendu \\
+2 & 39~573 & 24.0 (normal) & 142 (hypertendu) & Poids normal hypertendu \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{quote}
+\textbf{Interprétation~:} K-Means partitionne la population selon l'\textbf{IMC} et la \textbf{pression artérielle}. Le cluster~1 regroupe les individus les plus sains (surpoids mais normotendus), tandis que les clusters~0 et~2 correspondent à deux profils à risque cardiovasculaire distincts.
+\end{quote}
+
+\subsection{Classification Hiérarchique Ascendante (CAH)}
+
+La CAH~\cite{macqueen1967} construit un dendrogramme en fusionnant progressivement les individus les plus proches. La méthode de liaison \texttt{ward} minimise l'augmentation de la variance intra-cluster~:
+\begin{equation}
+\Delta(A, B) = \frac{|A|\cdot|B|}{|A|+|B|}\|\boldsymbol{\mu}_A - \boldsymbol{\mu}_B\|^2
+\end{equation}
+
+\begin{table}[h]
+\centering
+\caption{Profils des clusters CAH ($k=3$, $n=5~000$)}
+\label{tab:cah_profiles}
+\begin{tabular}{llrrl}
+\toprule
+Cluster & Taille & Fumeurs & Syst. (mmHg) & Profil \\
+\midrule
+0 & 2~928 & 2\% & 142 & Non-fumeurs hyperten dus \\
+1 & 1~407 & 18\% & 115 & Fumeurs modérés, normotendus \\
+2 & 665 & \textbf{100\%} & 142 & Fumeurs intenses, hyperten dus \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{quote}
+\textbf{Interprétation~:} La CAH isole un \textbf{cluster de fumeurs intenses} (100\% de fumeurs) avec hypertension, un profil à double risque cardiovasculaire bien documenté dans la littérature~\cite{booth2012}. K-Means et CAH produisent des structures complémentaires~: K-Means est guidé par les variables à grande variance (IMC, pression), la CAH détecte mieux les sous-groupes homogènes sur variables binaires.
+\end{quote}
+
+\subsection{Évaluation comparative}
+
+\begin{table}[h]
+\centering
+\caption{Comparaison K-Means vs CAH}
+\label{tab:clustering_eval}
+\begin{tabular}{lrrl}
+\toprule
+Métrique & K-Means & CAH & Interprétation \\
+\midrule
+Silhouette & 0.103 & 0.105 & Faible --- clusters peu séparés \\
+Davies-Bouldin & 2.655 & 2.721 & Élevé --- chevauchement \\
+Variance PCA (2D) & \multicolumn{2}{c}{24.3\%} & 2D insuffisant \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Malgré des silhouettes faibles ($\approx 0.10$), les deux méthodes révèlent des \textbf{structures interprétables médicalement cohérentes}~\cite{booth2012, who2000}.
+
+\section{Interprétabilité des modèles}
+
+\subsection{Objectif}
+
+Cette section pose la question~: \textbf{les outils d'interprétabilité convergent-ils vers les mêmes variables influentes, même en l'absence de signal~?} La réponse est elle-même un résultat analytique.
+
+\subsection{Outils utilisés}
+
+\textbf{Coefficients des modèles linéaires}~: un coefficient $w_j > 0$ indique qu'une augmentation de la variable $j$ est associée à une augmentation de la prédiction~\cite{james2021}.
+
+\textbf{Feature Importance (impureté de Gini)}~\cite{breiman2001}~:
+\begin{equation}
+\text{FI}(j) = \sum_{t \in \mathcal{T}_j}\frac{n_t}{n}\left[I(t) - \frac{n_{t_L}}{n_t}I(t_L) - \frac{n_{t_R}}{n_t}I(t_R)\right]
+\end{equation}
+
+\textbf{SHAP (SHapley Additive exPlanations)}~\cite{lundberg2017}~:
+\begin{equation}
+\phi_j = \sum_{S \subseteq F\setminus\{j\}} \frac{|S|!(|F|-|S|-1)!}{|F|!}\left[f(S \cup \{j\}) - f(S)\right]
+\end{equation}
+
+\subsection{Résultats et convergence}
+
+\begin{table}[h]
+\centering
+\caption{Variables dans le top 5 de chaque méthode d'interprétabilité}
+\label{tab:interpretability}
+\begin{tabular}{lccccc}
+\toprule
+Variable & LR & RF & XGB & SHAP & Ridge & Score \\
+\midrule
+\texttt{systolic\_bp} & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \textbf{5/5} \\
+\texttt{daily\_steps} & \checkmark & \checkmark & --- & \checkmark & --- & 3/5 \\
+\texttt{family\_history} & \checkmark & --- & \checkmark & --- & \checkmark & 3/5 \\
+\texttt{bmi} & --- & \checkmark & --- & \checkmark & --- & 2/5 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{quote}
+\textbf{Analyse critique~:} Les cinq méthodes ne s'accordent pas sur un classement stable --- \textbf{cette divergence est elle-même un résultat}~\cite{rudin2019}~: sans signal prédictif réel, les outils mesurent du bruit. La seule variable présente dans les cinq méthodes est \texttt{systolic\_bp}. Dans la littérature épidémiologique réelle, la pression artérielle est effectivement l'un des facteurs de risque cardiovasculaire les mieux documentés~\cite{esc2018}~--- mais dans nos données, cette convergence résulte de sa grande variance, pas d'une vraie relation causale.
+
+Sur des données réelles~\cite{booth2012, who2000}, on s'attendrait à voir la pression artérielle, le cholestérol LDL, le tabagisme, l'IMC et l'activité physique dominer clairement les classements avec des coefficients significativement différents de zéro.
+\end{quote}

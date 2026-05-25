@@ -1,0 +1,134 @@
+% !TEX root = ../manuscript.tex
+\minitoc
+\newpage
+
+\section{Analyse exploratoire des données (EDA)}
+
+\subsection{Présentation générale du dataset}
+
+Le jeu de données contient \textbf{100~000 observations} décrites par \textbf{15 variables} (l'identifiant \texttt{id} est exclu). On distingue trois types~: variables continues (âge, IMC, pas quotidiens, heures de sommeil, etc.), variables binaires (\texttt{smoker}, \texttt{alcohol}, \texttt{family\_history}, \texttt{disease\_risk}), et une variable catégorielle (\texttt{gender}). \textbf{Aucune valeur manquante} n'est détectée, ce qui s'explique par la nature synthétique des données.
+
+\subsection{Statistiques descriptives}
+
+Pour chaque variable continue $X = \{x_1, \ldots, x_n\}$ avec $n = 100\,000$, on calcule la moyenne et l'écart-type~\cite{saporta2011}~:
+
+\begin{equation}
+\bar{x} = \frac{1}{n}\sum_{i=1}^{n} x_i, \qquad
+s = \sqrt{\frac{1}{n-1}\sum_{i=1}^{n}(x_i - \bar{x})^2}
+\end{equation}
+
+\begin{table}[h]
+\centering
+\caption{Statistiques descriptives des variables continues}
+\label{tab:desc_stats}
+\begin{tabular}{lrrrr}
+\toprule
+Variable & Moyenne & Écart-type & Min & Max \\
+\midrule
+\texttt{age} & 48.5 ans & 17.9 & 18 & 79 \\
+\texttt{bmi} & 29.0 & 6.3 & 18.0 & 40.0 \\
+\texttt{daily\_steps} & 10~480 & 5~484 & 1~000 & 19~999 \\
+\texttt{sleep\_hours} & 6.5~h & 2.0 & 3.0 & 10.0 \\
+\texttt{cholesterol} & 224.3~mg/dL & 43.3 & 150 & 299 \\
+\texttt{systolic\_bp} & 134.6~mmHg & 26.0 & 90 & 179 \\
+\texttt{resting\_hr} & 74.5~bpm & 14.4 & 50 & 99 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{quote}
+\textbf{Interprétation~:} Un IMC moyen de 29 se situe en limite de surpoids selon la classification OMS, qui fixe le seuil à 25~kg/m²~\cite{who2000}. Le taux moyen de cholestérol à 224~mg/dL dépasse le seuil de 200~mg/dL recommandé par le NCEP~\cite{ncep2002}.
+\end{quote}
+
+\subsection{Distribution des variables}
+
+Le coefficient d'asymétrie (skewness) mesure la symétrie d'une distribution~\cite{saporta2011}~:
+
+\begin{equation}
+\text{Skew}(X) = \frac{1}{n}\sum_{i=1}^{n}\left(\frac{x_i - \bar{x}}{s}\right)^3
+\end{equation}
+
+Toutes les variables continues affichent un skewness inférieur à $|0.02|$~: distributions \textbf{quasi-uniformes}, caractéristique typique des données synthétiques générées par tirage aléatoire~\cite{chawla2002}.
+
+La variable cible présente un \textbf{déséquilibre}~: 75~179 individus (75.2\%) sans risque contre 24~821 (24.8\%) à risque. Ce déséquilibre, connu sous le nom de \textit{class imbalance problem}~\cite{japkowicz2002}, justifie l'utilisation du F1-score, de la précision et du rappel plutôt que la seule accuracy~\cite{sokolova2009}.
+
+\subsection{Analyse des corrélations}
+
+Le coefficient de corrélation de Pearson entre deux variables $X$ et $Y$~\cite{pearson1895}~:
+
+\begin{equation}
+r_{XY} = \frac{\sum_{i=1}^{n}(x_i - \bar{x})(y_i - \bar{y})}
+{\sqrt{\sum_{i=1}^{n}(x_i-\bar{x})^2 \cdot \sum_{i=1}^{n}(y_i-\bar{y})^2}}
+\end{equation}
+
+\begin{quote}
+\textbf{Résultat central~:} Les corrélations entre toutes les variables du dataset sont inférieures à $|0.01|$. La variable la plus corrélée avec \texttt{disease\_risk} est \texttt{resting\_hr} avec $r = 0.005$ --- statistiquement non significatif. Cela s'explique par la nature synthétique du dataset~: la variable cible semble avoir été générée indépendamment des autres variables. Ce constat justifie l'exploration de méthodes non-linéaires~\cite{breiman2001}.
+\end{quote}
+
+\subsection{Bilan de l'EDA}
+
+\begin{table}[h]
+\centering
+\caption{Bilan de l'analyse exploratoire}
+\label{tab:eda_bilan}
+\begin{tabular}{lll}
+\toprule
+Point & Constat & Implication \\
+\midrule
+Valeurs manquantes & Aucune & Pas de preprocessing nécessaire \\
+Distributions & Quasi-uniformes & Pas de transformation logarithmique \\
+Outliers & Aucun (méthode IQR) & Pas de traitement nécessaire \\
+Corrélations & Quasi-nulles ($< 0.01$) & Privilégier modèles non-linéaires \\
+Classe cible & Déséquilibrée (75/25) & Utiliser F1-score, AUC-ROC \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Feature Engineering et préparation des données}
+
+\subsection{Encodage des variables catégorielles}
+
+La variable \texttt{gender} est encodée en variable binaire~\cite{geron2019}~:
+
+\begin{equation}
+\texttt{gender\_enc} = \begin{cases} 1 & \text{si Male} \\ 0 & \text{si Female} \end{cases}
+\end{equation}
+
+La colonne \texttt{id} est supprimée~: identifiant technique sans pouvoir prédictif. La variable \texttt{hypercholesterol} ($= 1$ si \texttt{cholesterol} $> 200$) est créée pour le clustering mais \textbf{exclue de la régression} car directement dérivée de la variable cible~--- c'est un \textit{data leakage}~\cite{kaufman2012}.
+
+\subsection{Création de nouvelles variables}
+
+Trois nouvelles variables sont construites à partir de connaissances métier~\cite{kuhn2019}~:
+
+\textbf{Hypertension} selon les seuils ESC~\cite{esc2018}~:
+\begin{equation}
+\texttt{hypertension} = \begin{cases} 1 & \text{si } \texttt{systolic\_bp} \geq 140 \text{ ou } \texttt{diastolic\_bp} \geq 90 \\ 0 & \text{sinon} \end{cases}
+\end{equation}
+
+\textbf{Catégories IMC} selon la classification OMS~\cite{who2000}~:
+\begin{equation}
+\texttt{bmi\_cat} = \begin{cases} 0 & \texttt{bmi} < 18.5\ \text{(sous-poids)} \\ 1 & 18.5 \leq \texttt{bmi} < 25\ \text{(normal)} \\ 2 & 25 \leq \texttt{bmi} < 30\ \text{(surpoids)} \\ 3 & \texttt{bmi} \geq 30\ \text{(obèse)} \end{cases}
+\end{equation}
+
+\textbf{Score de style de vie} (variables normalisées par leur maximum)~:
+\begin{equation}
+\texttt{lifestyle\_score} = \frac{\texttt{daily\_steps}}{\max} + \frac{\texttt{sleep\_hours}}{\max} + \frac{\texttt{water\_intake\_l}}{\max} - \texttt{smoker} - \texttt{alcohol} - \frac{\texttt{bmi}}{\max} - \frac{\texttt{calories\_consumed}}{\max}
+\end{equation}
+
+\subsection{Mise à l'échelle}
+
+Deux méthodes de mise à l'échelle sont appliquées selon le contexte~\cite{hastie2009}~:
+
+\textbf{Standardisation (z-score)} pour les modèles linéaires et SVM~:
+\begin{equation}
+z_i = \frac{x_i - \bar{x}}{s}
+\end{equation}
+
+\textbf{Normalisation min-max} pour les algorithmes de distance (K-Means)~:
+\begin{equation}
+x_i^{\text{norm}} = \frac{x_i - x_{\min}}{x_{\max} - x_{\min}}
+\end{equation}
+
+\subsection{Dataset final}
+
+Après preprocessing, le dataset contient \textbf{16 variables explicatives} couvrant les dimensions démographiques, les habitudes de vie, les indicateurs biologiques et les variables construites.

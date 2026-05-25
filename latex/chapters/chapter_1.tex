@@ -1,0 +1,43 @@
+% !TEX root = ../manuscript.tex
+\minitoc
+\newpage
+
+\section{L'apprentissage automatique appliqué à la santé}
+
+Ces dernières années, l'apprentissage automatique s'est imposé comme un outil incontournable dans le domaine de la santé. Des travaux pionniers comme ceux d'Obermeyer \& Emanuel~\cite{obermeyer2016} ont montré que les algorithmes de ML peuvent surpasser les méthodes statistiques classiques pour prédire des événements cliniques. Plus récemment, une revue publiée dans \textit{Nature Medicine}~\cite{rajpurkar2022} dresse un panorama des applications actuelles~: diagnostic médical assisté par IA, prédiction de risque de maladies chroniques, personnalisation des traitements.
+
+Dans ce contexte, les jeux de données combinant indicateurs biologiques et habitudes de vie constituent un terrain d'étude particulièrement riche. L'idée centrale est que les maladies chroniques ne sont pas seulement le résultat de facteurs génétiques, mais résultent d'une accumulation de comportements quotidiens mesurables~\cite{booth2012}.
+
+\section{Régression~: prédire des indicateurs biologiques}
+
+La régression linéaire est l'une des méthodes les plus anciennes et les plus utilisées en statistique appliquée à la santé~\cite{james2021}. Pour pallier ses hypothèses fortes, des méthodes de \textbf{régression régularisée} ont été développées. La régression Ridge~\cite{hoerl1970} pénalise les coefficients trop grands via un terme $\lambda \|\mathbf{w}\|_2^2$, réduisant la variance du modèle. La régression Lasso~\cite{tibshirani1996} utilise une pénalisation $L_1$ qui force certains coefficients à zéro, réalisant ainsi une \textbf{sélection automatique de variables}.
+
+Les méthodes ensemblistes comme les \textbf{forêts aléatoires}~\cite{breiman2001} et le \textbf{gradient boosting} (XGBoost~\cite{chen2016}) offrent des performances souvent supérieures sur des données tabulaires, en capturant les interactions non-linéaires entre variables.
+
+\section{Classification~: prédire le risque de maladie}
+
+La prédiction du risque de maladie est l'un des cas d'usage les plus étudiés en santé numérique. Des modèles de classification supervisée ont été appliqués avec succès à la prédiction du diabète de type 2~\cite{kavakiotis2017}, des maladies cardiovasculaires~\cite{mohan2019} ou encore de l'hypertension~\cite{olawade2023}.
+
+Parmi les algorithmes les plus utilisés~:
+\begin{itemize}
+  \item La \textbf{régression logistique}~\cite{james2021}, modèle linéaire interprétable de référence.
+  \item Les \textbf{forêts aléatoires}~\cite{breiman2001} et le \textbf{gradient boosting}~\cite{chen2016}, qui dominent les benchmarks sur données tabulaires.
+\end{itemize}
+
+Un point de vigilance important est le \textbf{déséquilibre des classes}~\cite{japkowicz2002}~: quand les individus malades sont minoritaires, les modèles prédisent systématiquement la classe majoritaire. Des stratégies comme le rééchantillonnage SMOTE~\cite{chawla2002} ou l'ajustement des poids de classe permettent de corriger ce biais.
+
+\section{Clustering~: identifier des profils de mode de vie}
+
+Le clustering vise à regrouper des individus similaires sans variable cible prédéfinie~\cite{macqueen1967}. Dans le domaine de la santé, cette approche est utilisée pour la \textbf{stratification de patients}~\cite{obermeyer2019}.
+
+L'algorithme \textbf{K-Means}~\cite{macqueen1967} reste la méthode de référence. La \textbf{classification hiérarchique ascendante (CAH)} offre une représentation visuelle via le dendrogramme. L'évaluation d'un clustering se fait via le \textbf{coefficient de silhouette}~\cite{rousseeuw1987}~:
+
+\begin{equation}
+s(i) = \frac{b(i) - a(i)}{\max(a(i),\, b(i))}
+\end{equation}
+
+où $a(i)$ est la distance moyenne de l'observation $i$ aux autres points de son cluster, et $b(i)$ est la distance moyenne au cluster voisin le plus proche. Une valeur proche de 1 indique un clustering de qualité.
+
+\section{Interprétabilité des modèles}
+
+Un modèle performant ne suffit pas, notamment dans le domaine de la santé~: il faut aussi pouvoir \textbf{expliquer} ses prédictions~\cite{rudin2019}. Deux approches se distinguent. Les \textbf{modèles intrinsèquement interprétables} (régression linéaire, arbres) permettent de lire directement les relations. Les \textbf{méthodes post-hoc} s'appliquent à n'importe quel modèle~: c'est le cas de \textbf{SHAP}~\cite{lundberg2017}, qui attribue à chaque variable une contribution marginale à la prédiction en s'appuyant sur la théorie des jeux coopératifs. SHAP sera utilisé ici comme complément visuel d'interprétation, aux côtés des feature importances et des coefficients des modèles linéaires.
