@@ -1,12 +1,10 @@
 % !TEX root = ../manuscript.tex
-\minitoc
-\newpage
 
 \section{Analyse exploratoire des données (EDA)}
 
 \subsection{Présentation générale du dataset}
 
-Le jeu de données contient \textbf{100~000 observations} décrites par \textbf{15 variables} (l'identifiant \texttt{id} est exclu). On distingue trois types~: variables continues (âge, IMC, pas quotidiens, heures de sommeil, etc.), variables binaires (\texttt{smoker}, \texttt{alcohol}, \texttt{family\_history}, \texttt{disease\_risk}), et une variable catégorielle (\texttt{gender}). \textbf{Aucune valeur manquante} n'est détectée, ce qui s'explique par la nature synthétique des données.
+Le jeu de données contient \textbf{100~000 observations} décrites par \textbf{15 variables} (l'identifiant \texttt{id} est exclu). On distingue trois types~: variables continues --- \texttt{age} (âge), \texttt{bmi} (IMC), \texttt{daily\_steps} (nombre de pas quotidiens), \texttt{sleep\_hours} (heures de sommeil), \texttt{cholesterol} (cholestérol), \texttt{systolic\_bp} et \texttt{diastolic\_bp} (pressions artérielles), \texttt{resting\_hr} (fréquence cardiaque au repos) --- variables binaires (\texttt{smoker}, \texttt{alcohol}, \texttt{family\_history}, \texttt{disease\_risk}), et une variable catégorielle (\texttt{gender}). \textbf{Aucune valeur manquante} n'est détectée, ce qui s'explique par la nature synthétique des données.
 
 \subsection{Statistiques descriptives}
 
@@ -42,15 +40,15 @@ Variable & Moyenne & Écart-type & Min & Max \\
 
 \subsection{Distribution des variables}
 
-Le coefficient d'asymétrie (skewness) mesure la symétrie d'une distribution~\cite{saporta2011}~:
+Le coefficient d'asymétrie (\textit{skewness}) mesure la symétrie d'une distribution~\cite{saporta2011}~:
 
 \begin{equation}
 \text{Skew}(X) = \frac{1}{n}\sum_{i=1}^{n}\left(\frac{x_i - \bar{x}}{s}\right)^3
 \end{equation}
 
-Toutes les variables continues affichent un skewness inférieur à $|0.02|$~: distributions \textbf{quasi-uniformes}, caractéristique typique des données synthétiques générées par tirage aléatoire~\cite{chawla2002}.
+On le calcule pour décider si une transformation est nécessaire avant modélisation~: une distribution très asymétrique (skewness $> 1$ par exemple) peut biaiser les modèles linéaires et nécessite souvent une transformation logarithmique pour être "redressée". Ici, toutes les variables continues affichent un skewness inférieur à $|0.02|$~: distributions \textbf{quasi-uniformes}, ce qui s'explique par la génération synthétique aléatoire des données~\cite{chawla2002}. Aucune transformation n'est donc nécessaire.
 
-La variable cible présente un \textbf{déséquilibre}~: 75~179 individus (75.2\%) sans risque contre 24~821 (24.8\%) à risque. Ce déséquilibre, connu sous le nom de \textit{class imbalance problem}~\cite{japkowicz2002}, justifie l'utilisation du F1-score, de la précision et du rappel plutôt que la seule accuracy~\cite{sokolova2009}.
+La variable cible présente un \textbf{déséquilibre des classes} (\textit{class imbalance problem}~\cite{japkowicz2002})~: 75~179 individus (75.2\%) sont sans risque contre seulement 24~821 (24.8\%) à risque. Le problème concret est le suivant~: un modèle naïf qui prédit \textit{toujours} "sans risque" obtient déjà 75\% d'accuracy --- sans avoir rien appris. L'accuracy seule est donc une métrique trompeuse~: elle ne distingue pas un bon modèle d'un modèle inutile. C'est pourquoi on privilégie le F1-score, la précision, le rappel et l'AUC-ROC, qui mesurent réellement la capacité à détecter les deux classes~\cite{sokolova2009}.
 
 \subsection{Analyse des corrélations}
 
@@ -62,7 +60,7 @@ r_{XY} = \frac{\sum_{i=1}^{n}(x_i - \bar{x})(y_i - \bar{y})}
 \end{equation}
 
 \begin{quote}
-\textbf{Résultat central~:} Les corrélations entre toutes les variables du dataset sont inférieures à $|0.01|$. La variable la plus corrélée avec \texttt{disease\_risk} est \texttt{resting\_hr} avec $r = 0.005$ --- statistiquement non significatif. Cela s'explique par la nature synthétique du dataset~: la variable cible semble avoir été générée indépendamment des autres variables. Ce constat justifie l'exploration de méthodes non-linéaires~\cite{breiman2001}.
+\textbf{Résultat central~:} Les valeurs calculées sur le dataset (notebook 01\_EDA) révèlent que les corrélations entre toutes les variables sont inférieures à $|0.01|$. La variable la plus corrélée avec \texttt{disease\_risk} est \texttt{resting\_hr} avec $r = 0.005$ --- statistiquement non significatif sur 100~000 individus. Cela confirme que la variable cible a été générée indépendamment des autres variables. Ce constat justifie l'exploration de \textbf{méthodes non-linéaires}~\cite{breiman2001}~: la corrélation de Pearson ne détecte que les relations linéaires directes~; des algorithmes comme Random Forest ou XGBoost peuvent théoriquement capturer des relations plus complexes (interactions, effets seuils). En pratique, même ces méthodes échoueront ici --- ce qui confirme l'absence totale de signal.
 \end{quote}
 
 \subsection{Bilan de l'EDA}
@@ -76,13 +74,19 @@ r_{XY} = \frac{\sum_{i=1}^{n}(x_i - \bar{x})(y_i - \bar{y})}
 Point & Constat & Implication \\
 \midrule
 Valeurs manquantes & Aucune & Pas de preprocessing nécessaire \\
-Distributions & Quasi-uniformes & Pas de transformation logarithmique \\
+Distributions & Quasi-uniformes (skewness $<|0.02|$) & Pas de transformation logarithmique \\
 Outliers & Aucun (méthode IQR) & Pas de traitement nécessaire \\
 Corrélations & Quasi-nulles ($< 0.01$) & Privilégier modèles non-linéaires \\
-Classe cible & Déséquilibrée (75/25) & Utiliser F1-score, AUC-ROC \\
+Classe cible & Déséquilibrée (75/25) & Utiliser F1-score, AUC-ROC, SMOTE \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\textbf{Méthode IQR pour la détection des outliers.} L'\textit{Interquartile Range} (écart interquartile) est la méthode standard de détection des valeurs aberrantes~\cite{saporta2011}. On calcule $Q_1$ (25\textsuperscript{e} percentile) et $Q_3$ (75\textsuperscript{e} percentile), puis~:
+\begin{equation}
+\text{IQR} = Q_3 - Q_1
+\end{equation}
+Tout point en dehors de l'intervalle $[Q_1 - 1{,}5 \times \text{IQR}\ ;\ Q_3 + 1{,}5 \times \text{IQR}]$ est considéré comme un outlier. Par exemple, pour \texttt{bmi}~: $Q_1 = 23{,}5$, $Q_3 = 34{,}5$, IQR $= 11$ → borne basse $= 7$, borne haute $= 51$. Toutes les valeurs de \texttt{bmi} (18 à 40) restent dans cet intervalle~: aucun outlier détecté. Ce résultat est cohérent sur l'ensemble des variables, ce qui confirme la régularité artificielle d'un dataset synthétique.
 
 \section{Feature Engineering et préparation des données}
 
@@ -94,13 +98,13 @@ La variable \texttt{gender} est encodée en variable binaire~\cite{geron2019}~:
 \texttt{gender\_enc} = \begin{cases} 1 & \text{si Male} \\ 0 & \text{si Female} \end{cases}
 \end{equation}
 
-La colonne \texttt{id} est supprimée~: identifiant technique sans pouvoir prédictif. La variable \texttt{hypercholesterol} ($= 1$ si \texttt{cholesterol} $> 200$) est créée pour le clustering mais \textbf{exclue de la régression} car directement dérivée de la variable cible~--- c'est un \textit{data leakage}~\cite{kaufman2012}.
+La colonne \texttt{id} est supprimée~: identifiant technique sans pouvoir prédictif. La variable \texttt{hypercholesterol} ($= 1$ si \texttt{cholesterol} $> 200$~mg/dL, seuil NCEP~\cite{ncep2002}) est créée pour le clustering, mais \textbf{exclue de la régression} car elle constitue un \textit{data leakage}~\cite{kaufman2012}~: \texttt{hypercholesterol} est directement dérivée de \texttt{cholesterol}, la variable cible de la régression. Inclure une feature construite à partir de la cible revient à "donner la réponse" au modèle pendant l'entraînement --- il obtient alors un $R^2$ artificiellement élevé (0.675 observé) qui s'effondre sur de nouvelles données réelles.
 
 \subsection{Création de nouvelles variables}
 
-Trois nouvelles variables sont construites à partir de connaissances métier~\cite{kuhn2019}~:
+Trois nouvelles variables sont construites à partir de \textbf{connaissances métier}~\cite{kuhn2019}~: plutôt que de se limiter aux variables brutes, on encode des savoirs médicaux établis directement dans les features. Par exemple, on ne "découvre" pas le seuil d'hypertension dans les données --- on le connaît \textit{a priori} grâce aux recommandations cliniques, et on le traduit en variable binaire exploitable par les modèles.
 
-\textbf{Hypertension} selon les seuils ESC~\cite{esc2018}~:
+\textbf{Hypertension} selon les seuils de l'ESC (\textit{European Society of Cardiology}, l'organisme médical européen définissant les recommandations cardiovasculaires)~\cite{esc2018}~:
 \begin{equation}
 \texttt{hypertension} = \begin{cases} 1 & \text{si } \texttt{systolic\_bp} \geq 140 \text{ ou } \texttt{diastolic\_bp} \geq 90 \\ 0 & \text{sinon} \end{cases}
 \end{equation}
@@ -110,16 +114,21 @@ Trois nouvelles variables sont construites à partir de connaissances métier~\c
 \texttt{bmi\_cat} = \begin{cases} 0 & \texttt{bmi} < 18.5\ \text{(sous-poids)} \\ 1 & 18.5 \leq \texttt{bmi} < 25\ \text{(normal)} \\ 2 & 25 \leq \texttt{bmi} < 30\ \text{(surpoids)} \\ 3 & \texttt{bmi} \geq 30\ \text{(obèse)} \end{cases}
 \end{equation}
 
-\textbf{Score de style de vie} (variables normalisées par leur maximum)~:
-\begin{equation}
-\texttt{lifestyle\_score} = \frac{\texttt{daily\_steps}}{\max} + \frac{\texttt{sleep\_hours}}{\max} + \frac{\texttt{water\_intake\_l}}{\max} - \texttt{smoker} - \texttt{alcohol} - \frac{\texttt{bmi}}{\max} - \frac{\texttt{calories\_consumed}}{\max}
-\end{equation}
+\textbf{Score de style de vie} --- score composite heuristique résumant l'hygiène de vie globale d'un individu en une seule valeur. Il n'est pas validé médicalement, mais repose sur la cohérence avec la littérature~\cite{booth2012}~: les facteurs favorables à la santé contribuent positivement au score, les facteurs de risque le pénalisent. Chaque variable continue est divisée par son maximum pour la ramener entre 0 et 1, ce qui évite qu'une variable à grande échelle (comme \texttt{daily\_steps}, jusqu'à 20~000) domine le score face à une variable à petite échelle (comme \texttt{sleep\_hours}, entre 3 et 10)~:
+
+\begin{align}
+\texttt{lifestyle\_score} &= \frac{\texttt{daily\_steps}}{\max} + \frac{\texttt{sleep\_hours}}{\max} + \frac{\texttt{water\_intake\_l}}{\max} \notag \\
+&\quad - \texttt{smoker} - \texttt{alcohol} \notag \\
+&\quad - \frac{\texttt{bmi}}{\max} - \frac{\texttt{calories\_consumed}}{\max}
+\end{align}
+
+Les termes \textbf{positifs} (daily\_steps, sleep\_hours, water\_intake\_l) correspondent à des comportements bénéfiques pour la santé~; les termes \textbf{négatifs} (smoker, alcohol, bmi élevé, excès calorique) correspondent à des facteurs de risque établis~\cite{booth2012}.
 
 \subsection{Mise à l'échelle}
 
 Deux méthodes de mise à l'échelle sont appliquées selon le contexte~\cite{hastie2009}~:
 
-\textbf{Standardisation (z-score)} pour les modèles linéaires et SVM~:
+\textbf{Standardisation (z-score)} pour les modèles linéaires~:
 \begin{equation}
 z_i = \frac{x_i - \bar{x}}{s}
 \end{equation}

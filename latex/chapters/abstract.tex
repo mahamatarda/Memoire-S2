@@ -2,26 +2,13 @@
 
 \section*{Résumé}
 
-Ce mémoire présente un projet de data science appliqué à l'analyse des facteurs de mode de vie influençant l'état de santé. Il s'appuie sur le \textit{Health \& Lifestyle Dataset}, un jeu de données synthétique de 100~000 individus décrits par 15 variables couvrant les habitudes de vie (activité physique, sommeil, alimentation, tabagisme, alcool) et les indicateurs biologiques (IMC, cholestérol, pression artérielle, fréquence cardiaque).
+Ce mémoire présente un projet de data science appliqué à la modélisation des comportements de santé par apprentissage automatique. Il s'appuie sur le \textit{Health \& Lifestyle Dataset}, un jeu de données synthétique de 100~000 individus décrits par 15 variables couvrant les habitudes de vie (activité physique, sommeil, alimentation, tabagisme, alcool) et les indicateurs biologiques (IMC, cholestérol, pression artérielle, fréquence cardiaque).
 
-Un pipeline complet de data science a été mis en \oe uvre~: analyse exploratoire des données (EDA), feature engineering (encodage, création de variables métier, standardisation), puis trois axes de modélisation. En \textbf{régression}, six modèles ont été comparés (régression linéaire, Ridge, Lasso, ElasticNet, Random Forest, XGBoost) pour prédire le taux de cholestérol, avec tuning des hyperparamètres par \texttt{RandomizedSearchCV} et validation croisée K-Fold ($k=5$). En \textbf{classification}, trois modèles ont prédit le risque de maladie (\texttt{disease\_risk}) avec gestion du déséquilibre des classes. En \textbf{clustering}, les algorithmes K-Means et CAH (classification hiérarchique ascendante) ont identifié des profils types de mode de vie. L'\textbf{interprétabilité} a été analysée via les coefficients des modèles linéaires, les feature importances et les valeurs SHAP.
+Un pipeline complet de data science a été mis en \oe uvre~: analyse exploratoire des données (EDA), feature engineering (encodage, création de variables métier, standardisation), puis trois axes de modélisation. En \textbf{régression}, six modèles ont été comparés (régression linéaire, Ridge, Lasso, ElasticNet, Random Forest, XGBoost) pour prédire le taux de cholestérol, avec tuning des hyperparamètres par \texttt{RandomizedSearchCV} et validation croisée K-Fold ($k=5$). En \textbf{classification}, trois modèles ont prédit le risque de maladie (\texttt{disease\_risk}) avec deux stratégies de gestion du déséquilibre comparées~: ajustement des poids de classe et rééchantillonnage SMOTE~\cite{chawla2002}. En \textbf{clustering}, les algorithmes K-Means et CAH ont identifié des profils types de mode de vie. L'\textbf{interprétabilité} a été analysée via les coefficients des modèles linéaires, les feature importances et les valeurs SHAP (complément visuel).
 
 Le résultat central de ce projet est la mise en évidence d'une \textbf{limite fondamentale du dataset synthétique}~: les variables ont été générées indépendamment, sans relations causales encodées, conduisant à des performances proches du modèle naïf ($R^2 \approx 0$, AUC $\approx 0.5$). La détection d'un data leakage sur la variable \texttt{hypercholesterol} et l'absence de convergence entre méthodes d'interprétabilité confirment ce constat. La valeur principale de ce travail réside dans la \textbf{rigueur méthodologique} du pipeline mis en \oe uvre, directement transposable à des données épidémiologiques réelles.
 
 \bigskip
 \noindent\textbf{Mots-clés~:} data science, santé, machine learning, régression, classification, clustering, interprétabilité, SHAP, données synthétiques, data leakage.
-
-\newpage
-
-\section*{Abstract}
-
-This thesis presents a data science project applied to the analysis of lifestyle factors influencing health outcomes. It is based on the \textit{Health \& Lifestyle Dataset}, a synthetic dataset of 100,000 individuals described by 15 variables covering lifestyle habits (physical activity, sleep, diet, smoking, alcohol) and biological indicators (BMI, cholesterol, blood pressure, heart rate).
-
-A complete data science pipeline was implemented~: exploratory data analysis (EDA), feature engineering (encoding, creation of domain-specific variables, standardisation), and three modelling approaches. For \textbf{regression}, six models were compared (linear regression, Ridge, Lasso, ElasticNet, Random Forest, XGBoost) to predict cholesterol levels, with hyperparameter tuning via \texttt{RandomizedSearchCV} and K-Fold cross-validation ($k=5$). For \textbf{classification}, three models predicted disease risk (\texttt{disease\_risk}) with class imbalance handling. For \textbf{clustering}, K-Means and hierarchical agglomerative clustering (HAC) identified lifestyle profiles. \textbf{Interpretability} was analysed through linear model coefficients, feature importances, and SHAP values.
-
-The central finding is a \textbf{fundamental limitation of the synthetic dataset}~: variables were generated independently with no encoded causal relationships, leading to near-baseline performance ($R^2 \approx 0$, AUC $\approx 0.5$). The detection of data leakage on the \texttt{hypercholesterol} variable and the inconsistency between interpretability methods confirm this finding. The main contribution of this work lies in the \textbf{methodological rigour} of the pipeline, directly applicable to real epidemiological data.
-
-\bigskip
-\noindent\textbf{Keywords~:} data science, health, machine learning, regression, classification, clustering, interpretability, SHAP, synthetic data, data leakage.
 
 \newpage

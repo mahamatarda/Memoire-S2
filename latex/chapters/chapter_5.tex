@@ -1,6 +1,4 @@
 % !TEX root = ../manuscript.tex
-\minitoc
-\newpage
 
 \section{Méthodologie et organisation}
 
@@ -18,13 +16,14 @@ Ce projet a été conduit en suivant le cycle \textbf{CRISP-DM}~\cite{chapman200
 \toprule
 Catégorie & Outil & Usage \\
 \midrule
-Langage & Python 3 & Ensemble du projet \\
-Manipulation données & pandas, numpy & Chargement, nettoyage, feature engineering \\
-Modélisation & scikit-learn, xgboost & Entraînement, tuning, évaluation \\
-Interprétabilité & shap & Valeurs SHAP sur XGBoost \\
-Réduction de dim. & scikit-learn (PCA) & Visualisation clustering \\
-Versionnement & Git / GitHub & Suivi des notebooks et du rapport \\
-Rédaction & \LaTeX & Mémoire \\
+Langage              & Python 3                  & Ensemble du projet \\
+Manipulation données & pandas, numpy             & Chargement, nettoyage, feature engineering \\
+Modélisation         & scikit-learn, xgboost     & Entraînement, tuning, évaluation \\
+Déséquilibre classes & imbalanced-learn          & Rééchantillonnage SMOTE \\
+Interprétabilité     & shap                      & Valeurs SHAP sur XGBoost \\
+Réduction de dim.    & scikit-learn (PCA)        & Visualisation clustering \\
+Versionnement        & Git / GitHub              & Suivi des notebooks et du rapport \\
+Rédaction            & \LaTeX                    & Mémoire \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -39,13 +38,15 @@ Rédaction & \LaTeX & Mémoire \\
 \toprule
 Enseignement M1 & Application dans le projet \\
 \midrule
-ACP / ACM & Réduction dimensionnelle pour la visualisation des clusters \\
-Régression linéaire \& diagnostic & Baseline régression, Ridge, Lasso, ElasticNet \\
-Classification supervisée \& non supervisée & Logistic Reg., RF, XGBoost, K-Means, CAH \\
+ACP / ACM                          & Réduction dimensionnelle pour la visualisation des clusters \\
+Régression linéaire \& diagnostic  & Baseline régression, Ridge, Lasso, ElasticNet \\
+Classification supervisée          & Logistic Regression, Random Forest, XGBoost \\
+Apprentissage non supervisé        & K-Means, CAH \\
 Descente de gradient \& optimisation & Compréhension de XGBoost et de la log-loss \\
-Régression logistique & Baseline classification + interprétation coefficients \\
-Régularisation \& optimisation & Ridge, Lasso, ElasticNet \\
-Python & Ensemble du pipeline de data science \\
+Régression logistique              & Baseline classification + interprétation coefficients \\
+Régularisation \& optimisation     & Ridge, Lasso, ElasticNet \\
+Déséquilibre de classes            & class\_weight, SMOTE (imbalanced-learn) \\
+Python                             & Ensemble du pipeline de data science \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -64,25 +65,26 @@ Python & Ensemble du pipeline de data science \\
 
 \begin{itemize}
   \item \textbf{Détection et correction du data leakage}~\cite{kaufman2012}~: piège courant non systématiquement couvert en cours théoriques.
-  \item \textbf{RandomizedSearchCV}~\cite{bergstra2012}~: logique de l'exploration aléatoire vs exhaustive.
+  \item \textbf{RandomizedSearchCV}~\cite{bergstra2012}~: logique de l'exploration aléatoire vs exhaustive des hyperparamètres.
+  \item \textbf{Gestion du déséquilibre de classes}~: comparaison concrète entre \texttt{class\_weight='balanced'} et SMOTE~\cite{chawla2002}, et compréhension de la différence entre accuracy, F1-score et AUC-ROC~\cite{sokolova2009}.
   \item \textbf{Interprétabilité multi-méthodes}~: la divergence entre outils est elle-même informative~\cite{rudin2019}.
-  \item \textbf{Gestion du déséquilibre de classes}~: différence concrète entre accuracy, F1-score et AUC-ROC~\cite{sokolova2009}.
+  \item \textbf{Analyse critique d'un résultat négatif}~: savoir diagnostiquer pourquoi un modèle échoue est aussi précieux que d'en construire un qui réussit.
 \end{itemize}
 
 \subsection{Positionnement RSE / DDRS}
 
-L'utilisation d'un dataset \textbf{synthétique} s'inscrit dans une démarche éthique~: les données de santé sont sensibles et encadrées par le RGPD~\cite{rgpd2016}. Les données synthétiques éliminent tout risque de ré-identification tout en permettant de développer des méthodes --- un compromis central de l'IA responsable~\cite{floridi2019}.
+L'utilisation d'un dataset \textbf{synthétique} s'inscrit dans une démarche éthique~: les données de santé sont sensibles et encadrées par le RGPD~\cite{rgpd2016}. Les données synthétiques éliminent tout risque de ré-identification tout en permettant de développer des méthodes~--- un compromis central de l'IA responsable~\cite{floridi2019}.
 
-Le coût énergétique des entraînements sur grands datasets~\cite{strubell2019} a été limité en contraignant la profondeur des arbres et en réduisant \texttt{n\_iter} dans \texttt{RandomizedSearchCV}, avec un impact positif sur l'empreinte carbone du calcul.
+Le coût énergétique des entraînements sur grands datasets~\cite{strubell2019} a été limité en contraignant la profondeur des arbres (\texttt{max\_depth=15}) et en réduisant \texttt{n\_iter} dans \texttt{RandomizedSearchCV}, avec un impact positif sur l'empreinte carbone du calcul.
 
 \section{Perspectives}
 
-\textbf{1. Changer de dataset}~: reproduire le pipeline sur un dataset réel, comme la cohorte Framingham~\cite{dawber1951} ou les données NHANES~\cite{nhanes}, qui contiennent de vraies relations entre habitudes de vie et indicateurs de santé.
+\textbf{1. Changer de dataset}~: reproduire le pipeline sur un dataset réel, comme la cohorte Framingham~\cite{dawber1951} ou les données NHANES~\cite{nhanes}, qui contiennent de vraies relations entre habitudes de vie et indicateurs de santé. Les méthodes développées ici sont directement transposables.
 
-\textbf{2. Améliorer les modèles de classification}~: rééchantillonnage SMOTE~\cite{chawla2002}, stacking~\cite{hastie2009}, ou réseaux de neurones pour capturer des relations très non-linéaires~--- en lien avec le module Deep Learning du master.
+\textbf{2. Améliorer les modèles de classification}~: explorer le \textbf{stacking} (combinaison de plusieurs modèles~\cite{hastie2009}) et les \textbf{réseaux de neurones} pour capturer des relations très non-linéaires~--- en lien direct avec le module Deep Learning du master. SMOTE ayant déjà été intégré dans ce projet, ces pistes constituent la suite logique.
 
-\textbf{3. Déploiement}~: un modèle de classification pourrait être déployé sous forme d'API REST (FastAPI) permettant de soumettre un profil individuel et d'obtenir une prédiction avec sa valeur SHAP associée.
+\textbf{3. Déploiement}~: un modèle de classification pourrait être déployé sous forme d'API REST (FastAPI) permettant de soumettre un profil individuel et d'obtenir une prédiction avec ses valeurs SHAP associées, rendant le modèle accessible et explicable.
 
-\textbf{4. Interprétabilité avancée}~: les \textit{Partial Dependence Plots} (PDP) et les \textit{Individual Conditional Expectation} (ICE)~\cite{goldstein2015} permettraient de visualiser comment la prédiction varie en fonction d'une variable, toutes choses égales par ailleurs.
+\textbf{4. Interprétabilité avancée}~: les \textit{Partial Dependence Plots} (PDP) et les \textit{Individual Conditional Expectation} (ICE)~\cite{goldstein2015} permettraient de visualiser comment la prédiction varie en fonction d'une variable, toutes choses égales par ailleurs~--- une limite de SHAP qui agrège les contributions.
 
 \textbf{5. Vers le Master 2}~: les thématiques de causalité, fairness algorithmique et apprentissage fédéré~\cite{floridi2019} constituent des pistes naturelles pour un travail de recherche en M2, dans la continuité directe de ce projet.

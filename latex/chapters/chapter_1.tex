@@ -1,6 +1,4 @@
 % !TEX root = ../manuscript.tex
-\minitoc
-\newpage
 
 \section{L'apprentissage automatique appliqué à la santé}
 
@@ -24,7 +22,15 @@ Parmi les algorithmes les plus utilisés~:
   \item Les \textbf{forêts aléatoires}~\cite{breiman2001} et le \textbf{gradient boosting}~\cite{chen2016}, qui dominent les benchmarks sur données tabulaires.
 \end{itemize}
 
-Un point de vigilance important est le \textbf{déséquilibre des classes}~\cite{japkowicz2002}~: quand les individus malades sont minoritaires, les modèles prédisent systématiquement la classe majoritaire. Des stratégies comme le rééchantillonnage SMOTE~\cite{chawla2002} ou l'ajustement des poids de classe permettent de corriger ce biais.
+Un point de vigilance important est le \textbf{déséquilibre des classes}~\cite{japkowicz2002}~: dans notre dataset, 75,2\% des individus sont sans risque contre seulement 24,8\% à risque. Un modèle naïf qui prédit toujours "sans risque" atteint déjà 75\% d'accuracy --- sans rien apprendre du tout.
+
+Pour corriger ce biais, deux stratégies sont principalement utilisées. L'\textbf{ajustement des poids de classe} (\texttt{class\_weight='balanced'}) pénalise davantage les erreurs sur la classe minoritaire pendant l'entraînement, sans modifier les données. Le \textbf{SMOTE}~\cite{chawla2002} (\textit{Synthetic Minority Over-sampling Technique}) adopte une approche différente~: il crée synthétiquement de nouveaux exemples de la classe minoritaire en interpolant entre observations existantes. Pour un individu $x_i$ et l'un de ses $k$ plus proches voisins $x_{nn}$ dans la classe minoritaire~:
+
+\begin{equation}
+x_{\text{new}} = x_i + \lambda \cdot (x_{nn} - x_i), \quad \lambda \in [0, 1]
+\end{equation}
+
+Les deux stratégies sont appliquées et comparées dans ce projet. Comme on le verra, aucune ne parvient à améliorer significativement l'AUC~: cela confirme que le problème vient de l'absence de signal dans les données, et non du déséquilibre des classes.
 
 \section{Clustering~: identifier des profils de mode de vie}
 
@@ -40,4 +46,16 @@ où $a(i)$ est la distance moyenne de l'observation $i$ aux autres points de son
 
 \section{Interprétabilité des modèles}
 
-Un modèle performant ne suffit pas, notamment dans le domaine de la santé~: il faut aussi pouvoir \textbf{expliquer} ses prédictions~\cite{rudin2019}. Deux approches se distinguent. Les \textbf{modèles intrinsèquement interprétables} (régression linéaire, arbres) permettent de lire directement les relations. Les \textbf{méthodes post-hoc} s'appliquent à n'importe quel modèle~: c'est le cas de \textbf{SHAP}~\cite{lundberg2017}, qui attribue à chaque variable une contribution marginale à la prédiction en s'appuyant sur la théorie des jeux coopératifs. SHAP sera utilisé ici comme complément visuel d'interprétation, aux côtés des feature importances et des coefficients des modèles linéaires.
+Un modèle performant ne suffit pas, notamment dans le domaine de la santé~: il faut aussi pouvoir \textbf{expliquer} ses prédictions~\cite{rudin2019}. Deux grandes familles d'approches se distinguent.
+
+Les \textbf{modèles intrinsèquement interprétables} (régression linéaire, régression logistique, arbres de décision) permettent de lire directement les relations~: les coefficients d'une régression indiquent immédiatement le sens et l'amplitude de l'effet de chaque variable.
+
+Les \textbf{méthodes post-hoc} sont appliquées \textit{après} l'entraînement, sur n'importe quel modèle --- y compris les boîtes noires comme Random Forest ou XGBoost. L'idée est simple~: ne pas sacrifier les performances prédictives pour avoir de l'interprétabilité, mais expliquer le modèle a posteriori. \textbf{SHAP}~\cite{lundberg2017} (\textit{SHapley Additive exPlanations}) est la méthode post-hoc la plus utilisée aujourd'hui. Issue de la théorie des jeux coopératifs, elle répond à la question~: \textit{quelle est la contribution équitable de chaque variable à cette prédiction précise ?} La valeur SHAP $\phi_j$ de la variable $j$ est~:
+
+\begin{equation}
+\phi_j = \sum_{S \subseteq F \setminus \{j\}} \frac{|S|!\,(|F|-|S|-1)!}{|F|!} \Bigl[ f(S \cup \{j\}) - f(S) \Bigr]
+\end{equation}
+
+où $F$ est l'ensemble des variables, $S$ un sous-ensemble ne contenant pas $j$, et $f(S)$ la prédiction du modèle avec uniquement les variables de $S$. Concrètement, pour chaque individu, SHAP produit un score signé par variable~: positif si la variable pousse vers le risque, négatif sinon.
+
+Dans ce projet, SHAP est utilisé comme \textbf{complément visuel}, aux côtés des feature importances (Random Forest, XGBoost) et des coefficients de la régression logistique --- qui restent les interprétations principales.

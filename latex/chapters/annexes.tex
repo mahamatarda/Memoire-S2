@@ -1,0 +1,43 @@
+% !TEX root = ../manuscript.tex
+
+\section*{Annexe A — Variables du dataset}
+
+\begin{longtable}{@{}llll@{}}
+\toprule
+\textbf{Variable} & \textbf{Type} & \textbf{Description} & \textbf{Unité / Modalités} \\
+\midrule
+\texttt{age}              & Continue  & Âge de l'individu                        & années \\
+\texttt{bmi}              & Continue  & Indice de masse corporelle                & kg/m² \\
+\texttt{daily\_steps}     & Continue  & Nombre de pas quotidiens                  & pas/jour \\
+\texttt{sleep\_hours}     & Continue  & Durée de sommeil                          & heures/nuit \\
+\texttt{water\_intake\_l} & Continue  & Consommation d'eau                        & litres/jour \\
+\texttt{calories\_consumed}& Continue & Apport calorique quotidien                & kcal/jour \\
+\texttt{smoker}           & Binaire   & Statut tabagique                          & 0 = non, 1 = oui \\
+\texttt{alcohol}          & Binaire   & Consommation d'alcool                     & 0 = non, 1 = oui \\
+\texttt{resting\_hr}      & Continue  & Fréquence cardiaque au repos              & bpm \\
+\texttt{systolic\_bp}     & Continue  & Pression artérielle systolique            & mmHg \\
+\texttt{diastolic\_bp}    & Continue  & Pression artérielle diastolique           & mmHg \\
+\texttt{cholesterol}      & Continue  & Taux de cholestérol total                 & mg/dL \\
+\texttt{family\_history}  & Binaire   & Antécédents familiaux de maladie          & 0 = non, 1 = oui \\
+\texttt{gender}           & Catégorielle & Sexe de l'individu                     & Male / Female \\
+\texttt{disease\_risk}    & Binaire   & Variable cible : risque de maladie        & 0 = non, 1 = oui \\
+\bottomrule
+\end{longtable}
+
+\newpage
+
+\section*{Annexe B — Hyperparamètres testés (RandomizedSearchCV)}
+
+\begin{longtable}{@{}lll@{}}
+\toprule
+\textbf{Modèle} & \textbf{Hyperparamètre} & \textbf{Valeurs explorées} \\
+\midrule
+Ridge         & \texttt{alpha}                  & $[0.01, 0.1, 1, 10, 100]$ \\
+Lasso         & \texttt{alpha}                  & $[0.001, 0.01, 0.1, 1, 10]$ \\
+ElasticNet    & \texttt{alpha}, \texttt{l1\_ratio} & $[0.01\text{--}10]$, $[0.1, 0.5, 0.9]$ \\
+Random Forest & \texttt{n\_estimators}, \texttt{max\_depth} & $[50, 100, 200]$, $[5, 10, 15]$ \\
+XGBoost       & \texttt{learning\_rate}, \texttt{n\_estimators} & $[0.01, 0.05, 0.1]$, $[100, 200]$ \\
+\bottomrule
+\end{longtable}
+
+\newpage

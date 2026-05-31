@@ -14,6 +14,13 @@
 \usepackage{titlesec}
 \linespread{1.2}
 
+\titleformat{\chapter}[hang]
+  {\normalfont\LARGE\bfseries}
+  {\color{blue!70!black}\chaptertitlename~\thechapter~:}
+  {0.5em}
+  {\color{black}}
+\titlespacing*{\chapter}{0pt}{2ex}{1.5ex}
+
 \usepackage{amsfonts,cite,array,multirow,graphicx,amsmath,amsthm,tabularx,setspace,amssymb,multirow}
 \usepackage{tikz}
 
@@ -30,10 +37,10 @@
 \usepackage{multirow}
 \usepackage{graphicx}
 \usepackage{epigraph}
-\usepackage{minitoc}
 \usepackage{hyperref}
 \usepackage{xcolor}
 \usepackage{listings}
+\usepackage{tcolorbox}
 
 \lstset{
   basicstyle=\ttfamily\small,
@@ -42,10 +49,10 @@
   breaklines=true
 }
 
-\title{\Huge{Analyse des facteurs de mode de vie influençant l'état de santé : une approche data science}}
+\title{\Huge{Modélisation des comportements de santé par apprentissage automatique : régression, classification et clustering sur données synthétiques}}
 \author{Ardacham Mahamat Teguene}
 \date{Juin 2026}
-\def\mytitle{Analyse des facteurs de mode de vie influençant l'état de santé}
+\def\mytitle{Modélisation des comportements de santé par apprentissage automatique}
 \def\myname{Ardacham Mahamat Teguene}
 \def\degree{Master 1}
 \def\mydegree{Mathématiques et Informatique Appliqués aux Sciences Humaines et Sociales}
@@ -57,8 +64,7 @@
 \begin{document}
 
 %Front Matter
-\dominitoc
- \pagenumbering{roman}
+\pagenumbering{roman}
  \input{front_page}
  \addstarredchapter{Remerciements}
  \input{chapters/acknowlegement}
@@ -68,7 +74,7 @@
 \tableofcontents
 \addstarredchapter{Liste des figures}
 \listoffigures
-\addstarredchapter{Liste des tables}
+\addstarredchapter{Liste des tableaux}
 \listoftables
 
 %Chapters
@@ -76,6 +82,7 @@
 \pagenumbering{arabic}
 
 \addstarredchapter{Introduction}
+\addstarredchapter{Contexte}
 \input{chapters/introduction}
 
 \chapter{État de l'art}
@@ -99,5 +106,14 @@
 \addstarredchapter{Bibliographie}
 \bibliographystyle{unsrt}
 \bibliography{references}
+
+\addstarredchapter{Liste des abréviations}
+\input{chapters/abbreviations}
+
+\addstarredchapter{Lexique}
+\input{chapters/lexique}
+
+\addstarredchapter{Annexes}
+\input{chapters/annexes}
 
 \end{document}

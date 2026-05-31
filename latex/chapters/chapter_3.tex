@@ -1,6 +1,4 @@
 % !TEX root = ../manuscript.tex
-\minitoc
-\newpage
 
 \section{Régression~: prédire le taux de cholestérol}
 
@@ -8,55 +6,62 @@
 
 L'objectif est de prédire le taux de cholestérol (\texttt{cholesterol}, en mg/dL) à partir des habitudes de vie et indicateurs biologiques. Ce choix est médicalement motivé~: le cholestérol est un facteur de risque cardiovasculaire reconnu~\cite{ncep2002}.
 
-\textbf{Note sur le data leakage~:} la variable \texttt{hypercholesterol} ($= 1$ si cholestérol $> 200$) est directement dérivée de la variable cible. L'inclure comme feature constitue un \textit{data leakage}~\cite{kaufman2012} qui gonfle artificiellement le R² à 0.675. Une fois retirée, le R² chute à $\approx 0$ pour tous les modèles, confirmant l'absence de signal prédictif.
+\textbf{Note sur le data leakage~:} la variable \texttt{hypercholesterol} ($= 1$ si cholestérol $> 200$~mg/dL) est directement dérivée de la variable cible. L'inclure comme feature revient à donner la réponse au modèle pendant l'entraînement~--- c'est un \textit{data leakage}~\cite{kaufman2012} qui gonfle artificiellement le $R^2$ à 0.675. Une fois retirée, le $R^2$ chute à $\approx 0$ pour tous les modèles, confirmant l'absence de signal prédictif réel.
 
 \subsection{Protocole expérimental}
 
-\textbf{Split 80/20}~: 80~000 individus en entraînement, 20~000 en test (\texttt{random\_state=42}). Le jeu de test n'intervient qu'à l'évaluation finale~\cite{james2021}.
+\textbf{Split 80/20~:} 80~000 individus en entraînement, 20~000 en test (\texttt{random\_state=42}). Ce ratio classique garantit un ensemble d'entraînement suffisamment grand pour que les modèles apprennent, tout en conservant 20~000 observations pour une évaluation statistiquement fiable~\cite{james2021}. On n'utilise pas de troisième split (train/validation/test) car la validation croisée remplace avantageusement le jeu de validation fixe~: elle exploite l'intégralité des données d'entraînement et produit une estimation plus robuste.
 
-\textbf{Validation croisée K-Fold ($k=5$)}~\cite{hastie2009}~: le jeu d'entraînement est découpé en 5 plis. Le score moyen est estimé par~:
+\textbf{Validation croisée K-Fold ($k=5$)}~\cite{hastie2009}~: le jeu d'entraînement est découpé en $k$ plis égaux. À chaque itération, $k-1$ plis servent à entraîner et le pli restant à valider~; on répète $k$ fois en changeant le pli de validation. Le score moyen sur les $k$ itérations est~:
 \begin{equation}
 \text{CV-score} = \frac{1}{k}\sum_{i=1}^{k} \text{score}_i, \quad k=5
 \end{equation}
+où $k=5$ est la valeur consensus dans la littérature~\cite{james2021}~: avec 80~000 individus, chaque fold contient 16~000 exemples (suffisant), et $k=5$ offre un bon compromis entre coût de calcul et fiabilité de l'estimation. $k=10$ serait plus précis mais deux fois plus lent.
 
 \textbf{Métriques d'évaluation}~\cite{james2021}~:
 \begin{align}
-R^2 &= 1 - \frac{\sum(y_i - \hat{y}_i)^2}{\sum(y_i - \bar{y})^2} \\
-\text{RMSE} &= \sqrt{\frac{1}{n}\sum(y_i - \hat{y}_i)^2} \\
-\text{MAE} &= \frac{1}{n}\sum|y_i - \hat{y}_i|
+R^2 &= 1 - \frac{\sum_{i=1}^{n}(y_i - \hat{y}_i)^2}{\sum_{i=1}^{n}(y_i - \bar{y})^2} \\
+\text{RMSE} &= \sqrt{\frac{1}{n}\sum_{i=1}^{n}(y_i - \hat{y}_i)^2} \\
+\text{MAE} &= \frac{1}{n}\sum_{i=1}^{n}|y_i - \hat{y}_i|
 \end{align}
+
+où $y_i$ est la valeur observée (cholestérol réel), $\hat{y}_i$ la valeur prédite par le modèle, et $\bar{y}$ la moyenne observée. Ces trois métriques sont complémentaires~: le $R^2$ indique la proportion de variance expliquée ($R^2 = 1$ = prédiction parfaite, $R^2 = 0$ = le modèle prédit juste la moyenne, $R^2 < 0$ = pire que la moyenne). Le RMSE exprime l'erreur en mg/dL en pénalisant les grandes erreurs (effet du carré). La MAE donne l'erreur absolue moyenne, plus lisible~: ici MAE~$\approx 37.6$~mg/dL signifie que le modèle se trompe en moyenne de 37.6~mg/dL.
 
 \subsection{Modèles et justification}
 
-\textbf{Régression linéaire (baseline)}~: référence obligatoire. Si les autres modèles ne font pas mieux, la complexité ajoutée n'est pas justifiée~\cite{james2021}.
+\textbf{Régression linéaire (baseline)}~: point de référence obligatoire~\cite{james2021}. Si les autres modèles, plus complexes, ne font pas mieux, leur complexité supplémentaire n'est pas justifiée. Ici, c'est exactement ce qu'on observe.
 
-\textbf{Ridge (régularisation $L_2$)}~\cite{hoerl1970}~:
+\textbf{Ridge (régularisation $L_2$)}~\cite{hoerl1970}~: la régression linéaire classique minimise uniquement les erreurs de prédiction, ce qui peut mener à des coefficients très grands et instables quand les variables sont peu informatives. Ridge ajoute une pénalité qui bride les coefficients~:
 \begin{equation}
-\mathcal{L}_{\text{Ridge}} = \sum(y_i - \hat{y}_i)^2 + \lambda\sum_j w_j^2
+\mathcal{L}_{\text{Ridge}} = \sum_{i=1}^{n}(y_i - \hat{y}_i)^2 + \lambda\sum_j w_j^2
 \end{equation}
+où $\lambda \geq 0$ est le paramètre de régularisation (contrôle la force de la pénalité) et $w_j$ sont les coefficients du modèle. Plus $\lambda$ est grand, plus les coefficients sont réduits vers zéro --- sans jamais les annuler complètement.
 
-\textbf{Lasso (régularisation $L_1$)}~\cite{tibshirani1996}~: force certains coefficients à zéro, réalisant une \textbf{sélection automatique de variables}~:
+\textbf{Lasso (régularisation $L_1$)}~\cite{tibshirani1996}~: similaire à Ridge mais la pénalité sur $|w_j|$ (valeur absolue au lieu du carré) a une propriété remarquable~: elle force certains coefficients \textit{exactement} à zéro, réalisant ainsi une \textbf{sélection automatique de variables}~:
 \begin{equation}
-\mathcal{L}_{\text{Lasso}} = \sum(y_i - \hat{y}_i)^2 + \lambda\sum_j |w_j|
+\mathcal{L}_{\text{Lasso}} = \sum_{i=1}^{n}(y_i - \hat{y}_i)^2 + \lambda\sum_j |w_j|
 \end{equation}
+Résultat observé~: avec $\lambda = 9.54$ (tuné par RandomizedSearchCV), Lasso fixe les \textbf{16 coefficients sur 16 à zéro} --- il prédit simplement la moyenne du cholestérol pour tous les individus, confirmant formellement l'absence de signal prédictif linéaire.
 
-\textbf{ElasticNet}~\cite{hastie2009}~: combine $L_1$ et $L_2$ via un paramètre $\rho \in [0,1]$~:
+\textbf{ElasticNet}~\cite{hastie2009}~: combine les pénalités $L_1$ et $L_2$ via un paramètre de mélange $\rho \in [0, 1]$~:
 \begin{equation}
-\mathcal{L}_{\text{EN}} = \sum(y_i - \hat{y}_i)^2 + \lambda\left[\rho\sum_j|w_j| + \frac{1-\rho}{2}\sum_j w_j^2\right]
+\mathcal{L}_{\text{EN}} = \sum_{i=1}^{n}(y_i - \hat{y}_i)^2 + \lambda\left[\rho\sum_j|w_j| + \frac{1-\rho}{2}\sum_j w_j^2\right]
 \end{equation}
+où $\rho = 1$ redonne le Lasso, $\rho = 0$ redonne Ridge. Utile quand on ne sait pas a priori lequel des deux convient mieux.
 
-\textbf{Random Forest}~\cite{breiman2001}~: ensemble de $B$ arbres avec prédiction par moyenne~:
+\textbf{Random Forest}~\cite{breiman2001}~: construit $B$ arbres de décision indépendants, chacun entraîné sur un sous-échantillon aléatoire des données et des variables. La prédiction finale est la moyenne des $B$ arbres~:
 \begin{equation}
 \hat{y} = \frac{1}{B}\sum_{b=1}^{B} T_b(\mathbf{x})
 \end{equation}
-Paramètres~: \texttt{max\_depth=15}, \texttt{max\_samples=0.5}, \texttt{n\_jobs=-1} pour éviter les entraînements de plusieurs heures observés avec les paramètres par défaut.
+où $T_b(\mathbf{x})$ est la prédiction du $b$-ième arbre. Cette approche réduit la variance par rapport à un arbre unique et capture les non-linéarités. Paramètres utilisés~: \texttt{max\_depth=15}, \texttt{max\_samples=0.5}, \texttt{n\_jobs=-1} pour éviter des entraînements de plusieurs heures observés avec les paramètres par défaut (\texttt{max\_depth=None}).
 
-\textbf{XGBoost}~\cite{chen2016}~: gradient boosting séquentiel avec régularisation intégrée~:
+\textbf{XGBoost}~\cite{chen2016}~: contrairement à Random Forest qui construit des arbres en parallèle, XGBoost les construit \textit{séquentiellement}~--- chaque arbre corrige les erreurs du précédent. La prédiction à l'itération $t$ est~:
 \begin{equation}
 \hat{y}^{(t)} = \hat{y}^{(t-1)} + \eta \cdot T_t(\mathbf{x})
 \end{equation}
+où $\eta \in (0, 1]$ est le \textit{taux d'apprentissage} (learning rate) qui contrôle la contribution de chaque arbre, et $T_t(\mathbf{x})$ est l'arbre ajouté à l'itération $t$.
 
-\textbf{Tuning par RandomizedSearchCV}~\cite{bergstra2012}~: tire aléatoirement \texttt{n\_iter=20} combinaisons dans l'espace des hyperparamètres, divisant le temps de calcul par rapport à GridSearch tout en explorant suffisamment l'espace.
+\textbf{Tuning par RandomizedSearchCV}~\cite{bergstra2012}~: les hyperparamètres ($\lambda$, \texttt{max\_depth}, \texttt{learning\_rate}\ldots) ne peuvent pas être appris depuis les données~--- ils doivent être fixés avant l'entraînement. "Tuné" signifie que leur valeur optimale a été trouvée \textit{automatiquement} par RandomizedSearchCV~: à chaque itération, une combinaison aléatoire d'hyperparamètres est tirée et évaluée par validation croisée. Avec \texttt{n\_iter=20}, on explore 20 combinaisons aléatoires --- beaucoup plus rapide que GridSearch qui testerait toutes les combinaisons possibles, tout en couvrant suffisamment l'espace des paramètres~\cite{bergstra2012}.
 
 \subsection{Résultats et analyse critique}
 
@@ -68,20 +73,21 @@ Paramètres~: \texttt{max\_depth=15}, \texttt{max\_samples=0.5}, \texttt{n\_jobs
 \toprule
 Modèle & $R^2$ & RMSE (mg/dL) & MAE (mg/dL) & CV-$R^2$ \\
 \midrule
-LinearRegression (baseline) & 0.0001 & 43.33 & 37.59 & $\approx 0$ \\
-Ridge ($\alpha=7197$, tuné) & 0.0001 & 43.33 & 37.59 & $\approx 0$ \\
-Lasso ($\alpha=9.54$, tuné) & $\approx 0$ & 43.33 & 37.60 & $\approx 0$ \\
-ElasticNet & 0.0001 & 43.33 & 37.60 & $\approx 0$ \\
-Random Forest (tuné) & $\approx 0$ & 43.34 & 37.61 & $\approx 0$ \\
-XGBoost (tuné) & 0.0001 & 43.33 & 37.59 & $\approx 0$ \\
+LinearRegression (baseline) & 0.0001  & 43.33 & 37.59 & $\approx 0$ \\
+Ridge ($\lambda=7197$, tuné) & 0.0001  & 43.33 & 37.59 & $\approx 0$ \\
+Lasso ($\lambda=9.54$, tuné) & $-0.0000$ & 43.33 & 37.60 & $\approx 0$ \\
+ElasticNet                   & $-0.0000$ & 43.33 & 37.60 & $\approx 0$ \\
+Random Forest (tuné)         & $-0.005$  & 43.44 & 37.67 & $\approx 0$ \\
+XGBoost (tuné)               & 0.0001  & 43.33 & 37.59 & $\approx 0$ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \begin{quote}
-\textbf{Analyse critique~:} Aucun modèle ne réussit à prédire le taux de cholestérol ($R^2 \approx 0$). Le Lasso, en fixant tous ses coefficients à zéro, confirme formellement l'absence de signal prédictif linéaire. Ce résultat illustre une \textbf{limite fondamentale du dataset synthétique}~: les variables ont été générées indépendamment, sans relations causales réalistes. Dans des données réelles, l'alimentation, l'activité physique et le tabagisme influencent significativement le cholestérol~\cite{booth2012} --- mais cette relation n'existe pas ici. La valeur de cet exercice réside dans la \textbf{démonstration méthodologique}~: pipeline complet, détection de data leakage, comparaison de 6 modèles avec tuning.
+\textbf{Analyse critique~:} Aucun modèle ne parvient à prédire le taux de cholestérol ($R^2 \approx 0$ pour tous). Plusieurs observations renforcent ce constat. Premièrement, le Lasso (tuné) fixe les \textbf{16 coefficients sur 16 à zéro}~: il se contente de prédire la moyenne du cholestérol (224.3~mg/dL) pour chaque individu --- c'est la preuve formelle qu'aucune variable n'est linéairement prédictive. Deuxièmement, Random Forest et XGBoost non-tunés affichent des $R^2$ \textit{négatifs}~: ils sont plus mauvais que de prédire la moyenne, ce qui révèle qu'ils ont surajusté du bruit. Le tuning améliore légèrement XGBoost ($R^2$ repasse à 0.0001) mais ne change pas le fond du problème. Ce résultat illustre la \textbf{limite fondamentale du dataset synthétique}~: les variables ont été générées indépendamment, sans relations causales réalistes encodées. Dans des données réelles, alimentation, activité physique et tabagisme influencent significativement le cholestérol~\cite{booth2012} --- cette relation est tout simplement absente ici.
 \end{quote}
 
+% ─────────────────────────────────────────────────────────────
 \section{Classification~: prédire le risque de maladie}
 
 \subsection{Objectif et contexte}
@@ -90,15 +96,15 @@ L'objectif est de prédire si un individu est à risque de maladie (\texttt{dise
 
 \subsection{Protocole expérimental}
 
-\textbf{Split stratifié 80/20}~: le paramètre \texttt{stratify=y} maintient le ratio 75.2/24.8 dans les deux ensembles~\cite{james2021}.
+\textbf{Split stratifié 80/20~:} le paramètre \texttt{stratify=y} maintient le ratio 75.2/24.8 dans les deux ensembles, évitant qu'un split aléatoire ne crée un jeu de test avec trop peu d'individus à risque~\cite{james2021}.
 
-\textbf{Stratified K-Fold ($k=5$)}~: maintient le ratio de classes dans chaque fold~\cite{japkowicz2002}.
+\textbf{Stratified K-Fold ($k=5$)}~: maintient le ratio de classes dans chaque fold. Sans stratification, un fold pourrait ne contenir que des individus sans risque et biaiser l'évaluation~\cite{japkowicz2002}.
 
-\textbf{Gestion du déséquilibre}~\cite{japkowicz2002}~:
+\textbf{Gestion du déséquilibre}~: deux stratégies sont utilisées et comparées. L'ajustement des poids de classe pénalise davantage les erreurs sur la classe minoritaire~\cite{japkowicz2002}~:
 \begin{equation}
 w_k = \frac{n}{K \cdot n_k}
 \end{equation}
-via \texttt{class\_weight='balanced'} (Logistic Regression, Random Forest) et \texttt{scale\_pos\_weight=3} (XGBoost).
+où $n$ est le nombre total d'observations, $K$ le nombre de classes et $n_k$ le nombre d'observations dans la classe $k$. SMOTE~\cite{chawla2002} crée synthétiquement de nouveaux exemples minoritaires par interpolation (voir chapitre~1). Les deux approches sont comparées dans ce projet.
 
 \subsection{Métriques d'évaluation}
 
@@ -107,11 +113,13 @@ via \texttt{class\_weight='balanced'} (Logistic Regression, Random Forest) et \t
 \text{F1-score} &= \frac{2 \times \text{Précision} \times \text{Rappel}}{\text{Précision} + \text{Rappel}}
 \end{align}
 
-La courbe \textbf{ROC} trace le taux de vrais positifs en fonction du taux de faux positifs. L'\textbf{AUC-ROC}~\cite{james2021} mesure la capacité de discrimination~: AUC = 0.5 équivaut à un tirage aléatoire.
+où $TP$ (vrais positifs), $FP$ (faux positifs) et $FN$ (faux négatifs) sont issus de la matrice de confusion. La \textbf{précision} mesure la proportion de prédictions "à risque" qui sont réellement à risque~; le \textbf{rappel} mesure la proportion d'individus réellement à risque qui ont bien été détectés. Le \textbf{F1-score} est leur moyenne harmonique~: utile quand les deux comptent également.
 
-\textbf{Note sur le SVM~:} sa complexité en $\mathcal{O}(n^2)$ à $\mathcal{O}(n^3)$~\cite{cortes1995} le rend impraticable sur 100~000 observations sans infrastructure dédiée. Un test sur 5~000 individus a confirmé des performances similaires aux autres modèles.
+La courbe \textbf{ROC} trace le taux de vrais positifs en fonction du taux de faux positifs pour tous les seuils de décision. L'\textbf{AUC-ROC}~\cite{james2021} synthétise cette courbe en un seul chiffre~: AUC = 1 = discrimination parfaite, AUC = 0.5 = tirage aléatoire (aucun pouvoir discriminant).
 
-\subsection{Résultats}
+\textbf{Note sur le SVM~:} le SVM~\cite{cortes1995} a été écarté en raison de sa \textbf{complexité algorithmique}. La complexité d'un algorithme décrit comment son temps de calcul augmente avec la taille des données $n$. Le SVM nécessite de calculer des distances entre paires d'observations, ce qui donne une complexité en $\mathcal{O}(n^2)$ à $\mathcal{O}(n^3)$~: doubler $n$ multiplie le temps par 4 (voire 8). Concrètement~: sur 5~000 individus, l'entraînement prend quelques secondes. Sur 100~000 individus, le même calcul représenterait $100^2 = 10~000$ fois plus d'opérations, soit plusieurs heures sans infrastructure dédiée. Un test sur 5~000 individus a confirmé des performances similaires aux autres modèles (AUC~$\approx 0.5$)~: exclure le SVM ne prive pas l'analyse de résultats utiles.
+
+\subsection{Résultats et analyse critique}
 
 \begin{table}[h]
 \centering
@@ -121,14 +129,16 @@ La courbe \textbf{ROC} trace le taux de vrais positifs en fonction du taux de fa
 \toprule
 Modèle & Accuracy & Précision & Rappel & F1 & AUC-ROC \\
 \midrule
-Naïf (tout à 0) & 0.752 & --- & 0.000 & 0.000 & 0.500 \\
-Logistic Regression & 0.498 & 0.249 & 0.509 & 0.335 & 0.499 \\
-Random Forest & 0.568 & 0.245 & 0.355 & 0.290 & 0.494 \\
-XGBoost & 0.531 & 0.248 & 0.436 & 0.316 & 0.499 \\
+Naïf (tout à 0)      & 0.752 & ---   & 0.000 & 0.000 & 0.500 \\
+Logistic Regression  & 0.498 & 0.249 & 0.509 & 0.335 & 0.499 \\
+Random Forest        & 0.568 & 0.245 & 0.355 & 0.290 & 0.494 \\
+XGBoost              & 0.531 & 0.248 & 0.436 & 0.316 & 0.499 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
+\small\textit{$^*$ La précision du modèle naïf est indéfinie~: ce modèle prédit toujours 0, donc il n'émet jamais de prédiction positive ($TP = 0$, $FP = 0$), ce qui conduit à une division par zéro dans la formule $\frac{TP}{TP+FP}$.}
+
 \begin{quote}
-\textbf{Analyse critique~:} L'\textbf{AUC-ROC~$\approx$~0.5} pour tous les modèles signifie qu'ils n'ont aucun pouvoir discriminant réel~\cite{james2021}~--- équivalent à un tirage à pile ou face. La comparaison avec le modèle naïf est instructive~: avec \texttt{class\_weight='balanced'}, les modèles augmentent leur rappel mais au prix d'une accuracy inférieure à 50\%. Cela démontre concrètement pourquoi l'accuracy seule est trompeuse sur un dataset déséquilibré~\cite{sokolova2009}~: un modèle à 75\% d'accuracy qui ne prédit jamais de risque est inutile en pratique. Les importances de features sont uniformément distribuées, confirmant qu'aucune variable n'est réellement prédictive de \texttt{disease\_risk}.
+\textbf{Analyse critique~:} L'\textbf{AUC-ROC~$\approx$~0.5} pour tous les modèles confirme qu'ils n'ont aucun pouvoir discriminant~\cite{james2021}~--- équivalent à un tirage à pile ou face. La comparaison avec le modèle naïf est instructive~: ce dernier atteint 75.2\% d'accuracy en prédisant toujours "sans risque", sans rien apprendre. Avec \texttt{class\_weight='balanced'}, les modèles augmentent leur rappel (ils détectent plus d'individus à risque) mais leur accuracy tombe sous 50\%~--- ils sur-corrigent le déséquilibre au détriment de la précision. Cela illustre concrètement pourquoi l'accuracy seule est trompeuse sur un dataset déséquilibré~\cite{sokolova2009}. Ces résultats sont cohérents avec ceux de la régression ($R^2 \approx 0$)~: les deux confirment que \texttt{disease\_risk} a été généré indépendamment de toutes les autres variables, et qu'aucune technique --- aussi sophistiquée soit-elle --- ne peut extraire un signal qui n'existe pas.
 \end{quote}
