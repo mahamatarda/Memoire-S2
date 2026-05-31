@@ -6,6 +6,13 @@ Ces dernières années, l'apprentissage automatique s'est imposé comme un outil
 
 Dans ce contexte, les jeux de données combinant indicateurs biologiques et habitudes de vie constituent un terrain d'étude particulièrement riche. L'idée centrale est que les maladies chroniques ne sont pas seulement le résultat de facteurs génétiques, mais résultent d'une accumulation de comportements quotidiens mesurables~\cite{booth2012}.
 
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\textwidth]{machine_learning.png}
+\caption{Vue d'ensemble des grandes familles d'algorithmes de machine learning~\cite{rajpurkar2022}}
+\label{fig:ml_overview}
+\end{figure}
+
 \section{Régression~: prédire des indicateurs biologiques}
 
 La régression linéaire est l'une des méthodes les plus anciennes et les plus utilisées en statistique appliquée à la santé~\cite{james2021}. Pour pallier ses hypothèses fortes, des méthodes de \textbf{régression régularisée} ont été développées. La régression Ridge~\cite{hoerl1970} pénalise les coefficients trop grands via un terme $\lambda \|\mathbf{w}\|_2^2$, réduisant la variance du modèle. La régression Lasso~\cite{tibshirani1996} utilise une pénalisation $L_1$ qui force certains coefficients à zéro, réalisant ainsi une \textbf{sélection automatique de variables}.

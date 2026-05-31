@@ -48,7 +48,21 @@ Le coefficient d'asymétrie (\textit{skewness}) mesure la symétrie d'une distri
 
 On le calcule pour décider si une transformation est nécessaire avant modélisation~: une distribution très asymétrique (skewness $> 1$ par exemple) peut biaiser les modèles linéaires et nécessite souvent une transformation logarithmique pour être "redressée". Ici, toutes les variables continues affichent un skewness inférieur à $|0.02|$~: distributions \textbf{quasi-uniformes}, ce qui s'explique par la génération synthétique aléatoire des données~\cite{chawla2002}. Aucune transformation n'est donc nécessaire.
 
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{distributions_continues.png}
+\caption{Distributions des variables continues du dataset}
+\label{fig:distributions}
+\end{figure}
+
 La variable cible présente un \textbf{déséquilibre des classes} (\textit{class imbalance problem}~\cite{japkowicz2002})~: 75~179 individus (75.2\%) sont sans risque contre seulement 24~821 (24.8\%) à risque. Le problème concret est le suivant~: un modèle naïf qui prédit \textit{toujours} "sans risque" obtient déjà 75\% d'accuracy --- sans avoir rien appris. L'accuracy seule est donc une métrique trompeuse~: elle ne distingue pas un bon modèle d'un modèle inutile. C'est pourquoi on privilégie le F1-score, la précision, le rappel et l'AUC-ROC, qui mesurent réellement la capacité à détecter les deux classes~\cite{sokolova2009}.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.55\textwidth]{disease_risk_distribution.png}
+\caption{Distribution de la variable cible \texttt{disease\_risk} (déséquilibre 75/25)}
+\label{fig:disease_risk}
+\end{figure}
 
 \subsection{Analyse des corrélations}
 
@@ -59,9 +73,23 @@ r_{XY} = \frac{\sum_{i=1}^{n}(x_i - \bar{x})(y_i - \bar{y})}
 {\sqrt{\sum_{i=1}^{n}(x_i-\bar{x})^2 \cdot \sum_{i=1}^{n}(y_i-\bar{y})^2}}
 \end{equation}
 
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\textwidth]{correlation_matrix.png}
+\caption{Matrice de corrélation de Pearson entre toutes les variables du dataset}
+\label{fig:corr_matrix}
+\end{figure}
+
 \begin{quote}
 \textbf{Résultat central~:} Les valeurs calculées sur le dataset (notebook 01\_EDA) révèlent que les corrélations entre toutes les variables sont inférieures à $|0.01|$. La variable la plus corrélée avec \texttt{disease\_risk} est \texttt{resting\_hr} avec $r = 0.005$ --- statistiquement non significatif sur 100~000 individus. Cela confirme que la variable cible a été générée indépendamment des autres variables. Ce constat justifie l'exploration de \textbf{méthodes non-linéaires}~\cite{breiman2001}~: la corrélation de Pearson ne détecte que les relations linéaires directes~; des algorithmes comme Random Forest ou XGBoost peuvent théoriquement capturer des relations plus complexes (interactions, effets seuils). En pratique, même ces méthodes échoueront ici --- ce qui confirme l'absence totale de signal.
 \end{quote}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.75\textwidth]{correlations_target.png}
+\caption{Corrélations de chaque variable avec la cible \texttt{disease\_risk}}
+\label{fig:corr_target}
+\end{figure}
 
 \subsection{Bilan de l'EDA}
 

@@ -51,6 +51,13 @@ $k$ & Inertie & Silhouette \\
 
 $k=3$ maximise la silhouette et correspond au coude de la courbe d'inertie. \textbf{$k=3$ est retenu.}
 
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\textwidth]{kmeans_selection_k.png}
+\caption{Inertie intra-cluster et coefficient de silhouette selon $k$ (K-Means)}
+\label{fig:kmeans_k}
+\end{figure}
+
 \subsection{K-Means}
 
 L'algorithme K-Means~\cite{macqueen1967} alterne deux étapes~: affectation de chaque individu au centroïde le plus proche (selon la distance euclidienne), puis mise à jour de chaque centroïde comme la moyenne de ses membres~:
@@ -126,6 +133,13 @@ Variance ACP (2D) & \multicolumn{2}{c}{24.3\%} & Projection insuffisante (15 dim
 \end{tabular}
 \end{table}
 
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\textwidth]{kmeans_pca.png}
+\caption{Visualisation des clusters K-Means ($k=3$) par projection ACP (2 composantes, 24.3\% de variance)}
+\label{fig:kmeans_pca}
+\end{figure}
+
 Malgré des silhouettes faibles ($\approx 0.10$), les deux méthodes révèlent des structures interprétables médicalement~\cite{booth2012, who2000}~: obèse hypertendu (K-Means), fumeurs intenses + hypertendus (CAH). La faible silhouette reflète l'absence de groupes naturels francs dans des données synthétiques générées sans structure causale --- pas une erreur méthodologique.
 
 % ─────────────────────────────────────────────────────────────
@@ -156,6 +170,27 @@ Les cinq méthodes d'interprétabilité (coefficients LR, Ridge, feature importa
 
 Sur des données réelles~\cite{booth2012, who2000}, on s'attendrait à voir la pression artérielle, le cholestérol LDL, le tabagisme, l'IMC et l'activité physique dominer clairement les classements, avec des coefficients significativement différents de zéro.
 \end{quote}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.75\textwidth]{lr_coefficients.png}
+\caption{Coefficients de la régression logistique (variables standardisées)}
+\label{fig:lr_coef}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.75\textwidth]{rf_feature_importance.png}
+\caption{Feature importances (impureté de Gini) du Random Forest}
+\label{fig:rf_fi}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\textwidth]{shap_summary.png}
+\caption{SHAP summary plot (XGBoost) --- complément visuel d'interprétabilité}
+\label{fig:shap}
+\end{figure}
 
 Le tableau suivant synthétise la présence de chaque variable dans le top~5 des cinq méthodes~:
 

@@ -139,6 +139,20 @@ XGBoost              & 0.531 & 0.248 & 0.436 & 0.316 & 0.499 \\
 
 \small\textit{$^*$ La précision du modèle naïf est indéfinie~: ce modèle prédit toujours 0, donc il n'émet jamais de prédiction positive ($TP = 0$, $FP = 0$), ce qui conduit à une division par zéro dans la formule $\frac{TP}{TP+FP}$.}
 
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.75\textwidth]{roc_curves.png}
+\caption{Courbes ROC des trois modèles de classification (AUC $\approx$ 0.5 pour tous)}
+\label{fig:roc}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{confusion_matrices.png}
+\caption{Matrices de confusion des trois modèles de classification}
+\label{fig:confusion}
+\end{figure}
+
 \begin{quote}
 \textbf{Analyse critique~:} L'\textbf{AUC-ROC~$\approx$~0.5} pour tous les modèles confirme qu'ils n'ont aucun pouvoir discriminant~\cite{james2021}~--- équivalent à un tirage à pile ou face. La comparaison avec le modèle naïf est instructive~: ce dernier atteint 75.2\% d'accuracy en prédisant toujours "sans risque", sans rien apprendre. Avec \texttt{class\_weight='balanced'}, les modèles augmentent leur rappel (ils détectent plus d'individus à risque) mais leur accuracy tombe sous 50\%~--- ils sur-corrigent le déséquilibre au détriment de la précision. Cela illustre concrètement pourquoi l'accuracy seule est trompeuse sur un dataset déséquilibré~\cite{sokolova2009}. Ces résultats sont cohérents avec ceux de la régression ($R^2 \approx 0$)~: les deux confirment que \texttt{disease\_risk} a été généré indépendamment de toutes les autres variables, et qu'aucune technique --- aussi sophistiquée soit-elle --- ne peut extraire un signal qui n'existe pas.
 \end{quote}
