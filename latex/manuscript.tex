@@ -42,6 +42,11 @@
 \usepackage{listings}
 \usepackage{tcolorbox}
 
+% Commande pour ajouter les chapitres non numérotés à la table des matières
+\newcommand{\addstarredchapter}[1]{%
+  \addcontentsline{toc}{chapter}{#1}%
+}
+
 \lstset{
   basicstyle=\ttfamily\small,
   backgroundcolor=\color{gray!10},
