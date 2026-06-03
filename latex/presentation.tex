@@ -1,0 +1,496 @@
+\documentclass[12pt]{beamer}
+
+% ── Thème et couleurs ─────────────────────────────────────────
+\usetheme{default}
+\usecolortheme{default}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[frame number]
+
+% Couleurs personnalisées
+\definecolor{bleutitre}{RGB}{0,70,140}
+\definecolor{bleuaccent}{RGB}{0,102,204}
+\definecolor{grisclair}{RGB}{240,245,250}
+
+\setbeamercolor{frametitle}{fg=bleutitre, bg=grisclair}
+\setbeamercolor{title}{fg=bleutitre}
+\setbeamercolor{subtitle}{fg=bleuaccent}
+\setbeamercolor{structure}{fg=bleutitre}
+\setbeamercolor{normal text}{fg=black, bg=white}
+\setbeamercolor{block title}{fg=white, bg=bleutitre}
+\setbeamercolor{block body}{fg=black, bg=grisclair}
+\setbeamercolor{alerted text}{fg=bleuaccent}
+
+\setbeamerfont{frametitle}{size=\large, series=\bfseries}
+\setbeamerfont{title}{size=\Large, series=\bfseries}
+
+% Trait bleu sous le titre de chaque diapo
+\setbeamertemplate{frametitle}{
+  \vspace*{0.3em}
+  \insertframetitle
+  \vspace*{0.2em}
+  \textcolor{bleuaccent}{\hrule height 1.2pt}
+  \vspace*{0.3em}
+}
+
+% ── Packages ──────────────────────────────────────────────────
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{amsmath, amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning}
+
+% ── Métadonnées ───────────────────────────────────────────────
+\title{Modélisation des comportements de santé\\par apprentissage automatique}
+\subtitle{Régression, classification et clustering sur données synthétiques}
+\author{Ardacham Mahamat Teguene}
+\institute{Master 1 MIASHS ---~Université de Montpellier Paul Valéry\\
+\smallskip Tuteurs : Sophie Lèbre \& Jérôme Pasquet}
+\date{Juin 2026}
+
+% ══════════════════════════════════════════════════════════════
+\begin{document}
+% ══════════════════════════════════════════════════════════════
+
+% ── Diapo 1 : Titre ──────────────────────────────────────────
+\begin{frame}
+\titlepage
+\end{frame}
+
+% ── Diapo 2 : Plan ───────────────────────────────────────────
+\begin{frame}{Plan de la présentation}
+\tableofcontents
+\end{frame}
+
+% ══════════════════════════════════════════════════════════════
+\section{Contexte et problématique}
+% ══════════════════════════════════════════════════════════════
+
+\begin{frame}{Contexte et problématique}
+
+\begin{block}{Question centrale}
+\centering
+\textbf{Quels facteurs du mode de vie influencent le plus l'état de santé\\
+---~ et peut-on les identifier, les modéliser et les expliquer ?}
+\end{block}
+
+\bigskip
+
+\textbf{Motivations :}
+\begin{itemize}
+  \item Les maladies chroniques résultent de comportements quotidiens mesurables
+  \item Données de santé de plus en plus disponibles (IoT, dossiers médicaux)
+  \item ML peut modéliser des relations complexes là où la statistique classique atteint ses limites
+\end{itemize}
+
+\bigskip
+
+\textbf{Seuils médicaux de référence :}
+\begin{itemize}
+  \item Obésité : IMC $> 30$ (OMS)
+  \item Hypercholestérolémie : cholestérol $> 200$ mg/dL (NCEP)
+  \item Hypertension : pression systolique $\geq 140$ mmHg (ESC)
+\end{itemize}
+
+\end{frame}
+
+% ══════════════════════════════════════════════════════════════
+\section{Jeu de données et pipeline}
+% ══════════════════════════════════════════════════════════════
+
+\begin{frame}{Le jeu de données ---~\textit{Health \& Lifestyle Dataset}}
+
+\begin{columns}[T]
+\begin{column}{0.5\textwidth}
+\textbf{Caractéristiques :}
+\begin{itemize}
+  \item \textbf{100 000 individus}, 15 variables
+  \item Dataset \textbf{synthétique} (Kaggle)
+  \item Aucune valeur manquante
+  \item Aucun outlier (méthode IQR)
+\end{itemize}
+
+\bigskip
+
+\textbf{Variables cibles :}
+\begin{itemize}
+  \item \texttt{cholesterol} $\rightarrow$ régression
+  \item \texttt{disease\_risk} $\rightarrow$ classification
+\end{itemize}
+\end{column}
+
+\begin{column}{0.48\textwidth}
+\textbf{Types de variables :}
+
+\smallskip
+\begin{tabular}{ll}
+\toprule
+Type & Variables \\
+\midrule
+Continues & age, bmi, steps \\
+            & sleep, cholesterol \\
+            & systolic\_bp, hr \\
+Binaires    & smoker, alcohol \\
+            & family\_history \\
+            & disease\_risk \\
+Catégorielle & gender \\
+\bottomrule
+\end{tabular}
+\end{column}
+\end{columns}
+
+\end{frame}
+
+% ─────────────────────────────────────────────────────────────
+\begin{frame}{Pipeline CRISP-DM}
+
+\begin{center}
+\begin{tikzpicture}[
+  box/.style={draw=bleutitre, fill=grisclair, rounded corners=4pt,
+              minimum width=3.2cm, minimum height=0.7cm,
+              font=\small\bfseries, text=bleutitre},
+  arr/.style={->, thick, color=bleuaccent}
+]
+\node[box] (eda)  at (0,0)    {EDA};
+\node[box] (fe)   at (3.5,0)  {Feature Engineering};
+\node[box] (reg)  at (0,-1.4) {Régression};
+\node[box] (cla)  at (3.5,-1.4) {Classification};
+\node[box] (clu)  at (0,-2.8) {Clustering};
+\node[box] (int)  at (3.5,-2.8) {Interprétabilité};
+
+\draw[arr] (eda) -- (fe);
+\draw[arr] (fe)  -- (reg);
+\draw[arr] (fe)  -- (cla);
+\draw[arr] (reg) -- (clu);
+\draw[arr] (cla) -- (int);
+\draw[arr] (clu) -- (int);
+\end{tikzpicture}
+\end{center}
+
+\smallskip
+\begin{itemize}
+  \item Approche \textbf{itérative} : chaque étape informe la suivante
+  \item EDA $\rightarrow$ anticipe les problèmes de signal
+  \item Feature engineering $\rightarrow$ 3 variables métier créées, data leakage détecté
+\end{itemize}
+
+\end{frame}
+
+% ══════════════════════════════════════════════════════════════
+\section{Analyse exploratoire (EDA)}
+% ══════════════════════════════════════════════════════════════
+
+\begin{frame}{EDA ---~Résultats clés}
+
+\begin{columns}[T]
+\begin{column}{0.48\textwidth}
+\begin{block}{Distributions}
+\begin{itemize}
+  \item Skewness $< |0.02|$ pour toutes les variables continues
+  \item Distributions \textbf{quasi-uniformes}
+  \item Aucune transformation nécessaire
+\end{itemize}
+\end{block}
+
+\medskip
+
+\begin{block}{Classe cible}
+\begin{itemize}
+  \item Déséquilibre \textbf{75\% / 25\%}
+  \item Modèle naïf $\rightarrow$ 75\% d'accuracy sans rien apprendre
+  \item Métriques adaptées : F1, AUC-ROC
+\end{itemize}
+\end{block}
+\end{column}
+
+\begin{column}{0.48\textwidth}
+\begin{block}{\alert{Résultat central}}
+\begin{itemize}
+  \item Corrélations $< |0.01|$ entre \textbf{toutes} les variables
+  \item Variable la plus corrélée à \texttt{disease\_risk} : \texttt{resting\_hr} avec $r = 0.005$
+  \item \textbf{Signal linéaire quasi-nul}
+\end{itemize}
+\end{block}
+
+\medskip
+
+\textbf{Implication :} orientation vers les méthodes non-linéaires (RF, XGBoost)
+\end{column}
+\end{columns}
+
+\end{frame}
+
+% ══════════════════════════════════════════════════════════════
+\section{Modélisation supervisée}
+% ══════════════════════════════════════════════════════════════
+
+\begin{frame}{Régression ---~Protocole et modèles}
+
+\textbf{Objectif :} prédire \texttt{cholesterol} (mg/dL)
+
+\medskip
+
+\textbf{Protocole :}
+\begin{itemize}
+  \item Split 80/20 ---~Validation croisée K-Fold ($k=5$)
+  \item Tuning par \texttt{RandomizedSearchCV} (\texttt{n\_iter=20})
+  \item Métriques : $R^2$, RMSE, MAE
+\end{itemize}
+
+\medskip
+
+\textbf{6 modèles ---~logique de spectre de complexité :}
+
+\smallskip
+\begin{tabular}{lll}
+\toprule
+Modèle & Type & Spécificité \\
+\midrule
+Régression linéaire & Baseline & Référence \\
+Ridge ($L_2$) & Régularisée & Réduit les coefficients \\
+Lasso ($L_1$) & Régularisée & Annule des coefficients \\
+ElasticNet & Régularisée & $L_1 + L_2$ \\
+Random Forest & Ensembliste & Non-linéaire, parallèle \\
+XGBoost & Ensembliste & Non-linéaire, séquentiel \\
+\bottomrule
+\end{tabular}
+
+\end{frame}
+
+% ─────────────────────────────────────────────────────────────
+\begin{frame}{Régression ---~Résultats}
+
+\begin{center}
+\small
+\begin{tabular}{lrrrr}
+\toprule
+Modèle & $R^2$ & RMSE & MAE & CV-$R^2$ \\
+\midrule
+Linéaire (baseline) & 0.0001 & 43.33 & 37.59 & $\approx 0$ \\
+Ridge (tuné)        & 0.0001 & 43.33 & 37.59 & $\approx 0$ \\
+Lasso (tuné)        & $-0.000$ & 43.33 & 37.60 & $\approx 0$ \\
+ElasticNet          & $-0.000$ & 43.33 & 37.60 & $\approx 0$ \\
+Random Forest       & $-0.005$ & 43.44 & 37.67 & $\approx 0$ \\
+XGBoost (tuné)      & 0.0001 & 43.33 & 37.59 & $\approx 0$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\smallskip
+
+\begin{block}{Analyse critique}
+\small
+\begin{itemize}
+  \item \textbf{Lasso} : 16/16 coefficients $= 0$ $\rightarrow$ prédit la moyenne (224.3 mg/dL)
+  \item \textbf{Data leakage} sur \texttt{hypercholesterol} : $R^2$ 0.675 artificiel, corrigé à $\approx 0$
+  \item Aucun modèle retenu : différences statistiquement négligeables
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+% ─────────────────────────────────────────────────────────────
+\begin{frame}{Classification ---~Résultats}
+
+\small\textbf{Protocole :} split stratifié 80/20, K-Fold stratifié ($k=5$), \texttt{class\_weight='balanced'} vs SMOTE
+
+\smallskip
+
+\begin{center}
+\small
+\begin{tabular}{lrrrrr}
+\toprule
+Modèle & Accuracy & Précision & Rappel & F1 & AUC \\
+\midrule
+Naïf (tout à 0) & 0.752 & n/a   & 0.000 & 0.000 & 0.500 \\
+Logistic Reg.   & 0.498 & 0.249 & 0.509 & 0.335 & 0.499 \\
+Random Forest   & 0.568 & 0.245 & 0.355 & 0.290 & 0.494 \\
+XGBoost         & 0.525 & 0.246 & 0.441 & 0.316 & 0.499 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\smallskip
+
+\normalsize
+\begin{block}{Analyse critique}
+\small
+\begin{itemize}
+  \item \textbf{AUC $\approx$ 0.5} pour tous = équivalent à un tirage aléatoire
+  \item SMOTE et \texttt{class\_weight} ne peuvent pas extraire un signal absent
+  \item Cohérent avec la régression : \texttt{disease\_risk} généré indépendamment
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+% ══════════════════════════════════════════════════════════════
+\section{Clustering et interprétabilité}
+% ══════════════════════════════════════════════════════════════
+
+\begin{frame}{Clustering ---~K-Means et CAH}
+
+\small
+\begin{columns}[T]
+\begin{column}{0.48\textwidth}
+\textbf{K-Means ($k=3$)}
+
+\smallskip
+\begin{tabular}{llr}
+\toprule
+Cluster & Profil & IMC \\
+\midrule
+0 & Obèse hypertendu & 35.0 \\
+1 & Surpoids normotendu & 29.1 \\
+2 & Normal hypertendu & 24.0 \\
+\bottomrule
+\end{tabular}
+
+\smallskip
+Partition : \textbf{IMC} + \textbf{pression systolique}
+\end{column}
+
+\begin{column}{0.48\textwidth}
+\textbf{CAH Ward ($n=5\,000$)}
+
+\smallskip
+\begin{tabular}{llr}
+\toprule
+Cluster & Profil & Fumeurs \\
+\midrule
+0 & Non-fumeurs, HTA & 2\% \\
+1 & Fumeurs modérés & 18\% \\
+2 & Fumeurs intenses, HTA & \textbf{100\%} \\
+\bottomrule
+\end{tabular}
+
+\smallskip
+Isole un groupe de \textbf{fumeurs intenses}
+\end{column}
+\end{columns}
+
+\medskip
+
+\begin{tabular}{lrrl}
+\toprule
+Métrique & K-Means & CAH & \\
+\midrule
+Silhouette & 0.103 & 0.105 & Faible ---~ données sans structure \\
+ACP 2D     & \multicolumn{2}{c}{24.3\% de variance} & 15 dims quasi-indépendantes \\
+\bottomrule
+\end{tabular}
+
+\end{frame}
+
+% ─────────────────────────────────────────────────────────────
+\begin{frame}{Interprétabilité ---~Convergence des méthodes}
+
+\textbf{5 méthodes :} coefficients LR, Ridge, feature importance RF \& XGBoost, SHAP
+
+\medskip
+
+\begin{center}
+\small
+\begin{tabular}{lcccccr}
+\toprule
+Variable & LR & RF & XGB & SHAP & Ridge & Score \\
+\midrule
+\texttt{systolic\_bp}    & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \textbf{5/5} \\
+\texttt{daily\_steps}    & \checkmark & \checkmark & $\cdot$    & \checkmark & $\cdot$    & 3/5 \\
+\texttt{family\_history} & \checkmark & $\cdot$    & \checkmark & $\cdot$    & \checkmark & 3/5 \\
+\texttt{bmi}             & $\cdot$    & \checkmark & $\cdot$    & \checkmark & $\cdot$    & 2/5 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip
+
+\normalsize
+\begin{block}{Interprétation}
+\begin{itemize}
+  \item Les 5 méthodes \textbf{ne convergent pas} $\rightarrow$ elles mesurent du bruit aléatoire
+  \item \texttt{systolic\_bp} partout : grande variance, pas signal causal
+  \item \textbf{La divergence est elle-même un résultat analytique}
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+% ══════════════════════════════════════════════════════════════
+\section{Bilan et perspectives}
+% ══════════════════════════════════════════════════════════════
+
+\begin{frame}{Bilan ---~Résultat central}
+
+\begin{block}{\alert{Limite fondamentale du dataset synthétique}}
+Les variables ont été générées \textbf{indépendamment}, sans relation causale encodée.\\
+Aucune technique ne peut extraire un signal qui n'existe pas.
+\end{block}
+
+\bigskip
+
+\begin{columns}[T]
+\begin{column}{0.48\textwidth}
+\textbf{Ce que ça prouve :}
+\begin{itemize}
+  \item Corrélations $< 0.01$ en EDA prédisaient ce résultat
+  \item Lasso : 16/16 coefficients $= 0$
+  \item $R^2 \approx 0$, AUC $\approx 0.5$ partout
+  \item Interprétabilité divergente
+\end{itemize}
+\end{column}
+
+\begin{column}{0.48\textwidth}
+\textbf{Ce n'est pas un échec :}
+\begin{itemize}
+  \item Data leakage détecté et corrigé
+  \item Pipeline rigoureux et complet
+  \item Diagnostic critique mené à chaque étape
+  \item Directement transposable à des données réelles
+\end{itemize}
+\end{column}
+\end{columns}
+
+\bigskip
+
+\textcolor{bleuaccent}{\textbf{Savoir diagnostiquer pourquoi un modèle échoue est aussi précieux que d'en construire un qui réussit.}}
+
+\end{frame}
+
+% ─────────────────────────────────────────────────────────────
+\begin{frame}{Perspectives}
+
+\begin{enumerate}
+  \item \textbf{Changer de dataset} ---~cohortes Framingham ou NHANES : vraies relations biologiques, même pipeline
+  \item \textbf{Améliorer la classification} ---~stacking, réseaux de neurones (Deep Learning, M2)
+  \item \textbf{Déploiement} ---~API REST (FastAPI) avec prédictions + valeurs SHAP associées
+  \item \textbf{Interprétabilité avancée} ---~Partial Dependence Plots (PDP), ICE
+  \item \textbf{Data drift} ---~suivi de l'AUC sur nouvelles cohortes, réentraînement périodique
+  \item \textbf{Master 2} ---~causalité, fairness algorithmique, apprentissage fédéré
+\end{enumerate}
+
+\end{frame}
+
+% ── Diapo finale ─────────────────────────────────────────────
+\begin{frame}
+
+\vspace{2cm}
+\begin{center}
+{\Large\textcolor{bleutitre}{\textbf{Merci pour votre attention}}}
+
+\bigskip\bigskip
+
+{\large Questions ?}
+
+\bigskip\bigskip\bigskip
+
+\textcolor{gray}{\small Ardacham Mahamat Teguene ---~M1 MIASHS ---~Juin 2026}
+\end{center}
+
+\end{frame}
+
+\end{document}
