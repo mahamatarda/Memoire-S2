@@ -117,6 +117,14 @@ Memoire/
 
 ---
 
+## Note sur l'utilisation de l'IA
+
+Dans le cadre de ce mémoire, j'ai utilisé des outils d'intelligence artificielle générative (principalement **Claude** d'Anthropic) comme aide à la recherche, à la structuration du document, à la relecture et au débogage du code Python et LaTeX.
+
+Tout le contenu scientifique — choix des modèles, interprétation des résultats, analyse critique, conclusions — a été compris, vérifié et validé par l'auteur. L'IA a servi d'outil d'assistance, pas de substitut au raisonnement analytique.
+
+---
+
 ## Mots-clés
 
 data science · santé · machine learning · régression · classification · clustering · interprétabilité · SHAP · SMOTE · données synthétiques · data leakage · CRISP-DM
