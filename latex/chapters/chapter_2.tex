@@ -8,7 +8,7 @@ Le jeu de données contient \textbf{100~000 observations} décrites par \textbf{
 
 \subsection{Statistiques descriptives}
 
-Pour chaque variable continue $X = \{x_1, \ldots, x_n\}$ avec $n = 100\,000$, on calcule la moyenne et l'écart-type~\cite{saporta2011}~:
+Pour chaque variable continue $X = \{x_1, \ldots, x_n\}$ avec $n = 100\,000$, j'ai calculé la moyenne et l'écart-type~\cite{james2021}~:
 
 \begin{equation}
 \bar{x} = \frac{1}{n}\sum_{i=1}^{n} x_i, \qquad
@@ -40,13 +40,13 @@ Variable & Moyenne & Écart-type & Min & Max \\
 
 \subsection{Distribution des variables}
 
-Le coefficient d'asymétrie (\textit{skewness}) mesure la symétrie d'une distribution~\cite{saporta2011}~:
+Le coefficient d'asymétrie (\textit{skewness}) mesure la symétrie d'une distribution~\cite{james2021}~:
 
 \begin{equation}
 \text{Skew}(X) = \frac{1}{n}\sum_{i=1}^{n}\left(\frac{x_i - \bar{x}}{s}\right)^3
 \end{equation}
 
-On le calcule pour décider si une transformation est nécessaire avant modélisation~: une distribution très asymétrique (skewness $> 1$ par exemple) peut biaiser les modèles linéaires et nécessite souvent une transformation logarithmique pour être "redressée". Ici, toutes les variables continues affichent un skewness inférieur à $|0.02|$~: distributions \textbf{quasi-uniformes}, ce qui s'explique par la génération synthétique aléatoire des données~\cite{chawla2002}. Aucune transformation n'est donc nécessaire.
+Je l'utilise pour décider si une transformation est nécessaire avant modélisation~: une distribution très asymétrique (skewness $> 1$ par exemple) peut biaiser les modèles linéaires et nécessite souvent une transformation logarithmique pour être "redressée". Ici, toutes les variables continues affichent un skewness inférieur à $|0.02|$~: distributions \textbf{quasi-uniformes}, ce qui s'explique directement par la génération synthétique aléatoire des données~\cite{chawla2002}. Aucune transformation n'est donc nécessaire.
 
 \begin{figure}[h]
 \centering
@@ -66,7 +66,7 @@ La variable cible présente un \textbf{déséquilibre des classes} (\textit{clas
 
 \subsection{Analyse des corrélations}
 
-Le coefficient de corrélation de Pearson entre deux variables $X$ et $Y$~\cite{pearson1895}~:
+Le coefficient de corrélation de Pearson entre deux variables $X$ et $Y$~\cite{james2021}~:
 
 \begin{equation}
 r_{XY} = \frac{\sum_{i=1}^{n}(x_i - \bar{x})(y_i - \bar{y})}
@@ -81,7 +81,7 @@ r_{XY} = \frac{\sum_{i=1}^{n}(x_i - \bar{x})(y_i - \bar{y})}
 \end{figure}
 
 \begin{quote}
-\textbf{Résultat central~:} Les valeurs calculées sur le dataset (notebook 01\_EDA) révèlent que les corrélations entre toutes les variables sont inférieures à $|0.01|$. La variable la plus corrélée avec \texttt{disease\_risk} est \texttt{resting\_hr} avec $r = 0.005$ --- statistiquement non significatif sur 100~000 individus. Cela confirme que la variable cible a été générée indépendamment des autres variables. Ce constat justifie l'exploration de \textbf{méthodes non-linéaires}~\cite{breiman2001}~: la corrélation de Pearson ne détecte que les relations linéaires directes~; des algorithmes comme Random Forest ou XGBoost peuvent théoriquement capturer des relations plus complexes (interactions, effets seuils). En pratique, même ces méthodes échoueront ici --- ce qui confirme l'absence totale de signal.
+\textbf{Résultat central~:} Les corrélations calculées sur le dataset (notebook 01\_EDA) sont toutes inférieures à $|0.01|$. La variable la plus corrélée avec \texttt{disease\_risk} est \texttt{resting\_hr} avec $r = 0.005$ --- statistiquement non significatif sur 100~000 individus. Cela confirme que la variable cible a été générée indépendamment des autres variables. Ce constat justifie l'exploration de \textbf{méthodes non-linéaires}~\cite{breiman2001}~: la corrélation de Pearson ne détecte que les relations linéaires~; des algorithmes comme Random Forest ou XGBoost peuvent théoriquement capturer des relations plus complexes (interactions, effets seuils). En pratique, même ces méthodes échoueront ici --- ce qui confirme l'absence totale de signal.
 \end{quote}
 
 \begin{figure}[h]
@@ -110,7 +110,7 @@ Classe cible & Déséquilibrée (75/25) & Utiliser F1-score, AUC-ROC, SMOTE \\
 \end{tabular}
 \end{table}
 
-\textbf{Méthode IQR pour la détection des outliers.} L'\textit{Interquartile Range} (écart interquartile) est la méthode standard de détection des valeurs aberrantes~\cite{saporta2011}. On calcule $Q_1$ (25\textsuperscript{e} percentile) et $Q_3$ (75\textsuperscript{e} percentile), puis~:
+\textbf{Méthode IQR pour la détection des outliers.} L'\textit{Interquartile Range} (écart interquartile) est la méthode standard de détection des valeurs aberrantes~\cite{james2021}. On calcule $Q_1$ (25\textsuperscript{e} percentile) et $Q_3$ (75\textsuperscript{e} percentile), puis~:
 \begin{equation}
 \text{IQR} = Q_3 - Q_1
 \end{equation}
@@ -120,17 +120,17 @@ Tout point en dehors de l'intervalle $[Q_1 - 1{,}5 \times \text{IQR}\ ;\ Q_3 + 1
 
 \subsection{Encodage des variables catégorielles}
 
-La variable \texttt{gender} est encodée en variable binaire~\cite{geron2019}~:
+La variable \texttt{gender} est encodée en variable binaire~\cite{hastie2009}~:
 
 \begin{equation}
 \texttt{gender\_enc} = \begin{cases} 1 & \text{si Male} \\ 0 & \text{si Female} \end{cases}
 \end{equation}
 
-La colonne \texttt{id} est supprimée~: identifiant technique sans pouvoir prédictif. La variable \texttt{hypercholesterol} ($= 1$ si \texttt{cholesterol} $> 200$~mg/dL, seuil NCEP~\cite{ncep2002}) est créée pour le clustering, mais \textbf{exclue de la régression} car elle constitue un \textit{data leakage}~\cite{kaufman2012}~: \texttt{hypercholesterol} est directement dérivée de \texttt{cholesterol}, la variable cible de la régression. Inclure une feature construite à partir de la cible revient à "donner la réponse" au modèle pendant l'entraînement --- il obtient alors un $R^2$ artificiellement élevé (0.675 observé) qui s'effondre sur de nouvelles données réelles.
+La colonne \texttt{id} est supprimée~: identifiant technique sans pouvoir prédictif. La variable \texttt{hypercholesterol} ($= 1$ si \texttt{cholesterol} $> 200$~mg/dL, seuil NCEP~\cite{ncep2002}) est créée pour le clustering, mais \textbf{exclue de la régression} car elle constitue un \textit{data leakage}~\cite{kaufman2012}~: \texttt{hypercholesterol} est directement dérivée de \texttt{cholesterol}, la variable cible de la régression. Inclure une feature construite à partir de la cible revient à "donner la réponse" au modèle pendant l'entraînement --- il obtient alors un $R^2$ artificiellement élevé (0.675 observé) qui s'effondrerait sur de nouvelles données réelles.
 
 \subsection{Création de nouvelles variables}
 
-Trois nouvelles variables sont construites à partir de \textbf{connaissances métier}~\cite{kuhn2019}~: plutôt que de se limiter aux variables brutes, on encode des savoirs médicaux établis directement dans les features. Par exemple, on ne "découvre" pas le seuil d'hypertension dans les données --- on le connaît \textit{a priori} grâce aux recommandations cliniques, et on le traduit en variable binaire exploitable par les modèles.
+J'ai construit trois nouvelles variables à partir de \textbf{connaissances métier}~\cite{hastie2009}~: plutôt que de se limiter aux variables brutes, on encode directement dans les features des savoirs médicaux établis. Par exemple, on ne "découvre" pas le seuil d'hypertension dans les données --- on le connaît \textit{a priori} grâce aux recommandations cliniques.
 
 \textbf{Hypertension} selon les seuils de l'ESC (\textit{European Society of Cardiology}, l'organisme médical européen définissant les recommandations cardiovasculaires)~\cite{esc2018}~:
 \begin{equation}
@@ -142,7 +142,7 @@ Trois nouvelles variables sont construites à partir de \textbf{connaissances m�
 \texttt{bmi\_cat} = \begin{cases} 0 & \texttt{bmi} < 18.5\ \text{(sous-poids)} \\ 1 & 18.5 \leq \texttt{bmi} < 25\ \text{(normal)} \\ 2 & 25 \leq \texttt{bmi} < 30\ \text{(surpoids)} \\ 3 & \texttt{bmi} \geq 30\ \text{(obèse)} \end{cases}
 \end{equation}
 
-\textbf{Score de style de vie} --- score composite heuristique résumant l'hygiène de vie globale d'un individu en une seule valeur. Il n'est pas validé médicalement, mais repose sur la cohérence avec la littérature~\cite{booth2012}~: les facteurs favorables à la santé contribuent positivement au score, les facteurs de risque le pénalisent. Chaque variable continue est divisée par son maximum pour la ramener entre 0 et 1, ce qui évite qu'une variable à grande échelle (comme \texttt{daily\_steps}, jusqu'à 20~000) domine le score face à une variable à petite échelle (comme \texttt{sleep\_hours}, entre 3 et 10)~:
+\textbf{Score de style de vie} --- score composite heuristique résumant l'hygiène de vie globale d'un individu en une seule valeur. Il n'est pas validé médicalement, mais repose sur la cohérence avec la littérature~\cite{booth2012}~: les facteurs favorables à la santé contribuent positivement, les facteurs de risque pénalisent. Chaque variable continue est divisée par son maximum pour la ramener entre 0 et 1, ce qui évite qu'une variable à grande échelle (comme \texttt{daily\_steps}, jusqu'à 20~000) domine une variable à petite échelle (comme \texttt{sleep\_hours}, entre 3 et 10)~:
 
 \begin{align}
 \texttt{lifestyle\_score} &= \frac{\texttt{daily\_steps}}{\max} + \frac{\texttt{sleep\_hours}}{\max} + \frac{\texttt{water\_intake\_l}}{\max} \notag \\
@@ -168,4 +168,4 @@ x_i^{\text{norm}} = \frac{x_i - x_{\min}}{x_{\max} - x_{\min}}
 
 \subsection{Dataset final}
 
-Après preprocessing, le dataset contient \textbf{16 variables explicatives} couvrant les dimensions démographiques, les habitudes de vie, les indicateurs biologiques et les variables construites.
+Le dataset original contient \textbf{15 variables} (dont \texttt{disease\_risk}, la variable cible). Après preprocessing, on obtient \textbf{16 variables explicatives}~: la variable \texttt{gender} est remplacée par \texttt{gender\_enc} (encodage binaire), et trois nouvelles variables sont créées (\texttt{bmi\_cat}, \texttt{hypertension}, \texttt{lifestyle\_score}), soit $14 - 1 + 3 = 16$ features. Ces 16 variables couvrent les dimensions démographiques, les habitudes de vie, les indicateurs biologiques et les variables métier construites.

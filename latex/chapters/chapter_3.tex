@@ -4,7 +4,7 @@
 
 \subsection{Objectif et variable cible}
 
-L'objectif est de prédire le taux de cholestérol (\texttt{cholesterol}, en mg/dL) à partir des habitudes de vie et indicateurs biologiques. Ce choix est médicalement motivé~: le cholestérol est un facteur de risque cardiovasculaire reconnu~\cite{ncep2002}.
+On cherche à prédire le taux de cholestérol (\texttt{cholesterol}, en mg/dL) à partir des habitudes de vie et indicateurs biologiques. Ce choix est médicalement motivé~: le cholestérol est un facteur de risque cardiovasculaire reconnu~\cite{ncep2002}.
 
 \textbf{Note sur le data leakage~:} la variable \texttt{hypercholesterol} ($= 1$ si cholestérol $> 200$~mg/dL) est directement dérivée de la variable cible. L'inclure comme feature revient à donner la réponse au modèle pendant l'entraînement~--- c'est un \textit{data leakage}~\cite{kaufman2012} qui gonfle artificiellement le $R^2$ à 0.675. Une fois retirée, le $R^2$ chute à $\approx 0$ pour tous les modèles, confirmant l'absence de signal prédictif réel.
 
@@ -18,6 +18,8 @@ L'objectif est de prédire le taux de cholestérol (\texttt{cholesterol}, en mg/
 \end{equation}
 où $k=5$ est la valeur consensus dans la littérature~\cite{james2021}~: avec 80~000 individus, chaque fold contient 16~000 exemples (suffisant), et $k=5$ offre un bon compromis entre coût de calcul et fiabilité de l'estimation. $k=10$ serait plus précis mais deux fois plus lent.
 
+\textbf{Ce que garantit la validation croisée~:} la CV garantit la \textbf{robustesse de l'estimation} hors-échantillon~--- avec $k=5$ itérations, le résultat $R^2 \approx 0$ n'est pas un artefact du split particulier, mais une estimation stable. En revanche, elle ne garantit pas qu'un signal prédictif existe dans les données~: elle mesure ce signal avec précision, quelle qu'en soit la valeur. Un $R^2 \approx 0$ bien estimé reste $\approx 0$.
+
 \textbf{Métriques d'évaluation}~\cite{james2021}~:
 \begin{align}
 R^2 &= 1 - \frac{\sum_{i=1}^{n}(y_i - \hat{y}_i)^2}{\sum_{i=1}^{n}(y_i - \bar{y})^2} \\
@@ -28,6 +30,8 @@ R^2 &= 1 - \frac{\sum_{i=1}^{n}(y_i - \hat{y}_i)^2}{\sum_{i=1}^{n}(y_i - \bar{y}
 où $y_i$ est la valeur observée (cholestérol réel), $\hat{y}_i$ la valeur prédite par le modèle, et $\bar{y}$ la moyenne observée. Ces trois métriques sont complémentaires~: le $R^2$ indique la proportion de variance expliquée ($R^2 = 1$ = prédiction parfaite, $R^2 = 0$ = le modèle prédit juste la moyenne, $R^2 < 0$ = pire que la moyenne). Le RMSE exprime l'erreur en mg/dL en pénalisant les grandes erreurs (effet du carré). La MAE donne l'erreur absolue moyenne, plus lisible~: ici MAE~$\approx 37.6$~mg/dL signifie que le modèle se trompe en moyenne de 37.6~mg/dL.
 
 \subsection{Modèles et justification}
+
+Les six modèles retenus suivent une logique de \textbf{spectre de complexité}~: on part d'une baseline linéaire simple pour établir un plancher de performance, on ajoute des méthodes régularisées pour tester si contraindre les coefficients aide, puis des méthodes ensemblistes pour capturer d'éventuelles non-linéarités. Ce choix respecte un principe fondamental~: si un modèle plus complexe ne fait pas mieux que la baseline, sa complexité supplémentaire n'est pas justifiée~\cite{james2021}. C'est exactement ce qu'on observe ici.
 
 \textbf{Régression linéaire (baseline)}~: point de référence obligatoire~\cite{james2021}. Si les autres modèles, plus complexes, ne font pas mieux, leur complexité supplémentaire n'est pas justifiée. Ici, c'est exactement ce qu'on observe.
 
@@ -53,7 +57,7 @@ où $\rho = 1$ redonne le Lasso, $\rho = 0$ redonne Ridge. Utile quand on ne sai
 \begin{equation}
 \hat{y} = \frac{1}{B}\sum_{b=1}^{B} T_b(\mathbf{x})
 \end{equation}
-où $T_b(\mathbf{x})$ est la prédiction du $b$-ième arbre. Cette approche réduit la variance par rapport à un arbre unique et capture les non-linéarités. Paramètres utilisés~: \texttt{max\_depth=15}, \texttt{max\_samples=0.5}, \texttt{n\_jobs=-1} pour éviter des entraînements de plusieurs heures observés avec les paramètres par défaut (\texttt{max\_depth=None}).
+où $T_b(\mathbf{x})$ est la prédiction du $b$-ième arbre. Cette approche réduit la variance par rapport à un arbre unique et capture les non-linéarités. J'ai dû contraindre les paramètres~: \texttt{max\_depth=15}, \texttt{max\_samples=0.5}, \texttt{n\_jobs=-1} pour éviter des entraînements de plusieurs heures observés avec les paramètres par défaut (\texttt{max\_depth=None}).
 
 \textbf{XGBoost}~\cite{chen2016}~: contrairement à Random Forest qui construit des arbres en parallèle, XGBoost les construit \textit{séquentiellement}~--- chaque arbre corrige les erreurs du précédent. La prédiction à l'itération $t$ est~:
 \begin{equation}
@@ -84,15 +88,17 @@ XGBoost (tuné)               & 0.0001  & 43.33 & 37.59 & $\approx 0$ \\
 \end{table}
 
 \begin{quote}
-\textbf{Analyse critique~:} Aucun modèle ne parvient à prédire le taux de cholestérol ($R^2 \approx 0$ pour tous). Plusieurs observations renforcent ce constat. Premièrement, le Lasso (tuné) fixe les \textbf{16 coefficients sur 16 à zéro}~: il se contente de prédire la moyenne du cholestérol (224.3~mg/dL) pour chaque individu --- c'est la preuve formelle qu'aucune variable n'est linéairement prédictive. Deuxièmement, Random Forest et XGBoost non-tunés affichent des $R^2$ \textit{négatifs}~: ils sont plus mauvais que de prédire la moyenne, ce qui révèle qu'ils ont surajusté du bruit. Le tuning améliore légèrement XGBoost ($R^2$ repasse à 0.0001) mais ne change pas le fond du problème. Ce résultat illustre la \textbf{limite fondamentale du dataset synthétique}~: les variables ont été générées indépendamment, sans relations causales réalistes encodées. Dans des données réelles, alimentation, activité physique et tabagisme influencent significativement le cholestérol~\cite{booth2012} --- cette relation est tout simplement absente ici.
+\textbf{Analyse critique~:} Aucun modèle ne parvient à prédire le taux de cholestérol ($R^2 \approx 0$ pour tous). Plusieurs observations renforcent ce constat. D'abord, le Lasso (tuné) fixe les \textbf{16 coefficients sur 16 à zéro}~: il se contente de prédire la moyenne du cholestérol (224.3~mg/dL) pour chaque individu --- c'est la preuve formelle qu'aucune variable n'est linéairement prédictive. Ensuite, Random Forest et XGBoost non-tunés affichent des $R^2$ \textit{négatifs}~: ils sont plus mauvais que de prédire la moyenne, ce qui révèle qu'ils ont surajusté du bruit. Le tuning améliore légèrement XGBoost ($R^2$ repasse à 0.0001) mais ne change pas le fond du problème. Ce résultat illustre la \textbf{limite fondamentale du dataset synthétique}~: les variables ont été générées indépendamment, sans relations causales réalistes encodées. Sur des données réelles, alimentation, activité physique et tabagisme influencent significativement le cholestérol~\cite{booth2012} --- cette relation est tout simplement absente ici.
 \end{quote}
+
+\textbf{Quel est le meilleur modèle en régression~?} Aucun ne peut être retenu. Les différences entre modèles sont négligeables ($R^2$ entre $-0.005$ et $0.0001$)~: le \og meilleur \fg{} sur le jeu de test (XGBoost tuné, $R^2=0.0001$) n'est pas statistiquement différent de la baseline linéaire. Sélectionner un modèle ici n'aurait aucun sens~--- tous prédisent essentiellement la moyenne du cholestérol (224.3~mg/dL) pour chaque individu.
 
 % ─────────────────────────────────────────────────────────────
 \section{Classification~: prédire le risque de maladie}
 
 \subsection{Objectif et contexte}
 
-L'objectif est de prédire si un individu est à risque de maladie (\texttt{disease\_risk} = 1) ou non (\texttt{disease\_risk} = 0). Le dataset présente un \textbf{déséquilibre de classes}~: 75.2\% sans risque, 24.8\% à risque~\cite{japkowicz2002}.
+On cherche à prédire si un individu est à risque de maladie (\texttt{disease\_risk} = 1) ou non (\texttt{disease\_risk} = 0). Le dataset présente un \textbf{déséquilibre de classes}~: 75.2\% sans risque, 24.8\% à risque~\cite{japkowicz2002}.
 
 \subsection{Protocole expérimental}
 
@@ -100,7 +106,7 @@ L'objectif est de prédire si un individu est à risque de maladie (\texttt{dise
 
 \textbf{Stratified K-Fold ($k=5$)}~: maintient le ratio de classes dans chaque fold. Sans stratification, un fold pourrait ne contenir que des individus sans risque et biaiser l'évaluation~\cite{japkowicz2002}.
 
-\textbf{Gestion du déséquilibre}~: deux stratégies sont utilisées et comparées. L'ajustement des poids de classe pénalise davantage les erreurs sur la classe minoritaire~\cite{japkowicz2002}~:
+\textbf{Gestion du déséquilibre}~: j'ai comparé deux stratégies. L'ajustement des poids de classe pénalise davantage les erreurs sur la classe minoritaire~\cite{japkowicz2002}~:
 \begin{equation}
 w_k = \frac{n}{K \cdot n_k}
 \end{equation}
@@ -117,7 +123,9 @@ où $TP$ (vrais positifs), $FP$ (faux positifs) et $FN$ (faux négatifs) sont is
 
 La courbe \textbf{ROC} trace le taux de vrais positifs en fonction du taux de faux positifs pour tous les seuils de décision. L'\textbf{AUC-ROC}~\cite{james2021} synthétise cette courbe en un seul chiffre~: AUC = 1 = discrimination parfaite, AUC = 0.5 = tirage aléatoire (aucun pouvoir discriminant).
 
-\textbf{Note sur le SVM~:} le SVM~\cite{cortes1995} a été écarté en raison de sa \textbf{complexité algorithmique}. La complexité d'un algorithme décrit comment son temps de calcul augmente avec la taille des données $n$. Le SVM nécessite de calculer des distances entre paires d'observations, ce qui donne une complexité en $\mathcal{O}(n^2)$ à $\mathcal{O}(n^3)$~: doubler $n$ multiplie le temps par 4 (voire 8). Concrètement~: sur 5~000 individus, l'entraînement prend quelques secondes. Sur 100~000 individus, le même calcul représenterait $100^2 = 10~000$ fois plus d'opérations, soit plusieurs heures sans infrastructure dédiée. Un test sur 5~000 individus a confirmé des performances similaires aux autres modèles (AUC~$\approx 0.5$)~: exclure le SVM ne prive pas l'analyse de résultats utiles.
+\textbf{Note sur le SVM~:} le SVM a été écarté en raison de sa \textbf{complexité algorithmique}. La complexité d'un algorithme décrit comment son temps de calcul augmente avec la taille des données $n$. Le SVM nécessite de calculer des distances entre paires d'observations, ce qui donne une complexité en $\mathcal{O}(n^2)$ à $\mathcal{O}(n^3)$~: doubler $n$ multiplie le temps par 4 (voire 8). Concrètement~: sur 5~000 individus, l'entraînement prend quelques secondes. Sur 100~000 individus, le même calcul représenterait $100^2 = 10~000$ fois plus d'opérations, soit plusieurs heures sans infrastructure dédiée. Un test sur 5~000 individus a confirmé des performances similaires aux autres modèles (AUC~$\approx 0.5$)~: l'exclure ne prive pas l'analyse de résultats utiles.
+
+\textbf{Note sur le classifieur naïf de Bayes~:} fondé sur l'hypothèse d'indépendance conditionnelle des variables étant donné la classe~\cite{james2021}, ce classifieur est précisément adapté à notre dataset~--- les variables ont justement été générées indépendamment. Son absence constitue une \textbf{limite du choix de modèles}~: il aurait été pertinent de l'inclure, et l'on anticipe un résultat identique (AUC~$\approx 0.5$), l'absence de signal ne dépendant pas du classifieur choisi.
 
 \subsection{Résultats et analyse critique}
 
@@ -154,5 +162,9 @@ XGBoost              & 0.525 & 0.246 & 0.441 & 0.316 & 0.499 \\
 \end{figure}
 
 \begin{quote}
-\textbf{Analyse critique~:} L'\textbf{AUC-ROC~$\approx$~0.5} pour tous les modèles confirme qu'ils n'ont aucun pouvoir discriminant~\cite{james2021}~--- équivalent à un tirage à pile ou face. La comparaison avec le modèle naïf est instructive~: ce dernier atteint 75.2\% d'accuracy en prédisant toujours "sans risque", sans rien apprendre. Avec \texttt{class\_weight='balanced'}, les modèles augmentent leur rappel (ils détectent plus d'individus à risque) mais leur accuracy tombe sous 50\%~--- ils sur-corrigent le déséquilibre au détriment de la précision. Cela illustre concrètement pourquoi l'accuracy seule est trompeuse sur un dataset déséquilibré~\cite{sokolova2009}. Ces résultats sont cohérents avec ceux de la régression ($R^2 \approx 0$)~: les deux confirment que \texttt{disease\_risk} a été généré indépendamment de toutes les autres variables, et qu'aucune technique --- aussi sophistiquée soit-elle --- ne peut extraire un signal qui n'existe pas.
+\textbf{Analyse critique~:} L'\textbf{AUC-ROC~$\approx$~0.5} pour tous les modèles confirme qu'ils n'ont aucun pouvoir discriminant~\cite{james2021}~--- c'est équivalent à tirer à pile ou face. La comparaison avec le modèle naïf est instructive~: ce dernier atteint 75.2\% d'accuracy en prédisant toujours "sans risque", sans rien apprendre. Avec \texttt{class\_weight='balanced'}, les modèles augmentent leur rappel (ils détectent plus d'individus à risque) mais leur accuracy tombe sous 50\%~--- ils sur-corrigent le déséquilibre au détriment de la précision. Cela illustre concrètement pourquoi l'accuracy seule est trompeuse sur un dataset déséquilibré~\cite{sokolova2009}. Ces résultats sont cohérents avec ceux de la régression ($R^2 \approx 0$)~: les deux confirment que \texttt{disease\_risk} a été généré indépendamment de toutes les autres variables, et qu'aucune technique --- aussi sophistiquée soit-elle --- ne peut extraire un signal qui n'existe pas.
 \end{quote}
+
+\textbf{Quel est le meilleur modèle en classification~?} Aucun modèle n'est retenu pour déploiement. Avec AUC~$\approx 0.5$ pour tous, aucun ne discrimine mieux qu'un tirage aléatoire~: choisir le \og meilleur \fg{} n'a pas de sens statistique. Les légères différences d'accuracy ou de F1 entre modèles reflètent des variations aléatoires sur un signal nul, et non une vraie hiérarchie de performance.
+
+\textbf{Effet de la taille du jeu de données.} Augmenter le nombre d'observations ne ferait pas apparaître un signal absent~: 100~000 individus est déjà un très grand échantillon, et les corrélations restent inférieures à $|0.01|$ quelle que soit la taille. En revanche, sur des \textbf{données réelles} présentant de vraies relations, un plus grand dataset permettrait de détecter des effets de faible amplitude qu'un petit échantillon masquerait~\cite{james2021}. Diminuer la taille augmenterait la variance des estimations sans résoudre le problème fondamental ici.

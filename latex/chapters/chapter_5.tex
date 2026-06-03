@@ -4,7 +4,7 @@
 
 \subsection{Approche CRISP-DM}
 
-Ce projet a été conduit en suivant le cycle \textbf{CRISP-DM}~\cite{chapman2000}, qui structure un projet de data science en six phases~: compréhension du problème, compréhension des données, préparation des données, modélisation, évaluation, et déploiement. Chaque phase a alimenté la suivante de manière itérative~: l'EDA a révélé l'absence de signal linéaire, orientant le choix des modèles non-linéaires~; la détection du data leakage a conduit à réviser le feature engineering~; les résultats de classification ont confirmé le diagnostic de l'EDA.
+Ce projet a été conduit en suivant le cycle \textbf{CRISP-DM}~\cite{chapman2000}, qui structure un projet de data science en six phases~: compréhension du problème, compréhension des données, préparation des données, modélisation, évaluation, et déploiement. Chaque phase a alimenté la suivante de manière itérative~: l'EDA a révélé l'absence de signal linéaire, ce qui a orienté le choix des modèles non-linéaires~; la détection du data leakage a conduit à réviser le feature engineering~; les résultats de classification ont confirmé le diagnostic de l'EDA.
 
 \subsection{Outils et environnement technique}
 
@@ -55,11 +55,11 @@ Python                             & Ensemble du pipeline de data science \\
 
 \subsection{Difficultés techniques}
 
-\textbf{La limite fondamentale du dataset synthétique} est la difficulté principale. Découvrir que $R^2 \approx 0$ et AUC $\approx 0.5$ pour tous les modèles a demandé un vrai travail de diagnostic~: relier ce résultat au constat de l'EDA (corrélations $< 0.01$) et à la nature synthétique des données a été l'exercice analytique central.
+\textbf{La limite fondamentale du dataset synthétique} est la difficulté principale que j'ai rencontrée. Découvrir que $R^2 \approx 0$ et AUC $\approx 0.5$ pour tous les modèles a demandé un vrai travail de diagnostic~: relier ce résultat au constat de l'EDA (corrélations $< 0.01$) et à la nature synthétique des données a été l'exercice analytique central de ce projet.
 
 \textbf{La détection du data leakage} sur \texttt{hypercholesterol}~\cite{kaufman2012} est une difficulté classique en ML, rarement rencontrée dans les travaux académiques. Le $R^2$ artificiel de 0.675 aurait pu passer inaperçu sans une analyse rigoureuse des feature importances.
 
-\textbf{Le coût computationnel}~: un premier essai de Random Forest sans \texttt{max\_depth} ni \texttt{n\_jobs=-1} a conduit à un entraînement de plus de 3 heures interrompu avant convergence. Cela a nécessité de comprendre les paramètres internes de l'algorithme. Le SVM a été écarté pour la même raison, sa complexité en $\mathcal{O}(n^2)$~\cite{cortes1995} étant incompatible avec 100~000 observations.
+\textbf{Le coût computationnel}~: un premier essai de Random Forest sans \texttt{max\_depth} ni \texttt{n\_jobs=-1} a conduit à un entraînement de plus de 3 heures interrompu avant convergence. Ça m'a forcé à comprendre les paramètres internes de l'algorithme. Le SVM a été écarté pour la même raison, sa complexité en $\mathcal{O}(n^2)$ étant incompatible avec 100~000 observations.
 
 \subsection{Compétences acquises}
 
@@ -73,9 +73,9 @@ Python                             & Ensemble du pipeline de data science \\
 
 \subsection{Positionnement RSE / DDRS}
 
-L'utilisation d'un dataset \textbf{synthétique} s'inscrit dans une démarche éthique~: les données de santé sont sensibles et encadrées par le RGPD~\cite{rgpd2016}. Les données synthétiques éliminent tout risque de ré-identification tout en permettant de développer des méthodes~--- un compromis central de l'IA responsable~\cite{floridi2019}.
+L'utilisation d'un dataset \textbf{synthétique} s'inscrit dans une démarche éthique~: les données de santé sont sensibles et encadrées par le RGPD~\cite{rgpd2016}. Les données synthétiques éliminent tout risque de ré-identification tout en permettant de développer des méthodes~--- un compromis central de l'IA responsable~\cite{rgpd2016}.
 
-Le coût énergétique des entraînements sur grands datasets~\cite{strubell2019} a été limité en contraignant la profondeur des arbres (\texttt{max\_depth=15}) et en réduisant \texttt{n\_iter} dans \texttt{RandomizedSearchCV}, avec un impact positif sur l'empreinte carbone du calcul.
+Le coût énergétique des entraînements a été limité en contraignant la profondeur des arbres (\texttt{max\_depth=15}) et en réduisant \texttt{n\_iter} dans \texttt{RandomizedSearchCV}, avec un impact positif sur l'empreinte carbone du calcul.
 
 \section{Perspectives}
 
@@ -85,6 +85,8 @@ Le coût énergétique des entraînements sur grands datasets~\cite{strubell2019
 
 \textbf{3. Déploiement}~: un modèle de classification pourrait être déployé sous forme d'API REST (FastAPI) permettant de soumettre un profil individuel et d'obtenir une prédiction avec ses valeurs SHAP associées, rendant le modèle accessible et explicable.
 
-\textbf{4. Interprétabilité avancée}~: les \textit{Partial Dependence Plots} (PDP) et les \textit{Individual Conditional Expectation} (ICE)~\cite{goldstein2015} permettraient de visualiser comment la prédiction varie en fonction d'une variable, toutes choses égales par ailleurs~--- une limite de SHAP qui agrège les contributions.
+\textbf{4. Interprétabilité avancée}~: les \textit{Partial Dependence Plots} (PDP) et les \textit{Individual Conditional Expectation} (ICE) permettraient de visualiser comment la prédiction varie en fonction d'une variable, toutes choses égales par ailleurs~--- une limite de SHAP qui agrège les contributions.
 
-\textbf{5. Vers le Master 2}~: les thématiques de causalité, fairness algorithmique et apprentissage fédéré~\cite{floridi2019} constituent des pistes naturelles pour un travail de recherche en M2, dans la continuité directe de ce projet.
+\textbf{5. Robustesse sur le long terme (\textit{data drift})~:} sur des données réelles en production, un modèle se dégrade si la distribution des données évolue au fil du temps~--- on parle de \textit{concept drift}~\cite{hastie2009}. Les habitudes de vie d'une population changent, les seuils médicaux sont révisés, les profils épidémiologiques se transforment. En pratique, cela implique de surveiller les performances du modèle périodiquement (suivi de l'AUC sur de nouvelles cohortes) et de le réentraîner dès que les performances se dégradent. Cette problématique ne s'applique pas au dataset synthétique statique de ce projet, mais sera centrale sur des données réelles.
+
+\textbf{6. Vers le Master 2}~: les thématiques de causalité, fairness algorithmique et apprentissage fédéré constituent des pistes naturelles pour un travail de recherche en M2, dans la continuité directe de ce projet.

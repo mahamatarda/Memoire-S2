@@ -14,7 +14,7 @@ d(\mathbf{x}, \mathbf{y}) = \sqrt{\sum_{j=1}^{p}(x_j - y_j)^2}
 \end{equation}
 où $p$ est le nombre de variables (ici $p=15$), et $x_j$, $y_j$ sont les valeurs de la $j$-ième variable pour les individus $\mathbf{x}$ et $\mathbf{y}$.
 
-Cette distance est sensible aux échelles~: sans standardisation, \texttt{daily\_steps} (valeurs jusqu'à 20~000) dominerait \texttt{sleep\_hours} (valeurs entre 3 et 10) même si les deux variables sont médicalement aussi importantes l'une que l'autre --- la distance serait quasiment déterminée par \texttt{daily\_steps} seul, et le clustering ignorerait les autres variables~\cite{hastie2009}. Le z-score ramène chaque variable à une moyenne de 0 et un écart-type de 1, garantissant une contribution équitable de toutes les dimensions.
+Cette distance est sensible aux échelles~: sans standardisation, \texttt{daily\_steps} (valeurs jusqu'à 20~000) dominerait \texttt{sleep\_hours} (valeurs entre 3 et 10) même si les deux variables sont médicalement aussi importantes --- la distance serait quasiment déterminée par \texttt{daily\_steps} seul, et le clustering ignorerait les autres variables~\cite{hastie2009}. Le z-score ramène chaque variable à une moyenne de 0 et un écart-type de 1, garantissant une contribution équitable de toutes les dimensions.
 
 La CAH étant de complexité $\mathcal{O}(n^2)$ (voir note sur le SVM au chapitre~3), elle est appliquée sur un sous-échantillon aléatoire de \textbf{5~000 individus} pour rester dans des temps de calcul raisonnables.
 
@@ -116,7 +116,7 @@ Cluster & Taille & Fumeurs & Syst. (mmHg) & Profil \\
 
 \subsection{Évaluation et visualisation}
 
-\textbf{Visualisation par ACP (Analyse en Composantes Principales).} Nos données vivent dans un espace à 15 dimensions~: il est impossible de les représenter directement. L'ACP projette ces 15 dimensions sur les 2 axes qui capturent le maximum de variance, permettant une visualisation 2D des clusters. Les deux premières composantes expliquent \textbf{24.3\%} de la variance totale~: cela signifie que la projection 2D "voit" seulement 24.3\% de l'information originale. Si les clusters semblent peu séparés sur le graphique, ce n'est pas la preuve qu'ils n'existent pas --- ils se distinguent dans les 15 dimensions d'origine, pas dans la réduction 2D. Avec 15 variables quasi-indépendantes (comme confirmé par l'EDA), aucune direction ne concentre beaucoup de variance~: 24.3\% en 2D est donc attendu.
+\textbf{Visualisation par ACP (Analyse en Composantes Principales).} Nos données vivent dans un espace à 15 dimensions~: il est impossible de les représenter directement. L'ACP projette ces 15 dimensions sur les 2 axes qui capturent le maximum de variance, permettant une visualisation 2D des clusters. Les deux premières composantes expliquent \textbf{24.3\%} de la variance totale~: la projection 2D "voit" seulement 24.3\% de l'information originale. Si les clusters semblent peu séparés sur le graphique, ce n'est pas la preuve qu'ils n'existent pas --- ils se distinguent dans les 15 dimensions d'origine, pas dans la réduction 2D. Avec 15 variables quasi-indépendantes (confirmé par l'EDA), aucune direction ne concentre beaucoup de variance~: 24.3\% en 2D est donc attendu.
 
 \begin{table}[h]
 \centering
@@ -147,26 +147,26 @@ Malgré des silhouettes faibles ($\approx 0.10$), les deux méthodes révèlent 
 
 \subsection{Objectif}
 
-Cette section pose la question~: \textbf{les outils d'interprétabilité convergent-ils vers les mêmes variables influentes, même en l'absence de signal~?} La réponse est elle-même un résultat analytique.
+Cette section pose une question précise~: \textbf{les outils d'interprétabilité convergent-ils vers les mêmes variables influentes, même en l'absence de signal~?} La réponse est elle-même un résultat analytique.
 
 \subsection{Outils utilisés}
 
 \textbf{Coefficients des modèles linéaires}~: un coefficient $w_j > 0$ indique qu'une augmentation de la variable $j$ est associée à une augmentation de la prédiction~\cite{james2021}. Leur magnitude reflète l'importance relative de chaque variable --- sous réserve que les variables soient standardisées.
 
-\textbf{Feature Importance (impureté de Gini)}~\cite{breiman2001}~: pour les forêts aléatoires, l'importance de la variable $j$ mesure la réduction moyenne d'impureté qu'elle apporte dans tous les nœuds de l'arbre où elle est utilisée~:
+\textbf{Feature Importance (impureté de Gini)}~\cite{breiman2001}~: pour les forêts aléatoires, l'importance de la variable $j$ mesure la réduction moyenne d'impureté qu'elle apporte dans tous les nœuds où elle est utilisée~:
 \begin{equation}
 \text{FI}(j) = \sum_{t \in \mathcal{T}_j}\frac{n_t}{n}\left[I(t) - \frac{n_{t_L}}{n_t}I(t_L) - \frac{n_{t_R}}{n_t}I(t_R)\right]
 \end{equation}
-où $\mathcal{T}_j$ est l'ensemble des nœuds de l'arbre qui utilisent la variable $j$, $n_t$ le nombre d'observations au nœud $t$, $n$ l'effectif total, $I(t)$ l'impureté au nœud $t$ (mesurée par le critère de Gini), et $t_L$, $t_R$ les nœuds fils gauche et droit issus de la division en $t$.
+où $\mathcal{T}_j$ est l'ensemble des nœuds qui utilisent la variable $j$, $n_t$ le nombre d'observations au nœud $t$, $n$ l'effectif total, $I(t)$ l'impureté au nœud $t$ (critère de Gini), et $t_L$, $t_R$ les nœuds fils gauche et droit.
 
-\textbf{SHAP}~: défini au chapitre~1 (formule des valeurs de Shapley) et utilisé ici comme complément visuel, il attribue à chaque variable une contribution signée à chaque prédiction individuelle. Les formules ne sont pas reredéfinies ici.
+\textbf{SHAP}~: défini au chapitre~1 (formule des valeurs de Shapley) et utilisé ici comme complément visuel, il attribue à chaque variable une contribution signée à chaque prédiction individuelle. Les formules ne sont pas redéfinies ici.
 
 \subsection{Résultats, convergence et analyse critique}
 
 Les cinq méthodes d'interprétabilité (coefficients LR, Ridge, feature importance RF, XGBoost, SHAP) sont appliquées et leurs top~5 variables comparés.
 
 \begin{quote}
-\textbf{Analyse critique~:} Les cinq méthodes ne s'accordent pas sur un classement stable~--- \textbf{cette divergence est elle-même un résultat}~\cite{rudin2019}~: sans signal prédictif réel, les outils mesurent du bruit aléatoire, et chaque méthode "s'accroche" à des corrélations parasites différentes. La seule variable présente dans les cinq méthodes est \texttt{systolic\_bp}~: dans la littérature épidémiologique réelle, la pression artérielle est effectivement l'un des facteurs de risque cardiovasculaire les mieux documentés~\cite{esc2018}~--- mais dans nos données, cette convergence résulte de sa grande variance, pas d'une vraie relation causale.
+\textbf{Analyse critique~:} Les cinq méthodes ne s'accordent pas sur un classement stable~--- \textbf{cette divergence est elle-même un résultat}~\cite{rudin2019}~: sans signal prédictif réel, chaque outil mesure du bruit aléatoire et s'accroche à des corrélations parasites différentes. La seule variable présente dans les cinq méthodes est \texttt{systolic\_bp}~: dans la littérature épidémiologique réelle, la pression artérielle est effectivement l'un des facteurs de risque cardiovasculaire les mieux documentés~\cite{esc2018}~--- mais dans nos données, cette convergence résulte de sa grande variance, pas d'une vraie relation causale.
 
 Sur des données réelles~\cite{booth2012, who2000}, on s'attendrait à voir la pression artérielle, le cholestérol LDL, le tabagisme, l'IMC et l'activité physique dominer clairement les classements, avec des coefficients significativement différents de zéro.
 \end{quote}

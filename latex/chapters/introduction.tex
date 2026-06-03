@@ -56,11 +56,11 @@ Le projet s'appuie sur le \textit{Health \& Lifestyle Dataset}, un jeu de donné
   \item \textbf{Caractéristiques personnelles}~: \texttt{age}, \texttt{gender}, \texttt{family\_history}.
 \end{itemize}
 
-La variable cible principale est \texttt{disease\_risk}, un indicateur binaire (0/1) indiquant si un individu est considéré à risque de maladie. Bien que synthétique, ce dataset respecte des distributions statistiquement réalistes~\cite{chawla2002}, sans aucune contrainte éthique liée à des données personnelles réelles.
+La variable cible principale est \texttt{disease\_risk}, un indicateur binaire (0/1) indiquant si un individu est considéré à risque de maladie. Bien que synthétique, ce dataset respecte des distributions statistiquement réalistes~\cite{chawla2002}. Les données synthétiques sont générées algorithmiquement et ne correspondent à aucun individu réel~: elles permettent de développer et tester des méthodes sans risque de ré-identification, contrairement aux données médicales réelles qui sont soumises au Règlement Général sur la Protection des Données (RGPD)~\cite{rgpd2016}.
 
 \section*{Lien avec la formation}
 
-Ce projet est directement ancré dans les enseignements du master MIASHS~: réduction de dimension avec l'\textbf{ACP}, \textbf{régression linéaire et logistique}, \textbf{classification supervisée et non supervisée}, \textbf{régularisation et optimisation} (Ridge, Lasso, descente de gradient), et introduction au \textbf{deep learning}. Toutes ces notions sont mises en pratique ici de manière concrète, sur un problème à enjeu sociétal fort.
+Ce projet est directement ancré dans les enseignements du master MIASHS~: réduction de dimension avec l'\textbf{ACP}, \textbf{régression linéaire et logistique}, \textbf{classification supervisée et non supervisée}, \textbf{régularisation et optimisation} (Ridge, Lasso, descente de gradient), et \textbf{méthodes ensemblistes} (Random Forest, XGBoost). Toutes ces notions sont mises en pratique ici de manière concrète, sur un problème à enjeu sociétal fort. Le deep learning, abordé en cours, n'est pas appliqué dans ce projet~: les données tabulaires de taille modérée ne justifient pas son recours face aux méthodes ensemblistes~\cite{hastie2009}.
 
 \section*{Objectifs du projet}
 

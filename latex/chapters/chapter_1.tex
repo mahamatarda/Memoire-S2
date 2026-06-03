@@ -2,9 +2,9 @@
 
 \section{L'apprentissage automatique appliqué à la santé}
 
-Ces dernières années, l'apprentissage automatique s'est imposé comme un outil incontournable dans le domaine de la santé. Des travaux pionniers comme ceux d'Obermeyer \& Emanuel~\cite{obermeyer2016} ont montré que les algorithmes de ML peuvent surpasser les méthodes statistiques classiques pour prédire des événements cliniques. Plus récemment, une revue publiée dans \textit{Nature Medicine}~\cite{rajpurkar2022} dresse un panorama des applications actuelles~: diagnostic médical assisté par IA, prédiction de risque de maladies chroniques, personnalisation des traitements.
+L'apprentissage automatique a vraiment pris de l'ampleur en santé ces dernières années. Les travaux d'Obermeyer \& Emanuel~\cite{obermeyer2016} ont montré que les algorithmes de ML peuvent faire mieux que les méthodes statistiques classiques pour anticiper des événements cliniques --- ce qui n'est pas rien. Plus récemment, une revue dans \textit{Nature Medicine}~\cite{rajpurkar2022} dresse un panorama de l'état de l'art~: diagnostic médical assisté par IA, prédiction du risque de maladies chroniques, personnalisation des traitements.
 
-Dans ce contexte, les jeux de données combinant indicateurs biologiques et habitudes de vie constituent un terrain d'étude particulièrement riche. L'idée centrale est que les maladies chroniques ne sont pas seulement le résultat de facteurs génétiques, mais résultent d'une accumulation de comportements quotidiens mesurables~\cite{booth2012}.
+Ce qui m'intéresse ici, c'est cette idée que les maladies chroniques ne tombent pas du ciel~: elles se développent progressivement à partir de comportements quotidiens mesurables~\cite{booth2012}. Et si ces comportements laissent des traces dans les données, on devrait pouvoir les modéliser.
 
 \begin{figure}[h]
 \centering
@@ -15,15 +15,15 @@ Dans ce contexte, les jeux de données combinant indicateurs biologiques et habi
 
 \section{Régression~: prédire des indicateurs biologiques}
 
-La régression linéaire est l'une des méthodes les plus anciennes et les plus utilisées en statistique appliquée à la santé~\cite{james2021}. Pour pallier ses hypothèses fortes, des méthodes de \textbf{régression régularisée} ont été développées. La régression Ridge~\cite{hoerl1970} pénalise les coefficients trop grands via un terme $\lambda \|\mathbf{w}\|_2^2$, réduisant la variance du modèle. La régression Lasso~\cite{tibshirani1996} utilise une pénalisation $L_1$ qui force certains coefficients à zéro, réalisant ainsi une \textbf{sélection automatique de variables}.
+La régression linéaire reste l'une des méthodes les plus utilisées en statistique appliquée à la santé~\cite{james2021}. Mais elle a des hypothèses fortes, d'où le développement de variantes plus robustes. La régression Ridge~\cite{hoerl1970} ajoute une pénalité $\lambda \|\mathbf{w}\|_2^2$ qui réduit les coefficients sans jamais les annuler --- utile quand les variables sont peu informatives. La régression Lasso~\cite{tibshirani1996} utilise une pénalisation $L_1$ qui force certains coefficients exactement à zéro, ce qui revient à une \textbf{sélection automatique de variables} --- c'est une propriété vraiment pratique.
 
-Les méthodes ensemblistes comme les \textbf{forêts aléatoires}~\cite{breiman2001} et le \textbf{gradient boosting} (XGBoost~\cite{chen2016}) offrent des performances souvent supérieures sur des données tabulaires, en capturant les interactions non-linéaires entre variables.
+Pour les données tabulaires, les méthodes ensemblistes comme les \textbf{forêts aléatoires}~\cite{breiman2001} et le \textbf{gradient boosting} (XGBoost~\cite{chen2016}) donnent souvent de meilleurs résultats, en capturant les relations non-linéaires entre variables que la régression linéaire classique ne peut pas détecter.
 
 \section{Classification~: prédire le risque de maladie}
 
-La prédiction du risque de maladie est l'un des cas d'usage les plus étudiés en santé numérique. Des modèles de classification supervisée ont été appliqués avec succès à la prédiction du diabète de type 2~\cite{kavakiotis2017}, des maladies cardiovasculaires~\cite{mohan2019} ou encore de l'hypertension~\cite{olawade2023}.
+Prédire le risque de maladie est probablement le cas d'usage le plus étudié en santé numérique. Des modèles de classification ont été appliqués avec succès à la prédiction du diabète de type 2, des maladies cardiovasculaires ou encore de l'hypertension~\cite{rajpurkar2022}.
 
-Parmi les algorithmes les plus utilisés~:
+Parmi les algorithmes couramment utilisés~:
 \begin{itemize}
   \item La \textbf{régression logistique}~\cite{james2021}, modèle linéaire interprétable de référence.
   \item Les \textbf{forêts aléatoires}~\cite{breiman2001} et le \textbf{gradient boosting}~\cite{chen2016}, qui dominent les benchmarks sur données tabulaires.
@@ -37,32 +37,32 @@ Pour corriger ce biais, deux stratégies sont principalement utilisées. L'\text
 x_{\text{new}} = x_i + \lambda \cdot (x_{nn} - x_i), \quad \lambda \in [0, 1]
 \end{equation}
 
-Les deux stratégies sont appliquées et comparées dans ce projet. Comme on le verra, aucune ne parvient à améliorer significativement l'AUC~: cela confirme que le problème vient de l'absence de signal dans les données, et non du déséquilibre des classes.
+J'ai appliqué et comparé les deux stratégies dans ce projet. Comme on le verra, aucune ne parvient à améliorer significativement l'AUC~: cela confirme que le problème vient de l'absence de signal dans les données, et non du déséquilibre des classes.
 
 \section{Clustering~: identifier des profils de mode de vie}
 
-Le clustering vise à regrouper des individus similaires sans variable cible prédéfinie~\cite{macqueen1967}. Dans le domaine de la santé, cette approche est utilisée pour la \textbf{stratification de patients}~\cite{obermeyer2019}.
+Le clustering vise à regrouper des individus similaires sans variable cible prédéfinie~\cite{macqueen1967}. En santé, cette approche est utilisée pour la \textbf{stratification de patients}~\cite{booth2012} --- identifier des groupes à profils similaires pour adapter la prise en charge.
 
-L'algorithme \textbf{K-Means}~\cite{macqueen1967} reste la méthode de référence. La \textbf{classification hiérarchique ascendante (CAH)} offre une représentation visuelle via le dendrogramme. L'évaluation d'un clustering se fait via le \textbf{coefficient de silhouette}~\cite{rousseeuw1987}~:
+L'algorithme \textbf{K-Means}~\cite{macqueen1967} est la méthode de référence. La \textbf{classification hiérarchique ascendante (CAH)} propose une représentation visuelle via le dendrogramme. Pour évaluer la qualité d'un clustering, j'utilise le \textbf{coefficient de silhouette}~\cite{rousseeuw1987}~:
 
 \begin{equation}
 s(i) = \frac{b(i) - a(i)}{\max(a(i),\, b(i))}
 \end{equation}
 
-où $a(i)$ est la distance moyenne de l'observation $i$ aux autres points de son cluster, et $b(i)$ est la distance moyenne au cluster voisin le plus proche. Une valeur proche de 1 indique un clustering de qualité.
+où $a(i)$ est la distance moyenne de l'observation $i$ aux autres points de son cluster, et $b(i)$ est la distance moyenne au cluster voisin le plus proche. Une valeur proche de 1 indique un bon clustering.
 
 \section{Interprétabilité des modèles}
 
-Un modèle performant ne suffit pas, notamment dans le domaine de la santé~: il faut aussi pouvoir \textbf{expliquer} ses prédictions~\cite{rudin2019}. Deux grandes familles d'approches se distinguent.
+Un modèle qui prédit bien mais qu'on ne comprend pas n'est pas suffisant --- notamment en santé~\cite{rudin2019}. Deux familles d'approches s'opposent ici.
 
 Les \textbf{modèles intrinsèquement interprétables} (régression linéaire, régression logistique, arbres de décision) permettent de lire directement les relations~: les coefficients d'une régression indiquent immédiatement le sens et l'amplitude de l'effet de chaque variable.
 
-Les \textbf{méthodes post-hoc} sont appliquées \textit{après} l'entraînement, sur n'importe quel modèle --- y compris les boîtes noires comme Random Forest ou XGBoost. L'idée est simple~: ne pas sacrifier les performances prédictives pour avoir de l'interprétabilité, mais expliquer le modèle a posteriori. \textbf{SHAP}~\cite{lundberg2017} (\textit{SHapley Additive exPlanations}) est la méthode post-hoc la plus utilisée aujourd'hui. Issue de la théorie des jeux coopératifs, elle répond à la question~: \textit{quelle est la contribution équitable de chaque variable à cette prédiction précise ?} La valeur SHAP $\phi_j$ de la variable $j$ est~:
+Les \textbf{méthodes post-hoc} s'appliquent après l'entraînement, sur n'importe quel modèle --- y compris les boîtes noires. L'idée~: ne pas sacrifier les performances pour avoir de l'interprétabilité, mais expliquer le modèle a posteriori. \textbf{SHAP}~\cite{lundberg2017} (\textit{SHapley Additive exPlanations}) est la méthode post-hoc la plus répandue aujourd'hui. Issue de la théorie des jeux coopératifs, elle répond à la question~: \textit{quelle est la contribution équitable de chaque variable à cette prédiction précise~?} La valeur SHAP $\phi_j$ de la variable $j$ est~:
 
 \begin{equation}
 \phi_j = \sum_{S \subseteq F \setminus \{j\}} \frac{|S|!\,(|F|-|S|-1)!}{|F|!} \Bigl[ f(S \cup \{j\}) - f(S) \Bigr]
 \end{equation}
 
-où $F$ est l'ensemble des variables, $S$ un sous-ensemble ne contenant pas $j$, et $f(S)$ la prédiction du modèle avec uniquement les variables de $S$. Concrètement, pour chaque individu, SHAP produit un score signé par variable~: positif si la variable pousse vers le risque, négatif sinon.
+où $F$ est l'ensemble des variables, $S$ un sous-ensemble ne contenant pas $j$, et $f(S)$ la prédiction du modèle avec uniquement les variables de $S$. Pour chaque individu, SHAP produit un score signé par variable~: positif si la variable pousse vers le risque, négatif sinon.
 
-Dans ce projet, SHAP est utilisé comme \textbf{complément visuel}, aux côtés des feature importances (Random Forest, XGBoost) et des coefficients de la régression logistique --- qui restent les interprétations principales.
+Dans ce projet, je l'utilise comme \textbf{complément visuel}, aux côtés des feature importances (Random Forest, XGBoost) et des coefficients de la régression logistique --- qui restent les interprétations principales.
