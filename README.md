@@ -9,7 +9,7 @@
 
 ## Résumé
 
-Projet de data science appliqué à la modélisation des comportements de santé par apprentissage automatique, s'appuyant sur le *Health & Lifestyle Dataset* — un jeu de données synthétique de 100 000 individus décrits par 15 variables (habitudes de vie + indicateurs biologiques).
+Projet de data science appliqué à la modélisation des comportements de santé par apprentissage automatique, s'appuyant sur le [*Health & Lifestyle Dataset*](https://www.kaggle.com/datasets/chik0di/health-and-lifestyle-dataset) — un jeu de données synthétique de 100 000 individus décrits par 15 variables (habitudes de vie + indicateurs biologiques).
 
 Pipeline complet conduit selon la méthodologie **CRISP-DM** :
 
@@ -74,7 +74,7 @@ Memoire/
 │   └── logos/
 │       └── upv_new.png
 ├── figures/                          # Graphiques exportés des notebooks
-├── health_lifestyle_dataset.csv      # Dataset brut (100 000 lignes, ignoré par git)
+├── health_lifestyle_dataset.csv      # Dataset brut (100 000 lignes, ignoré par git) — source : Kaggle (lien ci-dessus)
 └── data_processed.csv                # Dataset après feature engineering (ignoré par git)
 ```
 
