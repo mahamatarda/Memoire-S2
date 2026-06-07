@@ -26,7 +26,7 @@ Pipeline complet conduit selon la méthodologie **CRISP-DM** :
 
 ## Rapport final
 
-Le PDF compilé est disponible dans ce dépôt : [`latex/manuscript.pdf`](latex/manuscript.pdf)
+Le PDF compilé est disponible dans ce dépôt : [`latex/Memoire_M1_ARDACHAM_Mahamat_Teguene_2026.pdf`](latex/Memoire_M1_ARDACHAM_Mahamat_Teguene_2026.pdf)
 
 ---
 
@@ -42,8 +42,8 @@ Memoire/
 │   ├── 05_clustering.ipynb           # K-Means + CAH + ACP
 │   └── 06_interpretabilite.ipynb     # Coefficients + FI Gini + SHAP
 ├── latex/
-│   ├── manuscript.tex                # Document principal
-│   ├── manuscript.pdf                # PDF compilé (tectonic)
+│   ├── Memoire_M1_ARDACHAM_Mahamat_Teguene_2026.tex   # Document principal
+│   ├── Memoire_M1_ARDACHAM_Mahamat_Teguene_2026.pdf   # PDF compilé (tectonic)
 │   ├── references.bib                # 25 sources bibliographiques
 │   ├── front_page.tex
 │   ├── chapters/
@@ -91,7 +91,7 @@ Memoire/
 | Interprétabilité | shap |
 | Réduction de dim. | scikit-learn (PCA) |
 | Versionnement | Git / GitHub |
-| Rédaction | LaTeX (compilé avec tectonic) |
+| Rédaction | LaTeX — `Memoire_M1_ARDACHAM_Mahamat_Teguene_2026.tex` (compilé avec tectonic) |
 
 ---
 
