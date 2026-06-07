@@ -1,0 +1,1007 @@
+================================================================================
+SCRIPT ORAL COMPLET — SOUTENANCE MÉMOIRE M1 MIASHS
+ARDACHAM Mahamat Teguene — Université de Montpellier Paul Valéry — Juin 2026
+================================================================================
+
+
+════════════════════════════════════════════════════════════════════════════════
+PARTIE A — SCRIPT ORAL SLIDE PAR SLIDE (~15 MINUTES)
+════════════════════════════════════════════════════════════════════════════════
+
+TIMING INDICATIF
+─────────────────────────────────────────────────────
+ Slides 1–2   Titre + Plan               ~1 min
+ Slides 3–6   Intro + Problématique      ~2 min 30
+ Slides 7–8   Données + Pipeline         ~2 min
+ Slides 9–10  État de l'art              ~2 min
+ Slides 11–14 EDA                        ~2 min
+ Slide  15    Feature Engineering        ~1 min
+ Slides 16–17 Régression                 ~1 min 30
+ Slides 18–20 Classification             ~1 min 30
+ Slides 21–23 Clustering                 ~1 min 30
+ Slides 24–25 Interprétabilité           ~1 min 30
+ Slides 26–27 Conclusion                 ~45 s
+ Slides 28–29 Biblio + Merci             ~15 s
+─────────────────────────────────────────────────────
+ TOTAL                                  ~17 min (ajustez le rythme)
+─────────────────────────────────────────────────────
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SLIDE 1 — TITRE  (~30 secondes)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Bonjour à tous.
+Je m'appelle Ardacham Mahamat Teguene, je suis en Master 1 MIASHS à
+l'Université de Montpellier Paul Valéry.
+
+Aujourd'hui je vous présente mon mémoire de fin de première année de master,
+qui porte sur la modélisation des comportements de santé par apprentissage
+automatique.
+
+En résumé : j'ai pris un jeu de données sur la santé, j'ai appliqué des
+algorithmes de machine learning — régression, classification, clustering —
+et j'ai analysé les résultats de façon critique.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SLIDE 2 — PLAN  (~30 secondes)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Voici comment je vais organiser ma présentation.
+Je commencerai par poser le contexte et la problématique, puis je présenterai
+les données et le pipeline général.
+Ensuite je passerai par l'état de l'art, l'analyse exploratoire, le feature
+engineering, puis les trois tâches de modélisation — régression, classification
+et clustering.
+Je terminerai par l'interprétabilité et la conclusion.
+
+On a onze sections, je vais aller à l'essentiel pour tenir dans le temps.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SLIDE 3 — I. INTRODUCTION  (~45 secondes)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Pour commencer, un peu de contexte.
+
+Aujourd'hui, les montres connectées mesurent notre sommeil. Les applications
+comptent nos pas. Les bilans sanguins enregistrent notre cholestérol.
+Sans le savoir, on génère une quantité massive d'informations sur nos
+habitudes de vie.
+
+Mais avoir des données ne suffit pas. Il faut savoir les analyser, les
+comprendre, et en tirer des conclusions utiles. C'est exactement ce que
+permet la data science — elle offre des outils pour explorer des jeux de
+données complexes, construire des modèles prédictifs, et expliquer ce qui
+se passe derrière les chiffres.
+
+C'est dans cette logique que s'inscrit mon mémoire.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SLIDE 4 — II. PROBLÉMATIQUE — contexte data science  (~30 secondes)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+La problématique centrale est :
+"Quels facteurs du mode de vie influencent le plus l'état de santé —
+et peut-on les identifier, les modéliser et les expliquer rigoureusement ?"
+
+En data science, ça se traduit par deux objectifs concrets.
+D'abord, prédire si une personne est à risque de maladie.
+Ensuite, expliquer pourquoi : est-ce à cause de son manque de sommeil ?
+De son cholestérol élevé ? De son inactivité physique ?
+
+Concrètement, j'ai travaillé sur deux variables cibles :
+le cholestérol en mg/dL pour la régression, et le risque de maladie
+— disease_risk 0 ou 1 — pour la classification.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SLIDE 5 — II. PROBLÉMATIQUE — contexte métier  (~30 secondes)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+D'un point de vue métier, les maladies chroniques — maladies
+cardiovasculaires, diabète de type 2, hypertension — représentent
+la première cause de mortalité mondiale.
+
+Ce qui est intéressant, c'est que ces maladies se développent progressivement
+à travers l'accumulation de comportements quotidiens : tabagisme, sédentarité,
+mauvaise alimentation, obésité.
+
+Et ces comportements laissent des traces mesurables dans les indicateurs
+biologiques. C'est précisément ce que j'ai cherché à capturer avec mes modèles.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SLIDE 6 — II. PROBLÉMATIQUE — seuils médicaux  (~30 secondes)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Pour ancrer mon travail dans une réalité médicale, j'ai défini trois
+seuils de référence reconnus :
+
+- Obésité : IMC supérieur à 30 — seuil OMS.
+- Hypercholestérolémie : cholestérol supérieur à 200 mg/dL — seuil NCEP.
+- Hypertension : pression systolique supérieure ou égale à 140 mmHg
+  — seuil de la Société Européenne de Cardiologie.
+
+Ces seuils ont directement guidé mon feature engineering, que je présenterai
+dans quelques minutes.
+
+L'enjeu est double : comprendre comment les habitudes de vie se traduisent
+en risques mesurables, ET évaluer si des modèles de ML peuvent capturer
+ces relations à partir des données.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SLIDE 7 — III. JEU DE DONNÉES ET PIPELINE — variables  (~45 secondes)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Le jeu de données que j'ai utilisé, c'est le Health & Lifestyle Dataset,
+disponible sur Kaggle.
+
+Il contient 100 000 individus décrits par 15 variables, réparties en
+trois catégories :
+- 6 variables d'habitudes de vie : nombre de pas, heures de sommeil,
+  consommation d'eau, calories, tabagisme, alcool.
+- 5 indicateurs biologiques : IMC, fréquence cardiaque au repos,
+  pressions artérielles systolique et diastolique, cholestérol.
+- 4 caractéristiques personnelles : âge, sexe, antécédents familiaux,
+  et risque de maladie.
+
+Point important : c'est un dataset synthétique — les données ont été
+générées algorithmiquement et ne correspondent à aucun individu réel.
+Ça règle la contrainte RGPD, mais ça a des conséquences sur les résultats,
+que j'explique tout de suite.
+
+Il n'y a aucune valeur manquante et aucun outlier détecté par la méthode IQR.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SLIDE 8 — III. JEU DE DONNÉES ET PIPELINE — pipeline + résultats  (~45 s)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+J'ai suivi la méthodologie CRISP-DM — une démarche itérative standard
+en data science.
+
+Mon pipeline complet suit cet enchaînement :
+EDA → Feature Engineering → Régression → Classification → Clustering
+→ Interprétabilité.
+
+Chaque étape informe la suivante : l'EDA m'a permis d'anticiper l'absence
+de signal, ce qui a guidé le choix des métriques et des modèles.
+
+En résumé des résultats :
+- Régression : XGBoost obtient R² = 0,0001 — aucun signal prédictif.
+- Classification : Logistic Regression avec AUC = 0,499 — équivalent à
+  un tirage au sort.
+- Clustering : K-Means k=3 avec silhouette = 0,103 — des profils
+  biologiques interprétables malgré l'absence de signal.
+
+Je vais maintenant expliquer pourquoi on arrive à ces résultats.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SLIDE 9 — IV. ÉTAT DE L'ART — ML en santé  (~30 secondes)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+En termes d'état de l'art, le machine learning est aujourd'hui largement
+utilisé en santé pour trois types d'applications :
+- La prédiction du risque cardiovasculaire.
+- La détection précoce du diabète de type 2.
+- La stratification de patients par profil de mode de vie.
+
+Ces trois applications correspondent exactement aux tâches de mon projet :
+régression sur le cholestérol, classification sur le risque de maladie,
+et clustering sur les profils de mode de vie.
+
+Mon mémoire s'inscrit donc dans un cadre applicatif réel et reconnu.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SLIDE 10 — IV. ÉTAT DE L'ART — comparatif des algorithmes  (~45 secondes)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Pour cette étude, j'ai sélectionné neuf algorithmes répartis selon leur rôle.
+
+Pour la régression : la Régression linéaire comme baseline, Ridge avec
+régularisation L2, Lasso avec régularisation L1 qui sélectionne automatiquement
+les variables, ElasticNet qui combine Ridge et Lasso, et les méthodes
+ensemblistes Random Forest et XGBoost.
+
+Pour la classification : Régression logistique, Random Forest, XGBoost.
+
+Pour le clustering : K-Means et CAH liaison Ward.
+
+Un algorithme a été volontairement exclu : le SVM.
+Pourquoi ? Sa complexité est en O(n²). Sur 100 000 individus, ça représente
+environ 10 milliards d'opérations — incompatible avec nos ressources de calcul.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SLIDE 11 — V. EDA — présentation + statistiques descriptives  (~45 s)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Passons à l'analyse exploratoire. Le dataset contient 15 variables :
+10 continues, 4 binaires, 1 catégorielle.
+
+Quelques statistiques clés :
+- Âge moyen : 48,5 ans, de 18 à 79 ans.
+- Cholestérol moyen : 224,3 mg/dL — au-dessus du seuil de 200.
+- Pression systolique moyenne : 134,6 mmHg — proche du seuil de 140.
+- Fréquence cardiaque au repos : 74,5 bpm en moyenne.
+
+Ces chiffres semblent raisonnables... mais les distributions vont révéler
+quelque chose d'important.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SLIDE 12 — V. EDA — distributions  (~30 secondes)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+En regardant les distributions, j'ai constaté quelque chose de révélateur :
+toutes les variables continues affichent un skewness inférieur à 0,02 en
+valeur absolue.
+
+Le skewness mesure l'asymétrie d'une distribution. Une valeur aussi proche
+de 0 signifie une distribution quasi-uniforme — comme si on avait tiré des
+nombres au hasard entre un minimum et un maximum.
+
+C'est exactement ce qui s'est passé : le dataset a été généré de façon
+aléatoire, sans structure causale encodée.
+
+Cette observation à l'EDA m'a directement permis d'anticiper que les modèles
+ne trouveraient aucun signal prédictif.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SLIDE 13 — V. EDA — corrélations  (~30 secondes)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+La matrice de corrélation de Pearson confirme cette hypothèse.
+Toutes les corrélations sont inférieures à 0,01 en valeur absolue.
+
+La variable la plus corrélée avec disease_risk est resting_hr, avec r = 0,01.
+C'est une corrélation quasi-nulle — non significative même sur 100 000 individus.
+
+Ça signifie que disease_risk a été généré indépendamment de toutes les autres
+variables. On ne peut pas prédire ce qu'on ne peut pas observer dans les données.
+
+Et je vais montrer que même Random Forest et XGBoost, qui peuvent capturer
+des relations non-linéaires, échouent ici — ce qui confirme bien l'absence
+totale de signal, pas une limite de nos algorithmes.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SLIDE 14 — V. EDA — déséquilibre des classes  (~30 secondes)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Dernier point de l'EDA : le déséquilibre des classes.
+Disease_risk est répartie à 75,2% sans risque et 24,8% à risque.
+
+Ce déséquilibre pose un problème classique : un modèle naïf qui prédit
+toujours "sans risque" obtient déjà 75% d'accuracy — sans avoir rien appris.
+
+Pour éviter d'être trompés par cette métrique, j'ai choisi d'évaluer
+la classification avec le F1-score, la précision, le rappel et l'AUC-ROC —
+des métriques capables de détecter les performances sur les deux classes.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SLIDE 15 — VI. FEATURE ENGINEERING  (~60 secondes)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Le feature engineering, c'est la création de nouvelles variables à partir
+des variables existantes, pour enrichir l'information disponible pour les modèles.
+
+J'ai fait deux types de transformations.
+
+D'abord l'encodage : gender encodé en binaire — 1 pour Male, 0 pour Female.
+
+Ensuite, trois variables métier créées à partir des seuils médicaux :
+
+- hypertension : 1 si pression systolique ≥ 140 ou diastolique ≥ 90.
+  Seuil de la Société Européenne de Cardiologie.
+
+- bmi_cat : catégorie IMC en 4 niveaux — sous-poids, normal, surpoids,
+  obèse — selon les seuils OMS.
+
+- lifestyle_score : un score composite qui combine les comportements
+  positifs — pas quotidiens, sommeil, hydratation — et les facteurs de
+  risque négatifs — tabagisme, alcool, IMC, calories — tous normalisés
+  entre 0 et 1 pour éviter qu'une variable à grande échelle domine.
+
+Et hypercholesterol : une variable binaire temporaire — 1 si cholestérol
+supérieur à 200 mg/dL. Elle est dérivée directement de la variable cible
+cholestérol, ce qui crée un data leakage. Je l'explique à la diapositive suivante.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SLIDE 16 — VII. RÉGRESSION — protocole  (~45 secondes)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Pour la régression, l'objectif est de prédire le taux de cholestérol
+en mg/dL à partir des autres variables.
+
+J'ai d'abord détecté un data leakage.
+Hypercholesterol est défini comme : cholestérol supérieur à 200 mg/dL.
+Si on inclut cette variable pour prédire le cholestérol, on donne littéralement
+la réponse au modèle — c'est comme tricher à un examen.
+Résultat : R² artificiel de 0,675. Après exclusion de la variable, R² retombe à 0.
+Cette variable a donc été exclue de la régression, et conservée uniquement
+pour le clustering où elle n'est pas dérivée de la variable cible.
+
+Le protocole :
+- Split 80/20 : 80 000 exemples train, 20 000 test.
+- K-Fold k=5 : 16 000 exemples par fold — bon compromis coût/fiabilité.
+- RandomizedSearchCV avec 20 tirages aléatoires pour le tuning.
+- Métriques : R², RMSE, MAE.
+
+J'ai testé 6 modèles : Linéaire, Ridge, Lasso, ElasticNet, Random Forest,
+XGBoost.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SLIDE 17 — VII. RÉGRESSION — résultats  (~45 secondes)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Les résultats sont sans appel.
+
+Tous les modèles obtiennent un R² entre -0,005 et 0,0001.
+Le RMSE est de 43,33 mg/dL pour la plupart — ce qui correspond exactement
+à l'écart-type du cholestérol dans le dataset.
+Autrement dit, les modèles prédisent la moyenne pour tout le monde.
+
+Deux cas particuliers :
+
+Lasso : avec lambda = 9,54, il a mis les 16 coefficients à 0. Il prédit
+uniquement la moyenne globale — 224,3 mg/dL — pour chaque individu.
+C'est un signal très clair : il n'y a rien à capturer.
+
+Random Forest : R² légèrement négatif — pire que la moyenne, parce qu'il
+surajuste du bruit aléatoire.
+
+La conclusion est claire : les variables ont été générées indépendamment.
+Il n'existe aucun signal prédictif pour la régression sur ce dataset.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SLIDE 18 — VIII. CLASSIFICATION — protocole  (~45 secondes)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Pour la classification, l'objectif est de prédire si un individu est à
+risque de maladie — disease_risk = 1 — ou non — disease_risk = 0.
+
+Pour gérer le déséquilibre 75/25, j'ai comparé deux stratégies :
+
+class_weight='balanced' : le modèle pénalise davantage les erreurs
+sur la classe minoritaire. La formule est w_k = n / (K × n_k), où n est
+le nombre total d'exemples, K le nombre de classes, et n_k le nombre
+d'exemples dans la classe k.
+
+SMOTE : Synthetic Minority Oversampling TEchnique. On génère de nouveaux
+exemples synthétiques de la classe minoritaire en interpolant entre des
+exemples existants : x_new = x_i + lambda × (x_voisin − x_i).
+
+Le protocole :
+- Split stratifié 80/20 : le ratio 75/25 est maintenu dans train et test.
+- Stratified K-Fold k=5 : le ratio est maintenu dans chaque fold.
+  Sans stratification, un fold pourrait ne contenir que des individus
+  sans risque et biaiser l'évaluation.
+- Métriques : accuracy, précision, rappel, F1-score, AUC-ROC.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SLIDE 19 — VIII. CLASSIFICATION — résultats  (~45 secondes)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Même conclusion qu'en régression : AUC ≈ 0,5 pour tous les modèles.
+C'est l'équivalent d'un tirage au sort.
+
+Le modèle naïf — qui prédit toujours "sans risque" — obtient 75% d'accuracy
+et un AUC de 0,5. C'est précisément pour ça que l'accuracy seule est
+trompeuse sur des données déséquilibrées.
+
+SMOTE n'a rien changé. Il ne peut pas créer un signal qui n'existe pas.
+Il génère des exemples synthétiques, mais ces exemples sont eux aussi
+dépourvus de tout lien avec disease_risk.
+
+class_weight='balanced' a légèrement augmenté le rappel, mais l'accuracy
+est tombée en dessous de 50% — les modèles sur-corrigent le déséquilibre
+au détriment de la précision.
+
+La cause est la même qu'en régression : disease_risk a été généré
+indépendamment de toutes les variables d'entrée.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SLIDE 20 — VIII. CLASSIFICATION — matrices de confusion  (~30 secondes)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Les matrices de confusion illustrent visuellement ce résultat.
+
+On voit que la Logistic Regression répartit ses prédictions entre les
+deux classes de façon quasi-aléatoire. Random Forest et XGBoost donnent
+des distributions similaires.
+
+Aucun modèle n'est retenu pour déploiement.
+Quand l'AUC est à 0,5 pour tous, choisir le "meilleur" n'a pas de sens
+statistique — les différences sont négligeables et non-significatives.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SLIDE 21 — IX. CLUSTERING — profils de mode de vie  (~45 secondes)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Le clustering a un objectif différent des deux tâches précédentes.
+Il n'y a pas de variable cible — on cherche à regrouper les individus
+selon leur similarité pour identifier des profils types de mode de vie.
+Disease_risk est donc exclue du clustering.
+
+Pour choisir le bon nombre de clusters k, j'ai utilisé deux méthodes
+complémentaires :
+- La méthode du coude sur la courbe d'inertie.
+- Le coefficient de silhouette.
+
+Les deux convergent vers k=3 : c'est au coude de la courbe d'inertie,
+et la silhouette est maximale à 0,103.
+
+Avant d'appliquer les algorithmes, j'ai standardisé toutes les variables
+par z-score. Pourquoi ? Pour éviter que daily_steps — qui va jusqu'à
+20 000 — domine sleep_hours — qui va de 3 à 10. Sans standardisation,
+les distances sont faussées par les échelles.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SLIDE 22 — IX. CLUSTERING — K-Means & CAH  (~45 secondes)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+K-Means sur 100 000 individus identifie trois clusters biologiquement
+cohérents :
+- Cluster 0 : 32 754 individus — IMC moyen 35 (obèse), pression 142 mmHg
+  (hypertendu) → profil "obèse hypertendu".
+- Cluster 1 : 27 673 individus — IMC 29,1 (surpoids), pression 115 mmHg
+  (normotendu) → profil "surpoids normotendu".
+- Cluster 2 : 39 573 individus — IMC 24 (normal), pression 142 mmHg
+  (hypertendu) → profil "poids normal hypertendu".
+
+K-Means partitionne principalement selon l'IMC et la pression artérielle,
+les deux variables avec les plus grandes variances.
+
+La CAH — Classification Ascendante Hiérarchique avec liaison Ward — a été
+appliquée sur un sous-échantillon de 5 000 individus. Pourquoi pas 100 000 ?
+Parce que la complexité de la CAH est en O(n²) — sur 100 000 individus,
+c'est 10 milliards d'opérations, impraticable.
+
+La CAH avec Ward identifie un profil supplémentaire intéressant : un cluster
+de fumeurs intenses et hypertendus — avec 100% de fumeurs dans le cluster 2.
+Ce profil n'apparaît pas en K-Means car Ward est plus sensible aux
+variables binaires comme smoker.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SLIDE 23 — IX. CLUSTERING — évaluation et visualisation  (~30 secondes)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Pour visualiser les clusters en 2D, j'ai utilisé l'ACP.
+
+Les données vivent dans un espace à 15 dimensions — impossible à représenter
+directement. L'ACP projette ces données sur les deux axes qui capturent
+le plus de variance.
+
+Les deux premières composantes expliquent 24,3% de la variance totale.
+Avec 15 variables quasi-indépendantes, c'est attendu : chaque variable
+contribue environ 100/15 ≈ 6,7% de variance, donc 2 composantes capturent
+environ 13% chacune.
+
+Sur le graphe, les trois clusters sont bien séparés visuellement,
+surtout sur l'axe vertical qui capture les différences d'IMC et
+de pression artérielle.
+
+La silhouette de 0,103 est faible, mais elle reflète l'absence de structure
+causale dans les données synthétiques — pas une erreur méthodologique.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SLIDE 24 — X. INTERPRÉTABILITÉ — 5 méthodes  (~45 secondes)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Pour l'interprétabilité, j'ai comparé 5 méthodes :
+les coefficients de la Régression Logistique, les coefficients de Ridge,
+les feature importances par impureté de Gini de Random Forest, les feature
+importances de XGBoost, et les valeurs SHAP sur XGBoost.
+
+Le tableau montre les variables qui apparaissent dans le top 5 de chaque
+méthode :
+- systolic_bp : 5/5 — présente dans toutes les méthodes.
+- daily_steps et family_history : 3/5.
+- bmi : 2/5.
+
+Mais attention — systolic_bp apparaît partout non pas parce qu'elle a un
+effet causal sur disease_risk, mais parce qu'elle a la plus grande variance
+dans le dataset. Les modèles accrochent sur la variance, pas sur un signal
+réel. C'est un résultat en soi.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SLIDE 25 — X. INTERPRÉTABILITÉ — résultat central  (~30 secondes)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Le résultat central : les 5 méthodes ne convergent pas. Elles mesurent
+du bruit aléatoire.
+
+Cette divergence n'est pas un problème — c'est en soi un résultat analytique.
+Quand il n'y a pas de signal, les outils d'interprétabilité montrent des
+résultats différents selon leur façon de mesurer l'importance.
+C'est ce que Rudin (2019) appelle une limite fondamentale des méthodes
+d'interprétabilité appliquées à des données sans structure.
+
+Les preuves convergentes de l'absence de signal sont :
+1. Corrélations < 0,01 à l'EDA
+2. Lasso : 16/16 coefficients = 0
+3. R² ≈ 0 et AUC ≈ 0,5 pour tous les modèles
+4. Data leakage détecté et corrigé — R² 0,675 → 0
+5. Interprétabilité divergente sur 5 méthodes
+
+"Savoir diagnostiquer pourquoi un modèle échoue est aussi précieux
+que d'en construire un qui réussit."
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SLIDE 26 — XI. CONCLUSION — perspectives  (~30 secondes)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Les perspectives naturelles de ce travail :
+
+D'abord, changer le dataset. Framingham ou NHANES sont des cohortes
+épidémiologiques réelles avec de vraies relations biologiques — mon pipeline
+est directement transposable, sans modifier le code.
+
+Ensuite, un déploiement API REST avec FastAPI : un individu donne son profil,
+le modèle retourne une prédiction et les valeurs SHAP expliquant les variables
+les plus influentes.
+
+Et en Master 2 : la causalité — aller au-delà de la corrélation pour
+identifier des relations de cause à effet réelles.
+
+Concernant l'utilisation de l'IA : j'ai utilisé Claude d'Anthropic pour
+la recherche bibliographique, la structuration du document, la relecture
+et le débogage. Tout le contenu scientifique — choix des modèles,
+interprétation, analyse critique — a été compris, vérifié et validé par moi.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SLIDE 27 — XI. CONCLUSION — outils & enseignements  (~20 secondes)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Les outils utilisés : Python 3, pandas, numpy pour les données, scikit-learn
+et XGBoost pour la modélisation, imbalanced-learn pour SMOTE, SHAP pour
+l'interprétabilité, et LaTeX pour la rédaction du mémoire.
+
+Le tableau de correspondance MIASHS montre que j'ai directement appliqué
+les enseignements du Master 1 : ACP/ACM, régression, classification supervisée,
+apprentissage non supervisé, régularisation, et gestion du déséquilibre
+de classes.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SLIDE 28 — BIBLIOGRAPHIE  (~10 secondes)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+J'ai mobilisé 25 sources bibliographiques couvrant les algorithmes utilisés,
+le contexte médical — OMS, NCEP, ESC — et les applications du ML en santé.
+Les références clés sont listées ici.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SLIDE 29 — MERCI  (~10 secondes)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Voilà pour ma présentation.
+Je vous remercie pour votre attention.
+Je suis prêt à répondre à vos questions.
+
+
+════════════════════════════════════════════════════════════════════════════════
+PARTIE B — QUESTIONS / RÉPONSES (~30 Q&R)
+════════════════════════════════════════════════════════════════════════════════
+
+THÈME 1 — DATASET ET DONNÉES
+──────────────────────────────────────────────────────────────────────────────
+
+Q1. Pourquoi avoir choisi un dataset synthétique ?
+R. Plusieurs raisons. D'abord la simplicité d'accès : c'est un dataset
+   public sur Kaggle, sans contrainte RGPD puisque les individus n'existent
+   pas réellement. Ensuite, c'est un choix pédagogique pertinent : travailler
+   sur des données sans signal force à construire un pipeline rigoureux et à
+   analyser les résultats de façon critique, plutôt que de simplement obtenir
+   un bon score. Enfin, ce pipeline est directement transposable à des données
+   réelles comme Framingham ou NHANES — c'est la valeur méthodologique du projet.
+
+Q2. Qu'est-ce que ça veut dire concrètement que les données sont "synthétiques" ?
+R. Ça veut dire que personne n'a réellement été mesuré. Un algorithme a tiré
+   des valeurs aléatoires pour chaque variable, indépendamment les unes des
+   autres. Par exemple, une personne peut avoir un cholestérol de 280 mg/dL
+   et fumer tous les jours, mais disease_risk = 0 parce que ça a été tiré
+   au sort. Il n'y a aucune logique médicale encodée dans la génération.
+
+Q3. Pourquoi 100 000 individus et pas moins ?
+R. 100 000 individus permettent d'avoir une puissance statistique suffisante
+   pour valider l'absence de signal. Sur un petit dataset, un R² proche de 0
+   pourrait s'expliquer par le manque de données. Sur 100 000 individus,
+   la conclusion est beaucoup plus solide : il n'y a vraiment rien à capturer.
+   C'est aussi représentatif des volumes de données en épidémiologie réelle.
+
+Q4. Vous avez eu des problèmes de qualité de données ?
+R. Non, c'est une des rares qualités de ce dataset synthétique : aucune
+   valeur manquante, aucun outlier détecté par la méthode IQR. En épidémiologie
+   réelle, la gestion des données manquantes serait une étape majeure du pipeline.
+   J'ai tout de même vérifié systématiquement — c'était important de valider
+   avant de passer à la modélisation.
+
+
+THÈME 2 — FEATURE ENGINEERING ET DATA LEAKAGE
+──────────────────────────────────────────────────────────────────────────────
+
+Q5. C'est quoi exactement le data leakage ?
+R. Le data leakage, c'est quand une variable qu'on utilise pour faire des
+   prédictions contient de l'information sur ce qu'on essaie de prédire —
+   de façon illégitime. Dans mon cas, hypercholesterol = 1 si cholestérol
+   > 200 mg/dL. Si j'utilise cette variable pour prédire le cholestérol,
+   je donne la réponse au modèle. C'est comme donner les réponses à un
+   étudiant avant l'examen : il réussit très bien, mais ça ne teste rien.
+   En pratique, c'est une erreur très fréquente en machine learning, et
+   elle peut fausser complètement l'évaluation d'un modèle.
+
+Q6. Vous avez dit R² = 0,675 avec le leakage — ça veut dire que le modèle
+    est bon ?
+R. Non, justement — c'est exactement le piège. Ce R² élevé est artificiel.
+   Le modèle n'a rien appris sur les relations entre les habitudes de vie
+   et le cholestérol. Il a juste appris que hypercholesterol = 1 implique
+   cholestérol > 200. Dès qu'on enlève cette variable, R² retombe à 0,0001.
+   C'est pourquoi la détection du data leakage est une étape critique
+   dans tout pipeline de machine learning.
+
+Q7. Pourquoi avoir quand même gardé hypercholesterol pour le clustering ?
+R. Parce que dans le clustering, il n'y a pas de variable cible à prédire.
+   On n'essaie pas de prédire le cholestérol — on cherche à regrouper les
+   individus selon leurs caractéristiques. Dans ce contexte, hypercholesterol
+   = 1 si cholestérol > 200 est une variable métier valide qui peut aider
+   à distinguer des profils de santé. Il n'y a donc pas de leakage dans
+   ce cas d'usage spécifique.
+
+Q8. Pourquoi avoir normalisé le lifestyle_score avec des divisions par le max
+    plutôt qu'avec un StandardScaler ?
+R. C'est un choix de conception du score composite. La normalisation par le
+   maximum ramène chaque variable entre 0 et 1, ce qui permet de les combiner
+   dans une formule additive sans qu'une variable à grande échelle — comme
+   daily_steps jusqu'à 20 000 — domine une variable à petite échelle — comme
+   sleep_hours entre 3 et 10. Un StandardScaler aurait centré les valeurs
+   autour de 0 avec des valeurs négatives, ce qui rendrait l'interprétation
+   du score composite moins intuitive.
+
+
+THÈME 3 — RÉGRESSION
+──────────────────────────────────────────────────────────────────────────────
+
+Q9. C'est quoi la différence entre Ridge et Lasso ?
+R. Les deux sont des modèles de régression linéaire avec régularisation —
+   c'est-à-dire qu'ils ajoutent une pénalité sur les coefficients pour
+   éviter le surapprentissage.
+   Ridge utilise la pénalité L2 : il pénalise le carré des coefficients.
+   Résultat : il les réduit vers 0, mais sans jamais les mettre exactement
+   à 0. Tous les prédicteurs restent dans le modèle.
+   Lasso utilise la pénalité L1 : il pénalise la valeur absolue des
+   coefficients. Résultat : il peut mettre certains coefficients exactement
+   à 0 — il fait donc de la sélection de variables automatique.
+   Dans mon cas, Lasso avec lambda = 9,54 a mis les 16/16 coefficients à 0,
+   ce qui confirme qu'aucune variable n'a de pouvoir prédictif.
+
+Q10. Pourquoi Lasso met-il tous les coefficients à 0 ?
+R.  Parce que la pénalité lambda = 9,54 est suffisamment forte pour que
+    le coût de garder un coefficient non-nul soit supérieur au gain de
+    prédiction qu'il apporte. Quand il n'y a aucun signal dans les données,
+    chaque coefficient contribue à peu près 0 à la réduction de l'erreur —
+    donc Lasso les élimine tous. Le modèle prédit uniquement la moyenne
+    globale : 224,3 mg/dL pour tout le monde.
+
+Q11. C'est quoi le tuning et pourquoi vous l'avez fait ?
+R.  Le tuning, c'est la recherche des meilleurs hyperparamètres pour un
+    modèle. Les hyperparamètres sont les paramètres qu'on fixe avant
+    l'entraînement — comme lambda pour Ridge/Lasso, ou le nombre d'arbres
+    pour Random Forest. J'ai utilisé RandomizedSearchCV : au lieu de tester
+    toutes les combinaisons possibles — ce serait un GridSearch exhaustif —
+    on tire 20 combinaisons aléatoires et on évalue chacune par validation
+    croisée k=5. C'est un bon compromis entre exploration et coût de calcul.
+    Le tuning n'a rien changé aux résultats ici, ce qui confirme que le
+    problème est dans les données, pas dans les hyperparamètres.
+
+Q12. Pourquoi k=5 pour la validation croisée et pas k=10 ?
+R.  Avec 80 000 exemples d'entraînement, k=5 donne 16 000 exemples par fold.
+    C'est largement suffisant pour une estimation fiable. k=10 donnerait
+    8 000 exemples par fold — statistiquement correct mais 2× plus coûteux
+    en calcul pour un gain marginal. Le consensus dans la littérature
+    (Kohavi, 1995) est que k=5 est le meilleur compromis pour des datasets
+    de cette taille.
+
+Q13. Que signifie un R² négatif pour Random Forest ?
+R.  Un R² négatif signifie que le modèle est pire qu'un modèle naïf qui
+    prédit toujours la moyenne. La formule est R² = 1 - SS_résiduel / SS_total.
+    Si SS_résiduel > SS_total, R² < 0. Dans le cas de Random Forest, le
+    modèle surajuste le bruit des données d'entraînement, et ses prédictions
+    sur le jeu de test sont plus mauvaises que la simple moyenne. C'est un
+    signe de surapprentissage du bruit aléatoire.
+
+
+THÈME 4 — CLASSIFICATION
+──────────────────────────────────────────────────────────────────────────────
+
+Q14. Pourquoi l'AUC = 0,5 est-il le pire résultat possible en classification ?
+R.  L'AUC — Area Under the ROC Curve — mesure la capacité du modèle à
+    distinguer les deux classes. AUC = 1 signifie une discrimination parfaite.
+    AUC = 0,5 signifie que le modèle ne distingue pas mieux qu'un tirage
+    aléatoire — comme si on lançait une pièce. La courbe ROC est la diagonale.
+    Dans mon cas, tous les modèles ont AUC ≈ 0,5 parce que disease_risk
+    a été généré indépendamment de toutes les variables — il est impossible
+    de prédire quelque chose qui n'a aucune relation avec vos données.
+
+Q15. Pourquoi SMOTE n'améliore pas les résultats ?
+R.  SMOTE crée de nouveaux exemples synthétiques de la classe minoritaire
+    en interpolant entre des exemples existants. Mais si la classe minoritaire
+    n'a aucune caractéristique distinctive — ce qui est le cas ici puisque
+    disease_risk est indépendant de tout — SMOTE génère des exemples qui
+    ressemblent à la classe majoritaire. Il ne peut pas inventer un signal
+    qui n'existe pas. C'est une confirmation expérimentale : le problème
+    n'est pas le déséquilibre des classes, c'est l'absence de signal.
+
+Q16. Quelle est la différence entre précision et rappel ?
+R.  La précision répond à : "Parmi ceux que j'ai prédit positifs, combien
+    le sont vraiment ?" C'est TP / (TP + FP).
+    Le rappel répond à : "Parmi tous les vrais positifs, combien ai-je
+    réussi à détecter ?" C'est TP / (TP + FN).
+    En santé, le rappel est souvent prioritaire : on préfère détecter tous
+    les malades même si on a quelques faux positifs, plutôt que de rater
+    des malades réels. Le F1-score combine les deux.
+
+Q17. Pourquoi ne pas avoir utilisé d'autres algorithmes pour la classification ?
+R.  J'ai choisi les trois algorithmes les plus représentatifs des trois
+    familles : un modèle linéaire (Régression logistique), un ensembliste
+    parallèle (Random Forest), et un ensembliste séquentiel (XGBoost).
+    Le SVM a été exclu pour des raisons de complexité computationnelle.
+    Les réseaux de neurones auraient été disproportionnés pour un dataset
+    de 100 000 individus sans signal — leur complexité est injustifiée quand
+    les modèles plus simples convergent tous vers AUC = 0,5.
+
+Q18. L'accuracy de 56,8% pour Random Forest est-elle un bon résultat ?
+R.  Non, et c'est exactement pourquoi l'accuracy seule est trompeuse.
+    Random Forest obtient 56,8% d'accuracy, mais son AUC est de 0,494 —
+    pire qu'un tirage au sort. Pourquoi ? Parce qu'il fait plus d'erreurs
+    sur la classe minoritaire qu'il n'en récupère. Le modèle naïf obtient
+    75% d'accuracy en prédisant toujours "sans risque" — pourtant il est
+    inutile. C'est pour ça qu'on utilise F1 + AUC sur des données déséquilibrées.
+
+
+THÈME 5 — CLUSTERING
+──────────────────────────────────────────────────────────────────────────────
+
+Q19. Comment vous avez choisi k=3 pour K-Means ?
+R.  J'ai utilisé deux méthodes complémentaires. La méthode du coude :
+    on trace l'inertie intra-cluster en fonction de k. L'inertie diminue
+    toujours quand k augmente, mais il y a un "coude" où la diminution
+    ralentit nettement — ici à k=3. Le coefficient de silhouette : il mesure
+    à quel point chaque point est bien assigné à son cluster. Il est maximal
+    à k=3 avec une valeur de 0,103. Les deux méthodes convergent vers k=3,
+    ce qui rend le choix robuste.
+
+Q20. C'est quoi la silhouette et pourquoi 0,103 est une valeur faible ?
+R.  La silhouette d'un point mesure la différence entre sa distance moyenne
+    aux autres points du même cluster et sa distance moyenne au cluster le plus
+    proche. Elle varie entre -1 et 1. Une valeur proche de 1 signifie que le
+    point est bien dans son cluster. Proche de 0, il est à la frontière.
+    Proche de -1, il serait mieux dans un autre cluster.
+    0,103 est faible — ça indique que les clusters ne sont pas très séparés.
+    Mais c'est attendu sur des données synthétiques générées sans structure
+    causale. Si les variables sont quasi-indépendantes, il ne peut pas y avoir
+    de groupes naturels très distincts. Ce n'est pas une erreur méthodologique,
+    c'est une conséquence directe de la nature des données.
+
+Q21. Pourquoi la CAH sur 5 000 individus seulement ?
+R.  La CAH a une complexité algorithmique en O(n²) en mémoire et en calcul.
+    Sur 5 000 individus, c'est 25 millions d'opérations — faisable.
+    Sur 100 000 individus, ce serait 10 milliards d'opérations — la machine
+    n'aurait pas assez de RAM. C'est une limite bien connue de la CAH,
+    et c'est pour ça que K-Means — en O(n) — est préféré sur les grands datasets.
+
+Q22. Les clusters trouvés ont-ils une réalité médicale ?
+R.  Oui, malgré la faible silhouette, les profils sont biologiquement cohérents.
+    Le cluster "obèse hypertendu" correspond au profil à haut risque cardiovasculaire
+    bien documenté en médecine — l'obésité abdominale est un facteur de risque
+    reconnu de l'hypertension. Le cluster "fumeurs intenses et hypertendus"
+    de la CAH correspond au profil tabagisme + hypertension, qui est lui aussi
+    un facteur de risque majeur. Ces profils ont du sens même si les données
+    sont synthétiques, parce que la standardisation + les distances euclidiennes
+    captent les variables avec les plus grandes variances — IMC et pression
+    artérielle — qui structurent naturellement la population.
+
+Q23. Pourquoi utiliser l'ACP pour visualiser les clusters ?
+R.  Parce qu'on ne peut pas visualiser directement un espace à 15 dimensions.
+    L'ACP — Analyse en Composantes Principales — projette les données sur les
+    deux axes qui expliquent le plus de variance. C'est une réduction de
+    dimensionnalité linéaire. PC1 (12,9%) et PC2 (11,4%) ensemble expliquent
+    24,3%. C'est faible, mais avec 15 variables quasi-indépendantes, chaque
+    variable contribue environ 6,7% — on ne peut pas faire beaucoup mieux
+    en 2D. La visualisation ACP reste utile pour vérifier la séparation
+    visuelle des clusters.
+
+
+THÈME 6 — INTERPRÉTABILITÉ
+──────────────────────────────────────────────────────────────────────────────
+
+Q24. C'est quoi SHAP et pourquoi l'avoir utilisé ?
+R.  SHAP — SHapley Additive exPlanations — est une méthode d'interprétabilité
+    basée sur la théorie des jeux. Pour chaque prédiction, SHAP calcule la
+    contribution de chaque variable à l'écart entre la prédiction et la
+    moyenne globale. La formule des valeurs de Shapley garantit qu'on répartit
+    équitablement la "contribution" entre toutes les variables.
+    L'avantage de SHAP : il donne une interprétation locale (pour un individu
+    spécifique) ET globale (sur tout le dataset). Je l'ai utilisé comme
+    complément visuel pour confirmer que les feature importances classiques
+    de XGBoost et les coefficients de régression convergent ou divergent.
+
+Q25. Pourquoi les 5 méthodes d'interprétabilité ne donnent-elles pas les
+     mêmes résultats ?
+R.  Parce qu'elles mesurent des choses différentes. Les coefficients de LR
+    mesurent l'effet linéaire marginal d'une variable. Les importances Gini
+    de RF mesurent à quel point une variable réduit l'impureté des noeuds.
+    Les importances XGBoost mesurent le gain moyen lors des splits sur une
+    variable. SHAP mesure la contribution marginale via la théorie des jeux.
+    Sur des données avec un vrai signal, ces méthodes convergent souvent.
+    Sur des données sans signal, elles mesurent du bruit différemment — et
+    les résultats divergent. La divergence elle-même est un résultat analytique.
+
+
+THÈME 7 — MÉTHODOLOGIE ET CRISP-DM
+──────────────────────────────────────────────────────────────────────────────
+
+Q26. C'est quoi CRISP-DM et pourquoi avoir suivi cette méthodologie ?
+R.  CRISP-DM — Cross-Industry Standard Process for Data Mining — est une
+    méthodologie standard en data science, introduite par Chapman et al. (2000).
+    Elle structure le travail en 6 étapes cycliques : compréhension du problème
+    métier, compréhension des données, préparation des données, modélisation,
+    évaluation, déploiement. C'est itératif — à chaque étape, on peut revenir
+    en arrière. Dans mon projet, l'EDA m'a conduit à anticiper l'absence de
+    signal, ce qui a influencé le choix des métriques de classification.
+    CRISP-DM garantit une démarche rigoureuse et reproductible, applicable
+    à n'importe quel projet de data science.
+
+Q27. Pourquoi avez-vous fait de la régression ET de la classification
+     sur le même dataset ?
+R.  Parce que le dataset contient deux variables cibles naturelles :
+    cholesterol pour la régression et disease_risk pour la classification.
+    Ces deux tâches répondent à des questions différentes. La régression
+    cherche à estimer une valeur continue — quel est le taux de cholestérol ?
+    La classification cherche à prendre une décision binaire — cette personne
+    est-elle à risque ou non ? En combinant les deux, j'explore différentes
+    facettes du même problème de santé, et j'utilise plus efficacement
+    le dataset disponible.
+
+Q28. Comment garantissez-vous que votre évaluation est fiable ?
+R.  J'ai utilisé plusieurs mécanismes. La validation croisée k=5 sur le jeu
+    d'entraînement garantit que les hyperparamètres ne sont pas surajustés.
+    Le jeu de test à 20% — jamais vu pendant l'entraînement ni le tuning —
+    donne une estimation non biaisée des performances réelles. La stratification
+    dans le split et dans le K-Fold pour la classification garantit que le ratio
+    75/25 est maintenu. Et j'ai fixé random_state=42 partout pour la
+    reproductibilité — n'importe qui peut reproduire exactement mes résultats.
+
+
+THÈME 8 — RÉSULTATS ET CRITIQUE
+──────────────────────────────────────────────────────────────────────────────
+
+Q29. Vos modèles ne fonctionnent pas — est-ce que votre mémoire est un échec ?
+R.  Non, et c'est peut-être la question la plus importante. La valeur d'un
+    projet de data science ne se mesure pas uniquement à la performance des
+    modèles. Mon mémoire démontre un pipeline complet et rigoureux, la
+    détection d'un data leakage — piège souvent invisible pour des débutants —
+    le choix raisonné des métriques adaptées aux données déséquilibrées,
+    la validation de l'absence de signal par cinq preuves convergentes
+    indépendantes, et une analyse critique honnête des limites.
+    Savoir diagnostiquer pourquoi un modèle échoue est aussi précieux que
+    d'en construire un qui réussit. Sur des données réelles comme Framingham,
+    le même pipeline produirait des résultats différents.
+
+Q30. Quel est votre meilleur modèle et lequel recommanderiez-vous ?
+R.  En régression, XGBoost tuné obtient le meilleur R² = 0,0001, mais il
+    faut être honnête : aucun modèle n'est recommandable car aucun n'a de
+    valeur prédictive réelle. En classification, techniquement Logistic
+    Regression a l'AUC la plus haute (0,499) et est le plus interprétable —
+    mais là encore, AUC ≈ 0,5 pour tous, choisir le "meilleur" n'a pas de
+    sens statistique. En clustering, K-Means k=3 est recommandé : silhouette
+    maximale, profils biologiquement cohérents, et applicable sur 100 000
+    individus contrairement à la CAH.
+
+Q31. Avez-vous envisagé d'autres algorithmes non testés ?
+R.  Oui. Le SVM a été exclu pour des raisons de complexité O(n²).
+    Les réseaux de neurones — MLP, LSTM — auraient été disproportionnés :
+    ils nécessitent beaucoup de données bien structurées et des temps de
+    calcul importants, pour un gain très incertain sur un dataset sans signal.
+    LightGBM aurait pu remplacer XGBoost — les deux sont des implémentations
+    du gradient boosting et auraient donné des résultats similaires.
+    L'isolation forest aurait pu être utile pour la détection d'anomalies,
+    mais ce n'est pas l'objectif du projet.
+
+Q32. Que se passerait-il sur des données réelles comme Framingham ?
+R.  Framingham est une cohorte épidémiologique réelle avec de vraies relations
+    biologiques encodées. Dans ce contexte, on s'attendrait à voir des
+    corrélations plus élevées — cholestérol vs âge, tabagisme vs pression
+    artérielle — des R² et AUC significativement supérieurs à 0 et 0,5,
+    et des méthodes d'interprétabilité qui convergent vers les variables
+    médicalement pertinentes : tabagisme, IMC, cholestérol, antécédents
+    familiaux. Le pipeline que j'ai construit est prêt pour cette transition —
+    il suffit de remplacer le dataset.
+
+
+THÈME 9 — QUESTIONS SPÉCIFIQUES POSÉES EN SESSION
+──────────────────────────────────────────────────────────────────────────────
+
+Q33. La corrélation entre resting_hr et disease_risk vaut-elle 0.005 ou 0.01 ?
+R.  Elle vaut 0,01 arrondi à deux décimales — c'est ce qu'affiche la matrice
+    de corrélation. La valeur exacte calculée par pandas est entre 0,005 et
+    0,0149, affichée à 0,01 après arrondi. Dans tous les cas, cette corrélation
+    est quasi-nulle et non significative sur une échelle de -1 à 1.
+    La conclusion ne change pas : disease_risk est indépendant de resting_hr.
+
+Q34. Pourquoi parler de "data leakage corrigé" si hypercholesterol n'a jamais
+     été incluse dans les features de régression ?
+R.  Bonne question. En toute rigueur, je n'ai pas "corrigé" une erreur que
+    j'avais commise — j'ai identifié un risque de leakage et j'ai délibérément
+    écarté cette variable de la régression dès la conception. J'ai créé
+    hypercholesterol temporairement dans le notebook pour illustrer l'effet
+    du leakage — R² monte à 0,675 quand on l'inclut — puis j'ai confirmé
+    qu'elle ne fait pas partie des features finales. La formulation précise
+    est : "data leakage détecté et écarté", pas "corrigé".
+
+Q35. C'est quoi le tuning plus en détail ?
+R.  Le tuning, ou réglage des hyperparamètres, c'est la recherche des meilleures
+    valeurs pour les paramètres qu'on fixe avant l'entraînement. Pour Ridge,
+    c'est lambda — la force de régularisation. Pour XGBoost, c'est le nombre
+    d'arbres, la profondeur maximale, le taux d'apprentissage, etc.
+    J'ai utilisé RandomizedSearchCV avec n_iter=20 : on définit une grille
+    de valeurs possibles pour chaque hyperparamètre, on tire 20 combinaisons
+    aléatoires, et on évalue chacune par validation croisée k=5. On retient
+    la combinaison avec le meilleur score CV. C'est plus rapide qu'un
+    GridSearch exhaustif — qui testerait toutes les combinaisons — pour
+    un résultat souvent comparable.
+
+Q36. SMOTE : comment les nouveaux exemples sont-ils générés exactement ?
+R.  Pour chaque exemple de la classe minoritaire x_i, SMOTE identifie ses
+    k plus proches voisins dans la même classe. Il choisit aléatoirement un
+    de ces voisins x_voisin, puis génère un nouvel exemple :
+    x_nouveau = x_i + lambda × (x_voisin − x_i)
+    où lambda est tiré uniformément entre 0 et 1.
+    Géométriquement, le nouvel exemple est placé sur le segment reliant x_i
+    à x_voisin. On peut ainsi générer autant de nouveaux exemples que nécessaire
+    pour équilibrer les classes. L'avantage sur la simple duplication : on
+    introduit de la variété plutôt que de copier exactement les mêmes exemples.
+
+
+CHIFFRES CLÉS À RETENIR PAR COEUR
+──────────────────────────────────────────────────────────────────────────────
+Dataset      : 100 000 individus, 15 variables, 6 notebooks
+Corrélations : toutes < |0.01|, max r = 0.01 (resting_hr / disease_risk)
+Régression   : R² = 0.0001 (XGBoost tuné) | RMSE = 43.33 mg/dL
+               Lasso : lambda = 9.54 → 16/16 coefficients = 0
+               Data leakage : R² 0.675 → 0 après exclusion de hypercholesterol
+Classification: AUC = 0.499 (Logistic Regression) — équivalent tirage aléatoire
+               Déséquilibre 75.2% / 24.8%
+Clustering   : k=3, silhouette = 0.103, ACP 24.3% variance (PC1 12.9% + PC2 11.4%)
+               CAH sur 5 000 individus (O(n²) incompatible avec 100 000)
+               SVM exclu : O(n²) ≈ 10 milliards d'opérations
+Split        : 80/20, random_state=42, k-fold k=5, 16 000 exemples/fold
+Seuils médic.: IMC > 30 (OMS), cholestérol > 200 mg/dL (NCEP), systolique ≥ 140 (ESC)
+Biblio       : 25 sources
+──────────────────────────────────────────────────────────────────────────────
+
+================================================================================
+FIN DU SCRIPT
+================================================================================
