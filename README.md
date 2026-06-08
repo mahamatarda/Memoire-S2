@@ -14,7 +14,7 @@ Projet de data science appliqué à la modélisation des comportements de santé
 Pipeline complet conduit selon la méthodologie **CRISP-DM** :
 
 - **EDA** : corrélations < 0.01 entre toutes les variables, absence de signal linéaire
-- **Feature engineering** : encodage, création de variables métier (score de style de vie composite, hypertension, catégories IMC), standardisation — 16 variables explicatives au total
+- **Feature engineering** : encodage, création de variables métier (score de style de vie composite, hypertension, catégories IMC), standardisation — 18 variables au total (15 originales + 3 nouvelles : hypertension, bmi_cat, lifestyle_score)
 - **Régression** : 6 modèles comparés (Linéaire, Ridge, Lasso, ElasticNet, Random Forest, XGBoost) — tuning par `RandomizedSearchCV` (n_iter=20), validation croisée K-Fold (k=5)
 - **Classification** : 3 modèles (LR, RF, XGBoost) + comparaison `class_weight='balanced'` vs SMOTE
 - **Clustering** : K-Means (k=3) + CAH liaison Ward sur sous-échantillon 5 000 individus + visualisation ACP (24.3% de variance en 2D)

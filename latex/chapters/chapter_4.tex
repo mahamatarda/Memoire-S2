@@ -118,6 +118,18 @@ Cluster & Taille & Fumeurs & Syst. (mmHg) & Profil \\
 
 \textbf{Visualisation par ACP (Analyse en Composantes Principales).} Nos données vivent dans un espace à 15 dimensions~: il est impossible de les représenter directement. L'ACP projette ces 15 dimensions sur les 2 axes qui capturent le maximum de variance, permettant une visualisation 2D des clusters. Les deux premières composantes expliquent \textbf{24.3\%} de la variance totale~: la projection 2D "voit" seulement 24.3\% de l'information originale. Si les clusters semblent peu séparés sur le graphique, ce n'est pas la preuve qu'ils n'existent pas --- ils se distinguent dans les 15 dimensions d'origine, pas dans la réduction 2D. Avec 15 variables quasi-indépendantes (confirmé par l'EDA), aucune direction ne concentre beaucoup de variance~: 24.3\% en 2D est donc attendu.
 
+\textbf{Pourquoi les clusters ont-ils une forme rectangulaire dans la projection ACP~?} Sur le graphique ACP (figure~\ref{fig:kmeans_pca}), les clusters apparaissent comme des \textbf{blocs rectangulaires} plutôt que des nuages sphériques --- résultat directement lié à la nature des variables du dataset.
+
+La première composante principale (PC1, axe horizontal) est fortement influencée par \texttt{bmi\_cat}, une variable ordinale à \textbf{4 valeurs discrètes} (0 = sous-poids, 1 = normal, 2 = surpoids, 3 = obèse). Cette discrétisation crée des \textbf{colonnes verticales}~: les individus s'alignent en 4 bandes distinctes plutôt que de se répartir continûment sur l'axe. La deuxième composante (PC2, axe vertical) est dominée par \texttt{hypertension}, une variable \textbf{binaire} (0 ou 1)~: une variable binaire ne peut prendre que deux valeurs, ce qui produit un \textbf{saut net haut/bas} dans la projection, divisant les individus entre normotendus (bas) et hypertendus (haut).
+
+Par ailleurs, les distributions quasi-uniformes de toutes les variables continues (chapitre~2) créent des nuages de points dispersés sans gradient de densité visible~: les points se répartissent uniformément au lieu de former des ellipses denses au centre. Le résultat final est une grille de rectangles dont la forme reflète la structure discrète du dataset plutôt qu'une vraie géométrie en clusters.
+
+\textbf{Indice de Davies-Bouldin~\cite{davies1979}.} Cet indice mesure la qualité du clustering en calculant, pour chaque cluster $i$, le ratio entre la dispersion interne et la distance entre centroïdes~:
+\begin{equation}
+DB = \frac{1}{k}\sum_{i=1}^{k}\max_{j \neq i}\left(\frac{\sigma_i + \sigma_j}{d(\boldsymbol{\mu}_i, \boldsymbol{\mu}_j)}\right)
+\end{equation}
+où $\sigma_i$ est la dispersion moyenne des points du cluster $i$ autour de son centroïde, et $d(\boldsymbol{\mu}_i, \boldsymbol{\mu}_j)$ la distance entre les centroïdes $i$ et $j$. \textbf{Un DB proche de 0 est idéal}~: les clusters sont compacts (faible $\sigma$) et bien séparés (grande distance). Un DB élevé indique des clusters éparpillés ou trop proches les uns des autres. Contrairement à la silhouette qui évalue chaque point individuellement, Davies-Bouldin évalue chaque paire de clusters~: les deux métriques sont complémentaires.
+
 \begin{table}[h]
 \centering
 \caption{Comparaison K-Means vs CAH}
@@ -191,6 +203,12 @@ Sur des données réelles~\cite{booth2012, who2000}, on s'attendrait à voir la 
 \caption{SHAP summary plot (XGBoost) --- complément visuel d'interprétabilité}
 \label{fig:shap}
 \end{figure}
+
+\begin{quote}
+\textbf{Comment lire le SHAP summary plot~?} Chaque \textbf{ligne} correspond à une variable, triée de haut en bas par importance décroissante (impact moyen en valeur absolue). Sur chaque ligne, chaque \textbf{point} représente un individu. L'\textbf{axe horizontal} indique l'impact SHAP sur la prédiction~: un point à droite ($x > 0$) signifie que la variable pousse la prédiction vers 1 (\texttt{disease\_risk} élevé)~; un point à gauche ($x < 0$) la pousse vers 0~; en $x = 0$, aucun impact. La \textbf{couleur} encode la valeur réelle de la variable~: rouge = valeur élevée, bleu = valeur faible.
+
+Sur des données avec un signal réel, on verrait un gradient net~: par exemple, si une pression artérielle élevée (rouge) est un facteur de risque, les points rouges se concentreraient à droite et les bleus à gauche. Ici, les couleurs sont \textbf{mélangées aléatoirement} autour de zéro~: des points rouges et bleus occupent les mêmes positions horizontales, sans aucun pattern. Cela confirme qu'aucune variable n'a d'impact systématique~--- SHAP détecte du bruit plutôt qu'un signal.
+\end{quote}
 
 Le tableau suivant synthétise la présence de chaque variable dans le top~5 des cinq méthodes~:
 

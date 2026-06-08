@@ -6,11 +6,13 @@
 
 On cherche à prédire le taux de cholestérol (\texttt{cholesterol}, en mg/dL) à partir des habitudes de vie et indicateurs biologiques. Ce choix est médicalement motivé~: le cholestérol est un facteur de risque cardiovasculaire reconnu~\cite{ncep2002}.
 
-\textbf{Note sur le data leakage~:} la variable \texttt{hypercholesterol} ($= 1$ si cholestérol $> 200$~mg/dL) est directement dérivée de la variable cible. L'inclure comme feature revient à donner la réponse au modèle pendant l'entraînement~--- c'est un \textit{data leakage}~\cite{kaufman2012} qui gonfle artificiellement le $R^2$ à 0.675. Une fois retirée, le $R^2$ chute à $\approx 0$ pour tous les modèles, confirmant l'absence de signal prédictif réel.
+\textbf{Variables utilisées pour la prédiction.} Le dataset final compte 18 variables. Pour la régression, 16 d'entre elles servent de features (18 totales $-$ \texttt{cholesterol} qui est la cible $-$ \texttt{disease\_risk} non pertinente ici)~: \texttt{age}, \texttt{bmi}, \texttt{daily\_steps}, \texttt{sleep\_hours}, \texttt{water\_intake\_l}, \texttt{calories\_consumed}, \texttt{smoker}, \texttt{alcohol}, \texttt{resting\_hr}, \texttt{systolic\_bp}, \texttt{diastolic\_bp}, \texttt{family\_history}, \texttt{gender\_enc}, \texttt{bmi\_cat}, \texttt{hypertension}, \texttt{lifestyle\_score}. La variable \texttt{cholesterol} est la cible (exclue des features), \texttt{disease\_risk} n'est pas pertinente ici, et \texttt{hypercholesterol} est exclue pour la raison suivante.
+
+\textbf{Note sur le data leakage~:} la variable \texttt{hypercholesterol} ($= 1$ si cholestérol $> 200$~mg/dL) a été créée temporairement dans ce notebook pour démontrer l'effet du leakage. Elle est directement dérivée de la variable cible~: l'inclure comme feature revient à donner la réponse au modèle pendant l'entraînement~--- c'est un \textit{data leakage}~\cite{kaufman2012} qui gonfle artificiellement le $R^2$ à 0.675. Une fois retirée, le $R^2$ chute à $\approx 0$ pour tous les modèles. Cette variable n'a été utilisée dans aucun autre notebook.
 
 \subsection{Protocole expérimental}
 
-\textbf{Split 80/20~:} 80~000 individus en entraînement, 20~000 en test (\texttt{random\_state=42}). Ce ratio classique garantit un ensemble d'entraînement suffisamment grand pour que les modèles apprennent, tout en conservant 20~000 observations pour une évaluation statistiquement fiable~\cite{james2021}. On n'utilise pas de troisième split (train/validation/test) car la validation croisée remplace avantageusement le jeu de validation fixe~: elle exploite l'intégralité des données d'entraînement et produit une estimation plus robuste.
+\textbf{Split 80/20~:} 80~000 individus en entraînement, 20~000 en test (\texttt{random\_state=42}). Le paramètre \texttt{random\_state=42} fixe la graine du générateur aléatoire~: il garantit que le découpage est \textbf{identique à chaque exécution du code}. Sans cette graine, le split serait différent à chaque run, rendant les résultats non reproductibles. Fixer \texttt{random\_state} est une bonne pratique scientifique fondamentale~: n'importe qui relançant le code obtient exactement les mêmes 80~000 individus d'entraînement et les mêmes 20~000 de test~\cite{james2021}. Ce ratio classique garantit un ensemble d'entraînement suffisamment grand pour que les modèles apprennent, tout en conservant 20~000 observations pour une évaluation statistiquement fiable. On n'utilise pas de troisième split (train/validation/test) car la validation croisée remplace avantageusement le jeu de validation fixe~: elle exploite l'intégralité des données d'entraînement et produit une estimation plus robuste.
 
 \textbf{Validation croisée K-Fold ($k=5$)}~\cite{hastie2009}~: le jeu d'entraînement est découpé en $k$ plis égaux. À chaque itération, $k-1$ plis servent à entraîner et le pli restant à valider~; on répète $k$ fois en changeant le pli de validation. Le score moyen sur les $k$ itérations est~:
 \begin{equation}
@@ -27,7 +29,11 @@ R^2 &= 1 - \frac{\sum_{i=1}^{n}(y_i - \hat{y}_i)^2}{\sum_{i=1}^{n}(y_i - \bar{y}
 \text{MAE} &= \frac{1}{n}\sum_{i=1}^{n}|y_i - \hat{y}_i|
 \end{align}
 
-où $y_i$ est la valeur observée (cholestérol réel), $\hat{y}_i$ la valeur prédite par le modèle, et $\bar{y}$ la moyenne observée. Ces trois métriques sont complémentaires~: le $R^2$ indique la proportion de variance expliquée ($R^2 = 1$ = prédiction parfaite, $R^2 = 0$ = le modèle prédit juste la moyenne, $R^2 < 0$ = pire que la moyenne). Le RMSE exprime l'erreur en mg/dL en pénalisant les grandes erreurs (effet du carré). La MAE donne l'erreur absolue moyenne, plus lisible~: ici MAE~$\approx 37.6$~mg/dL signifie que le modèle se trompe en moyenne de 37.6~mg/dL.
+où $y_i$ est la valeur observée (cholestérol réel), $\hat{y}_i$ la valeur prédite par le modèle, et $\bar{y}$ la moyenne observée. Ces trois métriques sont complémentaires.
+
+Le $R^2$ répond à la question~: \textbf{"mon modèle prédit-il mieux que la moyenne~?"}~\cite{james2021}. $R^2 = 1$ signifie une prédiction parfaite~; $R^2 = 0$ signifie que le modèle prédit uniquement la moyenne $\bar{y} = 224.3$~mg/dL pour tout le monde, sans utiliser les features~; $R^2 < 0$ signifie que le modèle est \textit{pire} que de prédire la moyenne.
+
+Le RMSE exprime l'erreur en mg/dL en pénalisant les grandes erreurs. Un résultat clé~: le RMSE observé de \textbf{43.33~mg/dL correspond exactement à l'écart-type du cholestérol} dans le dataset (43.3~mg/dL, voir Table~\ref{tab:desc_stats}). Cela signifie que tous les modèles font la même erreur qu'un modèle qui prédirait $\bar{y} = 224.3$~mg/dL pour chaque individu --- ils n'ont rien appris des features. La MAE donne l'erreur absolue moyenne, plus lisible~: ici MAE~$\approx 37.6$~mg/dL signifie que le modèle se trompe en moyenne de 37.6~mg/dL.
 
 \subsection{Modèles et justification}
 
@@ -106,11 +112,15 @@ On cherche à prédire si un individu est à risque de maladie (\texttt{disease\
 
 \textbf{Stratified K-Fold ($k=5$)}~: maintient le ratio de classes dans chaque fold. Sans stratification, un fold pourrait ne contenir que des individus sans risque et biaiser l'évaluation~\cite{japkowicz2002}.
 
+\textbf{Pourquoi 20~000 individus dans le jeu de test~?} Le jeu de test correspond au split 80/20~: 20\% de 100~000 = 20~000 individus. Ces individus n'ont jamais été vus pendant l'entraînement ni pendant le tuning des hyperparamètres. Toutes les matrices de confusion et métriques (AUC, F1, accuracy) sont calculées sur ces 20~000 observations~--- l'estimation de performance est donc non biaisée.
+
 \textbf{Gestion du déséquilibre}~: j'ai comparé deux stratégies. L'ajustement des poids de classe pénalise davantage les erreurs sur la classe minoritaire~\cite{japkowicz2002}~:
 \begin{equation}
 w_k = \frac{n}{K \cdot n_k}
 \end{equation}
-où $n$ est le nombre total d'observations, $K$ le nombre de classes et $n_k$ le nombre d'observations dans la classe $k$. SMOTE~\cite{chawla2002} crée synthétiquement de nouveaux exemples minoritaires par interpolation (voir chapitre~1). Les deux approches sont comparées dans ce projet.
+où $n$ est le nombre total d'observations, $K$ le nombre de classes et $n_k$ le nombre d'observations dans la classe $k$. SMOTE~\cite{chawla2002} crée synthétiquement de nouveaux exemples minoritaires par interpolation~: $\mathbf{x}_{\text{new}} = \mathbf{x}_i + \lambda(\mathbf{x}_{\text{voisin}} - \mathbf{x}_i)$, où $\lambda \in [0,1]$ est tiré aléatoirement. Le but est de rééquilibrer les classes pour que le modèle voie autant d'exemples des deux classes. Les deux approches sont comparées dans ce projet.
+
+\textbf{Résultat et conclusion sur SMOTE~:} ni SMOTE ni l'ajustement des poids n'améliorent les performances (AUC reste $\approx 0.5$). Ce résultat confirme que le problème provient de l'\textbf{absence totale de signal}, pas du déséquilibre des classes~: SMOTE génère de nouveaux exemples minoritaires, mais ces exemples synthétiques ont les mêmes valeurs de features que les exemples majoritaires~--- il ne peut pas créer un signal qui n'existe pas dans les données.
 
 \subsection{Métriques d'évaluation}
 
@@ -162,7 +172,11 @@ XGBoost              & 0.525 & 0.246 & 0.441 & 0.316 & 0.499 \\
 \end{figure}
 
 \begin{quote}
-\textbf{Analyse critique~:} L'\textbf{AUC-ROC~$\approx$~0.5} pour tous les modèles confirme qu'ils n'ont aucun pouvoir discriminant~\cite{james2021}~--- c'est équivalent à tirer à pile ou face. La comparaison avec le modèle naïf est instructive~: ce dernier atteint 75.2\% d'accuracy en prédisant toujours "sans risque", sans rien apprendre. Avec \texttt{class\_weight='balanced'}, les modèles augmentent leur rappel (ils détectent plus d'individus à risque) mais leur accuracy tombe sous 50\%~--- ils sur-corrigent le déséquilibre au détriment de la précision. Cela illustre concrètement pourquoi l'accuracy seule est trompeuse sur un dataset déséquilibré~\cite{sokolova2009}. Ces résultats sont cohérents avec ceux de la régression ($R^2 \approx 0$)~: les deux confirment que \texttt{disease\_risk} a été généré indépendamment de toutes les autres variables, et qu'aucune technique --- aussi sophistiquée soit-elle --- ne peut extraire un signal qui n'existe pas.
+\textbf{Analyse critique~:} La colonne \textbf{AUC-ROC} est la métrique centrale~: tous les modèles affichent AUC~$\approx 0.5$, ce qui signifie qu'aucun ne discrimine mieux qu'un tirage aléatoire~\cite{james2021}. L'accuracy seule est trompeuse~: Random Forest affiche 56.8\% d'accuracy mais une AUC de \textbf{0.494~--- inférieure au modèle naïf} (0.500). En pratique, un Random Forest à 56.8\% d'accuracy est pire qu'un modèle qui dit toujours "sans risque", en termes de capacité à distinguer les deux classes. Cela illustre pourquoi l'accuracy seule est dangereuse sur des données déséquilibrées~\cite{sokolova2009}~: elle peut masquer un modèle inutile derrière un chiffre élevé.
+
+\textbf{Lecture des matrices de confusion (Figure~\ref{fig:confusion})~:} chaque matrice est calculée sur les 20~000 individus du jeu de test. Les lignes correspondent aux vraies étiquettes (ce que l'individu est réellement), les colonnes aux étiquettes prédites. Un modèle efficace aurait des valeurs élevées sur la diagonale (vrais positifs + vrais négatifs) et faibles hors-diagonale. Ici, pour chaque modèle, les chiffres de chaque ligne sont presque équilibrés entre les deux colonnes~: un vrai malade a à peu près autant de chances d'être prédit "à risque" que "sans risque". C'est exactement le comportement d'un modèle qui tire au sort~--- cohérent avec AUC~$\approx 0.5$.
+
+Avec \texttt{class\_weight='balanced'}, les modèles augmentent leur rappel (ils détectent plus d'individus à risque) mais leur accuracy tombe sous 50\%~--- ils sur-corrigent le déséquilibre au détriment de la précision. Ces résultats sont cohérents avec ceux de la régression ($R^2 \approx 0$)~: les deux confirment que \texttt{disease\_risk} a été généré indépendamment de toutes les autres variables.
 \end{quote}
 
 \textbf{Quel est le meilleur modèle en classification~?} Aucun modèle n'est retenu pour déploiement. Avec AUC~$\approx 0.5$ pour tous, aucun ne discrimine mieux qu'un tirage aléatoire~: choisir le \og meilleur \fg{} n'a pas de sens statistique. Les légères différences d'accuracy ou de F1 entre modèles reflètent des variations aléatoires sur un signal nul, et non une vraie hiérarchie de performance.

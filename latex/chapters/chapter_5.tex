@@ -71,11 +71,33 @@ Python                             & Ensemble du pipeline de data science \\
   \item \textbf{Analyse critique d'un résultat négatif}~: savoir diagnostiquer pourquoi un modèle échoue est aussi précieux que d'en construire un qui réussit.
 \end{itemize}
 
+\subsection{Plus-value~: diagnostiquer les biais du pipeline}
+
+Ce projet ne produit pas un modèle prédictif déployable --- les métriques ($R^2 \approx 0$, AUC $\approx 0.5$) l'excluent. Sa plus-value réside dans une contribution différente~: \textbf{construire un pipeline capable de diagnostiquer pourquoi un modèle échoue}, et d'identifier rigoureusement ses biais.
+
+Trois apports concrets peuvent être retenus~:
+
+\begin{enumerate}
+  \item \textbf{Détection du data leakage.} La variable \texttt{hypercholesterol} produisait un $R^2$ artificiel de 0.675~\cite{kaufman2012}. Un pipeline mal construit aurait publié ce résultat comme une performance réelle. La détection et la correction rigoureuse de ce biais est une compétence directement valorisable sur des données épidémiologiques réelles.
+
+  \item \textbf{Diagnostic de l'absence de signal par cinq preuves convergentes.} Corrélations de Pearson $< 0.01$ (EDA), $R^2 \approx 0$ sur six modèles de régression dont des méthodes non-linéaires (Random Forest, XGBoost), AUC $\approx 0.5$ sur trois modèles de classification, silhouettes $\approx 0.10$ en clustering, et divergence des cinq outils d'interprétabilité. Cette convergence de preuves indépendantes est plus robuste qu'un résultat isolé.
+
+  \item \textbf{Accuracy trompeuse sur données déséquilibrées.} Un modèle naïf atteignait 75\% d'accuracy sur le déséquilibre 75/25~; le Random Forest affichait 56.8\% d'accuracy mais une AUC de 0.494, soit \textit{pire} que le hasard pur~\cite{sokolova2009}. Identifier et exposer ce piège méthodologique est un résultat analytique à part entière.
+\end{enumerate}
+
+Ce pipeline est \textbf{directement transposable} sur des données réelles~\cite{dawber1951, nhanes}~: les mêmes étapes de détection de leakage, de validation des métriques et de comparaison des méthodes s'appliquent, et le signal réel permettrait d'obtenir des résultats prédictifs exploitables.
+
 \subsection{Positionnement RSE / DDRS}
 
 L'utilisation d'un dataset \textbf{synthétique} s'inscrit dans une démarche éthique~: les données de santé sont sensibles et encadrées par le RGPD~\cite{rgpd2016}. Les données synthétiques éliminent tout risque de ré-identification tout en permettant de développer des méthodes~--- un compromis central de l'IA responsable~\cite{rgpd2016}.
 
 Le coût énergétique des entraînements a été limité en contraignant la profondeur des arbres (\texttt{max\_depth=15}) et en réduisant \texttt{n\_iter} dans \texttt{RandomizedSearchCV}, avec un impact positif sur l'empreinte carbone du calcul.
+
+\subsection{Limites méthodologiques}
+
+\textbf{Corrélations non-linéaires non explorées.} L'analyse de Pearson a révélé des coefficients inférieurs à $|0.01|$ --- mais Pearson ne détecte que les relations \textit{linéaires}~\cite{james2021}. Une analyse complémentaire aurait pu mobiliser le coefficient de Spearman (corrélation des rangs, capte les relations monotones), la \textit{mutual information} (\texttt{mutual\_info\_classif} dans scikit-learn, toute dépendance statistique quelle que soit sa forme), ou des nuages de points pour identifier visuellement des structures non-linéaires (relations en U, effets seuil, interactions).
+
+Toutefois, l'utilisation de \textbf{Random Forest et XGBoost}~\cite{breiman2001} --- algorithmes capables de capturer n'importe quelle relation non-linéaire --- constitue une réponse indirecte à cette limite. Leur échec ($R^2 \approx 0$, AUC $\approx 0.5$) démontre que même les dépendances non-linéaires sont absentes~: résultat plus fort qu'un test de Spearman ou de mutual information, car il exploite toute la puissance des méthodes ensemblistes sur 100~000 individus.
 
 \section{Perspectives}
 
