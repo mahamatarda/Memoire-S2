@@ -311,9 +311,11 @@ Ensuite, trois variables métier créées à partir des seuils médicaux :
   risque négatifs — tabagisme, alcool, IMC, calories — tous normalisés
   entre 0 et 1 pour éviter qu'une variable à grande échelle domine.
 
-Et hypercholesterol : une variable binaire temporaire — 1 si cholestérol
-supérieur à 200 mg/dL. Elle est dérivée directement de la variable cible
-cholestérol, ce qui crée un data leakage. Je l'explique à la diapositive suivante.
+Et hypercholesterol : une variable créée temporairement dans le notebook de
+régression uniquement pour démontrer l'effet du data leakage — 1 si cholestérol
+supérieur à 200 mg/dL. Elle n'a jamais été ajoutée au dataset final, jamais
+utilisée dans le clustering ni dans aucun autre notebook. Elle existe seulement
+dans 03_regression.ipynb pour illustrer ce piège. Je l'explique à la diapositive suivante.
 
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -328,8 +330,9 @@ Hypercholesterol est défini comme : cholestérol supérieur à 200 mg/dL.
 Si on inclut cette variable pour prédire le cholestérol, on donne littéralement
 la réponse au modèle — c'est comme tricher à un examen.
 Résultat : R² artificiel de 0,675. Après exclusion de la variable, R² retombe à 0.
-Cette variable a donc été exclue de la régression, et conservée uniquement
-pour le clustering où elle n'est pas dérivée de la variable cible.
+Cette variable a donc été exclue de toute modélisation — régression, classification
+et clustering. Elle n'existe que dans 03_regression.ipynb pour illustrer le piège,
+elle n'a jamais été ajoutée au dataset final.
 
 Le protocole :
 - Split 80/20 : 80 000 exemples train, 20 000 test.
@@ -662,13 +665,15 @@ R. Non, justement — c'est exactement le piège. Ce R² élevé est artificiel.
    C'est pourquoi la détection du data leakage est une étape critique
    dans tout pipeline de machine learning.
 
-Q7. Pourquoi avoir quand même gardé hypercholesterol pour le clustering ?
-R. Parce que dans le clustering, il n'y a pas de variable cible à prédire.
-   On n'essaie pas de prédire le cholestérol — on cherche à regrouper les
-   individus selon leurs caractéristiques. Dans ce contexte, hypercholesterol
-   = 1 si cholestérol > 200 est une variable métier valide qui peut aider
-   à distinguer des profils de santé. Il n'y a donc pas de leakage dans
-   ce cas d'usage spécifique.
+Q7. Est-ce qu'hypercholesterol a été utilisée dans le clustering ?
+R. Non — c'est une confusion importante à éviter. Hypercholesterol n'a jamais
+   été utilisée dans le clustering ni dans aucun autre notebook. Elle a été
+   créée temporairement dans 03_regression.ipynb uniquement pour démontrer
+   l'effet du data leakage : quand on l'inclut comme feature pour prédire
+   le cholestérol, le R² monte artificiellement à 0,675 — puis on la retire
+   et le R² chute à ≈ 0. C'est une démonstration pédagogique, pas une variable
+   du dataset. Le clustering utilise les 15 variables du dataset (hors
+   disease_risk qui est exclue du clustering comme variable cible).
 
 Q8. Pourquoi avoir normalisé le lifestyle_score avec des divisions par le max
     plutôt qu'avec un StandardScaler ?
@@ -985,19 +990,180 @@ R.  Pour chaque exemple de la classe minoritaire x_i, SMOTE identifie ses
     introduit de la variété plutôt que de copier exactement les mêmes exemples.
 
 
+THÈME 10 — QUESTIONS POSÉES EN PRÉPARATION (NOUVELLES)
+──────────────────────────────────────────────────────────────────────────────
+
+Q37. C'est quoi random_state=42 dans le split 80/20 ?
+R.  random_state=42, c'est la graine du générateur aléatoire. Quand on divise
+    80 000 / 20 000, Python mélange aléatoirement les individus. Sans graine,
+    ce mélange est différent à chaque exécution — les résultats changent.
+    Avec random_state=42, le mélange est toujours identique : n'importe qui
+    qui relance le code obtient exactement les mêmes 80 000 individus
+    d'entraînement et les mêmes 20 000 de test. C'est une bonne pratique
+    scientifique fondamentale pour la reproductibilité.
+    Le 42 n'a aucune signification mathématique — c'est une convention populaire.
+
+Q38. Pourquoi on travaille sur 20 000 individus en test ?
+R.  Parce que le split 80/20 sur 100 000 individus donne 20 000 exemples de test.
+    C'est délibéré : on réserve 80% pour l'entraînement et le tuning, et 20%
+    pour l'évaluation finale. Ces 20 000 exemples ne sont jamais vus pendant
+    l'entraînement ni le tuning — c'est ce qui garantit une évaluation honnête.
+    20 000 individus sur un déséquilibre 75/25 donnent environ 15 000 "sans risque"
+    et 5 000 "à risque" — suffisant pour une évaluation statistiquement fiable.
+
+Q39. C'est quoi les valeurs lambda λ=7197 pour Ridge et λ=9,54 pour Lasso ?
+R.  Lambda est la force de régularisation — le paramètre qui contrôle à quel
+    point les coefficients sont pénalisés.
+    Pour Ridge : λ=7197 signifie une pénalité très forte. Tous les coefficients
+    sont fortement poussés vers 0, mais aucun n'est mis exactement à 0.
+    Ce λ élevé est le résultat du tuning — RandomizedSearchCV a trouvé que
+    plus la régularisation est forte, moins le modèle surajuste le bruit.
+    Pour Lasso : λ=9,54 suffit pour mettre les 16/16 coefficients exactement
+    à 0. Ça signifie que le gain de prédiction de chaque variable est inférieur
+    au coût de la pénalité — aucune variable ne "mérite" d'être gardée.
+    Ces deux valeurs élevées confirment l'absence de signal.
+
+Q40. Ça veut dire quoi "tuné" — RF(tuné), XGBoost(tuné) ?
+R.  "Tuné" veut dire que les hyperparamètres ont été optimisés par
+    RandomizedSearchCV avec n_iter=20 et validation croisée k=5.
+    Pour Random Forest (non tuné) : on utilise les valeurs par défaut
+    de scikit-learn — par exemple max_depth=None, ce qui peut donner des
+    arbres très profonds qui surajustent du bruit, d'où le R² négatif.
+    Pour RF (tuné) : on a cherché les meilleures valeurs de max_depth,
+    n_estimators, min_samples_split, etc. Le R² reste quasi-nul, mais le
+    modèle ne surajuste plus aussi agressivement.
+    En résumé : tuné = on a cherché les meilleurs réglages. Ici, même les
+    meilleurs réglages ne changent rien parce que le problème est dans les
+    données, pas dans les hyperparamètres.
+
+Q41. Quelles sont les 16 variables utilisées pour prédire le cholestérol ?
+R.  Pour la régression, on utilise 16 features sur les 18 variables du dataset
+    final : age, bmi, daily_steps, sleep_hours, water_intake_l,
+    calories_consumed, smoker, alcohol, resting_hr, systolic_bp, diastolic_bp,
+    family_history, gender_enc, bmi_cat, hypertension, lifestyle_score.
+    On exclut cholesterol (c'est la variable cible qu'on veut prédire) et
+    disease_risk (non pertinente pour prédire le cholestérol).
+    Hypercholesterol n'est pas dans cette liste — elle n'a jamais été dans
+    le dataset final.
+
+Q42. On a 15 variables de base, mais combien au total après feature engineering ?
+R.  Le dataset original contient 15 variables (sans l'identifiant id).
+    Après feature engineering : gender est remplacée par gender_enc (substitution
+    directe, pas un ajout — le nombre reste 15), puis on ajoute 3 nouvelles
+    variables métier : hypertension, bmi_cat, lifestyle_score. Total : 15+3 = 18.
+    Hypercholesterol n'est PAS dans les 18 — elle a été créée temporairement
+    dans 03_regression.ipynb pour démontrer le leakage, jamais ajoutée au dataset.
+    Pour la régression, on utilise 16 de ces 18 variables (18 − cholesterol − disease_risk).
+
+Q43. C'est quoi la métrique Davies-Bouldin et comment l'interpréter ?
+R.  L'indice de Davies-Bouldin mesure la qualité du clustering en calculant,
+    pour chaque cluster, le ratio entre sa dispersion interne et sa distance
+    aux autres clusters. Plus précisément : DB = moyenne de (dispersion_i +
+    dispersion_j) / distance(centroïde_i, centroïde_j) sur toutes les paires.
+    Un DB proche de 0 est idéal : clusters compacts (faible dispersion) et
+    bien séparés (grande distance). Un DB élevé indique des clusters éparpillés
+    ou trop proches.
+    Dans mon projet : K-Means donne DB = 2,655 et CAH DB = 2,721 — valeurs
+    élevées mais cohérentes avec l'absence de structure causale dans les données.
+    La différence entre les deux méthodes est négligeable.
+
+Q44. Pourquoi les clusters ont-ils une forme rectangulaire bizarre dans le graphe ACP ?
+R.  C'est directement lié à la nature des variables. Deux variables dominent
+    les deux premières composantes de l'ACP :
+    PC1 (axe horizontal) est influencé par bmi_cat — une variable ordinale
+    à 4 valeurs discrètes (0, 1, 2, 3). Résultat : les individus s'alignent
+    en 4 colonnes verticales plutôt que de se disperser continûment.
+    PC2 (axe vertical) est dominé par hypertension — une variable binaire (0 ou 1).
+    Une variable binaire ne peut prendre que deux valeurs → saut net haut/bas
+    dans la projection. C'est pour ça qu'on voit des blocs en haut (hypertendus)
+    et en bas (normotendus).
+    En résumé : rectangles = variables discrètes. Ce n'est pas une erreur,
+    c'est la forme naturelle des données avec des variables binaires et ordinales.
+
+Q45. Comment lire le SHAP summary plot ?
+R.  Chaque ligne = une variable, triée par importance décroissante (de haut en bas).
+    Chaque point sur une ligne = un individu.
+    L'axe horizontal = l'impact SHAP sur la prédiction :
+      - Point à droite (x > 0) : la variable pousse la prédiction vers disease_risk=1
+      - Point à gauche (x < 0) : elle pousse vers disease_risk=0
+      - Point à x=0 : aucun impact
+    La couleur = valeur réelle de la variable : rouge = valeur élevée, bleu = faible.
+    Sur des données avec un signal, on verrait un gradient net — par exemple,
+    si systolic_bp élevée est un facteur de risque, tous les points rouges
+    seraient à droite. Ici, les couleurs sont mélangées aléatoirement autour
+    de 0 : rouge et bleu au même endroit, sans pattern. SHAP confirme l'absence
+    de signal.
+
+Q46. Après Pearson ≤ 0,01, n'aurait-il pas fallu explorer des corrélations non-linéaires ?
+R.  C'est une critique légitime : Pearson ne détecte que les relations linéaires.
+    On aurait pu utiliser le coefficient de Spearman (relations monotones),
+    la mutual information (toute dépendance statistique), ou des scatter plots
+    pour visualiser des structures non-linéaires.
+    Mais l'utilisation de Random Forest et XGBoost — des algorithmes capables
+    de capturer n'importe quelle relation non-linéaire, y compris des interactions
+    d'ordre élevé — constitue une réponse plus forte : leur échec (R² ≈ 0,
+    AUC ≈ 0,5) démontre que même les dépendances non-linéaires sont absentes.
+    C'est un résultat plus robuste qu'un test de Spearman, parce qu'il exploite
+    toute la puissance des méthodes ensemblistes sur 100 000 individus.
+    Reconnaître cette limite et savoir l'argumenter, c'est justement la valeur
+    analytique du projet.
+
+Q47. Quelle est la plus-value de ce projet si les modèles ne fonctionnent pas ?
+R.  La plus-value n'est pas dans les métriques — elle est dans le pipeline de
+    diagnostic. Ce projet démontre trois apports concrets :
+    1. Détection du data leakage : R² 0,675 artificiel identifié et corrigé.
+       En pratique, ce piège passe souvent inaperçu.
+    2. Cinq preuves convergentes de l'absence de signal : corrélations, R²≈0
+       sur 6 modèles, AUC≈0,5 sur 3 modèles, silhouette faible, interprétabilité
+       divergente. Cette convergence est plus solide qu'un résultat isolé.
+    3. Accuracy trompeuse sur déséquilibre 75/25 : Random Forest affiche 56,8%
+       d'accuracy mais AUC=0,494, pire qu'un tirage aléatoire. Identifier et
+       exposer ce piège méthodologique est un résultat en soi.
+    Ce pipeline est directement transposable sur Framingham ou NHANES — les
+    mêmes étapes produiraient des résultats prédictifs exploitables sur des
+    données réelles avec un vrai signal.
+
+Q48. C'est quoi la différence entre une variable binaire et une variable catégorielle ?
+R.  Une variable binaire n'a que deux valeurs possibles, généralement 0 et 1.
+    Exemple : smoker (fume ou ne fume pas), alcohol (boit ou ne boit pas),
+    family_history (antécédents familiaux ou non). Il n'y a pas d'ordre
+    particulier — juste deux états.
+    Une variable catégorielle a plusieurs modalités sans ordre naturel.
+    Exemple : gender (Male, Female) — il n'y a pas de sens à dire que
+    Male > Female ou Female > Male. Les deux sont des catégories.
+    En pratique, pour les modèles de ML, une variable binaire est déjà
+    utilisable directement (0/1). Une variable catégorielle à plusieurs
+    modalités doit être encodée — soit en ordinal si l'ordre a un sens
+    (bmi_cat : 0<1<2<3), soit en one-hot encoding si les modalités sont
+    sans ordre (gender : Male→[1,0], Female→[0,1]).
+    Dans mon projet : gender (catégorielle, 2 modalités) → gender_enc (binaire).
+    smoker est déjà binaire, donc aucun encodage nécessaire.
+
+──────────────────────────────────────────────────────────────────────────────
+
 CHIFFRES CLÉS À RETENIR PAR COEUR
 ──────────────────────────────────────────────────────────────────────────────
-Dataset      : 100 000 individus, 15 variables, 6 notebooks
+Dataset      : 100 000 individus, 15 variables originales (sans id)
+               → 18 variables après feature engineering (15 + 3 nouvelles)
+               → 16 features pour la régression (18 − cholesterol − disease_risk)
+               hypercholesterol : temporaire dans 03_regression.ipynb UNIQUEMENT,
+               jamais dans le dataset final, jamais dans le clustering
+               6 notebooks
 Corrélations : toutes < |0.01|, max r = 0.01 (resting_hr / disease_risk)
-Régression   : R² = 0.0001 (XGBoost tuné) | RMSE = 43.33 mg/dL
-               Lasso : lambda = 9.54 → 16/16 coefficients = 0
-               Data leakage : R² 0.675 → 0 après exclusion de hypercholesterol
+               Pearson (linéaire) + RF/XGBoost (non-linéaires) échouent → absence totale
+Régression   : R² = 0.0001 (XGBoost tuné) | RMSE = 43.33 mg/dL = écart-type du cholestérol
+               Ridge : lambda = 7197 (régularisation forte, coefficients → 0 sans jamais = 0)
+               Lasso : lambda = 9.54 → 16/16 coefficients = 0 exactement
+               Data leakage : R² 0.675 → ≈ 0 après exclusion de hypercholesterol
 Classification: AUC = 0.499 (Logistic Regression) — équivalent tirage aléatoire
-               Déséquilibre 75.2% / 24.8%
-Clustering   : k=3, silhouette = 0.103, ACP 24.3% variance (PC1 12.9% + PC2 11.4%)
+               RF : accuracy = 56.8% MAIS AUC = 0.494 (pire que le hasard)
+               Déséquilibre 75.2% / 24.8% — test = 20 000 individus (split 80/20)
+Clustering   : k=3, silhouette = 0.103, Davies-Bouldin = 2.655 (K-Means) / 2.721 (CAH)
+               ACP 24.3% variance (PC1 12.9% + PC2 11.4%)
+               Forme rectangulaire : bmi_cat discret sur PC1, hypertension binaire sur PC2
                CAH sur 5 000 individus (O(n²) incompatible avec 100 000)
                SVM exclu : O(n²) ≈ 10 milliards d'opérations
-Split        : 80/20, random_state=42, k-fold k=5, 16 000 exemples/fold
+Split        : 80/20, random_state=42 (reproductibilité), k-fold k=5, 16 000 exemples/fold
 Seuils médic.: IMC > 30 (OMS), cholestérol > 200 mg/dL (NCEP), systolique ≥ 140 (ESC)
 Biblio       : 25 sources
 ──────────────────────────────────────────────────────────────────────────────
