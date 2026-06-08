@@ -28,12 +28,21 @@ Pipeline complet conduit selon la méthodologie **CRISP-DM** :
 
 Le PDF compilé est disponible dans ce dépôt : [`latex/Memoire_M1_ARDACHAM_Mahamat_Teguene_2026.pdf`](latex/Memoire_M1_ARDACHAM_Mahamat_Teguene_2026.pdf)
 
+## Support de soutenance
+
+- [`Support Mahamat - Memoire.pdf`](Support%20Mahamat%20-%20Memoire.pdf) — Présentation 28 slides (PDF)
+- [`Support Mahamat - Memoire.pptx`](Support%20Mahamat%20-%20Memoire.pptx) — Présentation modifiable (PPTX)
+- [`script_oral_complet.txt`](script_oral_complet.txt) — Script oral intégral : Partie A (15 min slide par slide) + Partie B (36 Q&R thématiques)
+
 ---
 
 ## Structure du dépôt
 
 ```text
 Memoire/
+├── Support Mahamat - Memoire.pdf     # Présentation soutenance (28 slides)
+├── Support Mahamat - Memoire.pptx    # Présentation modifiable
+├── script_oral_complet.txt           # Script oral + 36 Q&R
 ├── notebooks/
 │   ├── 01_EDA.ipynb                  # Analyse exploratoire
 │   ├── 02_feature_engineering.ipynb  # Encodage, variables métier, standardisation
@@ -59,18 +68,6 @@ Memoire/
 │   │   ├── lexique.tex
 │   │   └── annexes.tex
 │   ├── figures/                      # Graphiques intégrés dans le LaTeX
-│   │   ├── distributions_continues.png
-│   │   ├── correlation_matrix.png
-│   │   ├── disease_risk_distribution.png
-│   │   ├── roc_curves.png
-│   │   ├── confusion_matrices.png
-│   │   ├── kmeans_selection_k.png
-│   │   ├── kmeans_pca.png
-│   │   ├── lr_coefficients.png
-│   │   ├── rf_feature_importance.png
-│   │   ├── shap_summary.png
-│   │   ├── machine_learning.png
-│   │   └── correlations_target.png
 │   └── logos/
 │       └── upv_new.png
 ├── figures/                          # Graphiques exportés des notebooks
@@ -97,13 +94,15 @@ Memoire/
 
 ## Points méthodologiques clés
 
-- **Data leakage détecté et corrigé** : `hypercholesterol` = f(`cholesterol`) → R² artificiel de 0.675, corrigé à ≈ 0 après suppression
+- **Data leakage détecté et corrigé** : `hypercholesterol` = f(`cholesterol`) → R² artificiel de 0.675, corrigé à ≈ 0 après suppression (variable temporaire dans 03_regression.ipynb uniquement)
+- **Plus-value** : pipeline de diagnostic — 5 preuves convergentes d'absence de signal (corrélations, R²≈0, AUC≈0.5, silhouette, interprétabilité divergente), détection du data leakage, accuracy trompeuse sur déséquilibre 75/25
 - **SVM exclu** : complexité O(n²) incompatible avec 100 000 observations (≈ 10 milliards d'opérations)
 - **Lasso** : 16/16 coefficients réduits à 0 — confirme l'absence totale de signal linéaire
 - **SMOTE vs class_weight** : les deux stratégies confirment qu'aucune ne peut extraire un signal absent
 - **Clustering** : silhouettes ≈ 0.10 (faibles mais attendues sur données synthétiques sans structure causale)
-- **ACP** : 24.3% de variance expliquée en 2D sur 15 dimensions quasi-indépendantes
+- **ACP** : 24.3% de variance expliquée en 2D — forme rectangulaire due aux variables discrètes (`bmi_cat` sur PC1, `hypertension` binaire sur PC2)
 - **Interprétabilité** : divergence entre les 5 méthodes — elle-même un résultat analytique sur données sans signal
+- **Corrélations non-linéaires** : Pearson ≤ 0.01 ; RF/XGBoost (non-linéaires) échouent aussi → absence de signal confirmée même au-delà du linéaire
 
 ---
 
