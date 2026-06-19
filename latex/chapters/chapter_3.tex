@@ -22,18 +22,14 @@ où $k=5$ est la valeur consensus dans la littérature~\cite{james2021}~: avec 8
 
 \textbf{Ce que garantit la validation croisée~:} la CV garantit la \textbf{robustesse de l'estimation} hors-échantillon~--- avec $k=5$ itérations, le résultat $R^2 \approx 0$ n'est pas un artefact du split particulier, mais une estimation stable. En revanche, elle ne garantit pas qu'un signal prédictif existe dans les données~: elle mesure ce signal avec précision, quelle qu'en soit la valeur. Un $R^2 \approx 0$ bien estimé reste $\approx 0$.
 
-\textbf{Métriques d'évaluation}~\cite{james2021}~:
+\textbf{Métriques d'évaluation.} Trois métriques complémentaires~\cite{james2021}~:
 \begin{align}
-R^2 &= 1 - \frac{\sum_{i=1}^{n}(y_i - \hat{y}_i)^2}{\sum_{i=1}^{n}(y_i - \bar{y})^2} \\
-\text{RMSE} &= \sqrt{\frac{1}{n}\sum_{i=1}^{n}(y_i - \hat{y}_i)^2} \\
-\text{MAE} &= \frac{1}{n}\sum_{i=1}^{n}|y_i - \hat{y}_i|
+R^2 &= 1 - \frac{\sum_{i}(y_i - \hat{y}_i)^2}{\sum_{i}(y_i - \bar{y})^2}, \quad
+\text{RMSE} = \sqrt{\frac{1}{n}\sum_{i}(y_i - \hat{y}_i)^2}, \quad
+\text{MAE} = \frac{1}{n}\sum_{i}|y_i - \hat{y}_i|
 \end{align}
 
-où $y_i$ est la valeur observée (cholestérol réel), $\hat{y}_i$ la valeur prédite par le modèle, et $\bar{y}$ la moyenne observée. Ces trois métriques sont complémentaires.
-
-Le $R^2$ répond à la question~: \textbf{"mon modèle prédit-il mieux que la moyenne~?"}~\cite{james2021}. $R^2 = 1$ signifie une prédiction parfaite~; $R^2 = 0$ signifie que le modèle prédit uniquement la moyenne $\bar{y} = 224.3$~mg/dL pour tout le monde, sans utiliser les features~; $R^2 < 0$ signifie que le modèle est \textit{pire} que de prédire la moyenne.
-
-Le RMSE exprime l'erreur en mg/dL en pénalisant les grandes erreurs. Un résultat clé~: le RMSE observé de \textbf{43.33~mg/dL correspond exactement à l'écart-type du cholestérol} dans le dataset (43.3~mg/dL, voir Table~\ref{tab:desc_stats}). Cela signifie que tous les modèles font la même erreur qu'un modèle qui prédirait $\bar{y} = 224.3$~mg/dL pour chaque individu --- ils n'ont rien appris des features. La MAE donne l'erreur absolue moyenne, plus lisible~: ici MAE~$\approx 37.6$~mg/dL signifie que le modèle se trompe en moyenne de 37.6~mg/dL.
+Le $R^2$ mesure si le modèle prédit mieux que la moyenne~: $R^2 = 0$ signifie qu'il prédit $\bar{y}$ pour tout le monde, $R^2 < 0$ qu'il est pire que cette baseline triviale. L'interprétation la plus révélatrice est celle du RMSE~: \textbf{43.33~mg/dL = exactement l'écart-type du cholestérol} dans le dataset (voir Table~\ref{tab:desc_stats}). Un modèle qui prédirait la moyenne $\bar{y} = 224.3$~mg/dL pour chaque individu obtiendrait, par définition, RMSE~$= \sigma_y = 43.3$~mg/dL. C'est exactement ce que font tous nos modèles~: le RMSE ne baisse pas, les features ne réduisent pas l'erreur d'une seule unité.
 
 \subsection{Modèles et justification}
 
@@ -41,35 +37,31 @@ Les six modèles retenus suivent une logique de \textbf{spectre de complexité}~
 
 \textbf{Régression linéaire (baseline)}~: point de référence obligatoire~\cite{james2021}. Si les autres modèles, plus complexes, ne font pas mieux, leur complexité supplémentaire n'est pas justifiée. Ici, c'est exactement ce qu'on observe.
 
-\textbf{Ridge (régularisation $L_2$)}~\cite{hoerl1970}~: la régression linéaire classique minimise uniquement les erreurs de prédiction, ce qui peut mener à des coefficients très grands et instables quand les variables sont peu informatives. Ridge ajoute une pénalité qui bride les coefficients~:
+\textbf{Ridge (régularisation $L_2$)}~\cite{hoerl1970}~:
 \begin{equation}
-\mathcal{L}_{\text{Ridge}} = \sum_{i=1}^{n}(y_i - \hat{y}_i)^2 + \lambda\sum_j w_j^2
+\mathcal{L}_{\text{Ridge}} = \sum_{i}(y_i - \hat{y}_i)^2 + \lambda\sum_j w_j^2
 \end{equation}
-où $\lambda \geq 0$ est le paramètre de régularisation (contrôle la force de la pénalité) et $w_j$ sont les coefficients du modèle. Plus $\lambda$ est grand, plus les coefficients sont réduits vers zéro --- sans jamais les annuler complètement.
+La pénalité $L_2$ bride les coefficients sans les annuler. Résultat~: avec $\lambda = 7197$ (très forte régularisation), les coefficients sont quasi-nuls --- le modèle "apprend" à ignorer toutes les features, cohérent avec l'absence de signal.
 
-\textbf{Lasso (régularisation $L_1$)}~\cite{tibshirani1996}~: similaire à Ridge mais la pénalité sur $|w_j|$ (valeur absolue au lieu du carré) a une propriété remarquable~: elle force certains coefficients \textit{exactement} à zéro, réalisant ainsi une \textbf{sélection automatique de variables}~:
+\textbf{Lasso (régularisation $L_1$)}~\cite{tibshirani1996}~:
 \begin{equation}
-\mathcal{L}_{\text{Lasso}} = \sum_{i=1}^{n}(y_i - \hat{y}_i)^2 + \lambda\sum_j |w_j|
+\mathcal{L}_{\text{Lasso}} = \sum_{i}(y_i - \hat{y}_i)^2 + \lambda\sum_j |w_j|
 \end{equation}
-Résultat observé~: avec $\lambda = 9.54$ (tuné par RandomizedSearchCV), Lasso fixe les \textbf{16 coefficients sur 16 à zéro} --- il prédit simplement la moyenne du cholestérol pour tous les individus, confirmant formellement l'absence de signal prédictif linéaire.
+La pénalité $L_1$ réalise une \textbf{sélection automatique de variables} en forçant exactement certains coefficients à zéro. Résultat~: avec $\lambda = 9.54$, Lasso fixe les \textbf{16 coefficients sur 16 à zéro} --- preuve formelle que aucune des 16 features n'est linéairement prédictive du cholestérol.
 
-\textbf{ElasticNet}~\cite{hastie2009}~: combine les pénalités $L_1$ et $L_2$ via un paramètre de mélange $\rho \in [0, 1]$~:
-\begin{equation}
-\mathcal{L}_{\text{EN}} = \sum_{i=1}^{n}(y_i - \hat{y}_i)^2 + \lambda\left[\rho\sum_j|w_j| + \frac{1-\rho}{2}\sum_j w_j^2\right]
-\end{equation}
-où $\rho = 1$ redonne le Lasso, $\rho = 0$ redonne Ridge. Utile quand on ne sait pas a priori lequel des deux convient mieux.
+\textbf{ElasticNet}~\cite{hastie2009}~: combinaison des pénalités $L_1$ et $L_2$ via un paramètre de mélange $\rho \in [0,1]$, offrant un compromis entre sélection (Lasso) et stabilité (Ridge). Produit ici des résultats identiques.
 
-\textbf{Random Forest}~\cite{breiman2001}~: construit $B$ arbres de décision indépendants, chacun entraîné sur un sous-échantillon aléatoire des données et des variables. La prédiction finale est la moyenne des $B$ arbres~:
+\textbf{Random Forest}~\cite{breiman2001}~: bagging de $B$ arbres de décision, chacun entraîné sur un sous-échantillon aléatoire~:
 \begin{equation}
 \hat{y} = \frac{1}{B}\sum_{b=1}^{B} T_b(\mathbf{x})
 \end{equation}
-où $T_b(\mathbf{x})$ est la prédiction du $b$-ième arbre. Cette approche réduit la variance par rapport à un arbre unique et capture les non-linéarités. J'ai dû contraindre les paramètres~: \texttt{max\_depth=15}, \texttt{max\_samples=0.5}, \texttt{n\_jobs=-1} pour éviter des entraînements de plusieurs heures observés avec les paramètres par défaut (\texttt{max\_depth=None}).
+Contrairement aux méthodes linéaires, RF capture n'importe quelle relation non-linéaire. Son échec ($R^2 \approx 0$) est donc un résultat analytiquement plus fort que celui des méthodes linéaires~: il élimine la possibilité d'une structure non-linéaire dans les données. En pratique, j'ai contraint les paramètres (\texttt{max\_depth=15}, \texttt{max\_samples=0.5}) pour éviter des temps d'entraînement de plusieurs heures observés avec \texttt{max\_depth=None}.
 
-\textbf{XGBoost}~\cite{chen2016}~: contrairement à Random Forest qui construit des arbres en parallèle, XGBoost les construit \textit{séquentiellement}~--- chaque arbre corrige les erreurs du précédent. La prédiction à l'itération $t$ est~:
+\textbf{XGBoost}~\cite{chen2016}~: gradient boosting séquentiel --- chaque arbre $T_t$ corrige les erreurs résiduelles du modèle précédent avec un taux d'apprentissage $\eta$~:
 \begin{equation}
 \hat{y}^{(t)} = \hat{y}^{(t-1)} + \eta \cdot T_t(\mathbf{x})
 \end{equation}
-où $\eta \in (0, 1]$ est le \textit{taux d'apprentissage} (learning rate) qui contrôle la contribution de chaque arbre, et $T_t(\mathbf{x})$ est l'arbre ajouté à l'itération $t$.
+XGBoost est généralement plus performant que RF sur données tabulaires~\cite{grinsztajn2022}. Ici, $R^2 = 0.0001$ (tuné) contre $R^2 = -0.005$ pour RF non-contraint~: une nuance sans signification pratique.
 
 \textbf{Tuning par RandomizedSearchCV}~\cite{bergstra2012}~: les hyperparamètres ($\lambda$, \texttt{max\_depth}, \texttt{learning\_rate}\ldots) ne peuvent pas être appris depuis les données~--- ils doivent être fixés avant l'entraînement. "Tuné" signifie que leur valeur optimale a été trouvée \textit{automatiquement} par RandomizedSearchCV~: à chaque itération, une combinaison aléatoire d'hyperparamètres est tirée et évaluée par validation croisée. Avec \texttt{n\_iter=20}, on explore 20 combinaisons aléatoires --- beaucoup plus rapide que GridSearch qui testerait toutes les combinaisons possibles, tout en couvrant suffisamment l'espace des paramètres~\cite{bergstra2012}.
 
@@ -114,26 +106,22 @@ On cherche à prédire si un individu est à risque de maladie (\texttt{disease\
 
 \textbf{Pourquoi 20~000 individus dans le jeu de test~?} Le jeu de test correspond au split 80/20~: 20\% de 100~000 = 20~000 individus. Ces individus n'ont jamais été vus pendant l'entraînement ni pendant le tuning des hyperparamètres. Toutes les matrices de confusion et métriques (AUC, F1, accuracy) sont calculées sur ces 20~000 observations~--- l'estimation de performance est donc non biaisée.
 
-\textbf{Gestion du déséquilibre}~: j'ai comparé deux stratégies. L'ajustement des poids de classe pénalise davantage les erreurs sur la classe minoritaire~\cite{japkowicz2002}~:
-\begin{equation}
-w_k = \frac{n}{K \cdot n_k}
-\end{equation}
-où $n$ est le nombre total d'observations, $K$ le nombre de classes et $n_k$ le nombre d'observations dans la classe $k$. SMOTE~\cite{chawla2002} crée synthétiquement de nouveaux exemples minoritaires par interpolation~: $\mathbf{x}_{\text{new}} = \mathbf{x}_i + \lambda(\mathbf{x}_{\text{voisin}} - \mathbf{x}_i)$, où $\lambda \in [0,1]$ est tiré aléatoirement. Le but est de rééquilibrer les classes pour que le modèle voie autant d'exemples des deux classes. Les deux approches sont comparées dans ce projet.
+\textbf{Gestion du déséquilibre}~: j'ai comparé deux stratégies. L'ajustement des poids (\texttt{class\_weight='balanced'}) pénalise davantage les erreurs sur la classe minoritaire sans modifier les données~\cite{japkowicz2002}. SMOTE~\cite{chawla2002} crée synthétiquement de nouveaux exemples minoritaires par interpolation entre observations existantes, rééquilibrant les classes au niveau des données. Les deux approches sont comparées.
 
 \textbf{Résultat et conclusion sur SMOTE~:} ni SMOTE ni l'ajustement des poids n'améliorent les performances (AUC reste $\approx 0.5$). Ce résultat confirme que le problème provient de l'\textbf{absence totale de signal}, pas du déséquilibre des classes~: SMOTE génère de nouveaux exemples minoritaires, mais ces exemples synthétiques ont les mêmes valeurs de features que les exemples majoritaires~--- il ne peut pas créer un signal qui n'existe pas dans les données.
 
 \subsection{Métriques d'évaluation}
 
-\begin{align}
-\text{Précision} &= \frac{TP}{TP+FP}, \quad \text{Rappel} = \frac{TP}{TP+FN} \\
-\text{F1-score} &= \frac{2 \times \text{Précision} \times \text{Rappel}}{\text{Précision} + \text{Rappel}}
-\end{align}
+Les métriques de classification retenues~\cite{sokolova2009}~:
 
-où $TP$ (vrais positifs), $FP$ (faux positifs) et $FN$ (faux négatifs) sont issus de la matrice de confusion. La \textbf{précision} mesure la proportion de prédictions "à risque" qui sont réellement à risque~; le \textbf{rappel} mesure la proportion d'individus réellement à risque qui ont bien été détectés. Le \textbf{F1-score} est leur moyenne harmonique~: utile quand les deux comptent également.
+\begin{equation}
+\text{Précision} = \frac{TP}{TP+FP}, \qquad \text{Rappel} = \frac{TP}{TP+FN}, \qquad
+\text{F1} = \frac{2 \cdot \text{Précision} \cdot \text{Rappel}}{\text{Précision} + \text{Rappel}}
+\end{equation}
 
-La courbe \textbf{ROC} trace le taux de vrais positifs en fonction du taux de faux positifs pour tous les seuils de décision. L'\textbf{AUC-ROC}~\cite{james2021} synthétise cette courbe en un seul chiffre~: AUC = 1 = discrimination parfaite, AUC = 0.5 = tirage aléatoire (aucun pouvoir discriminant).
+Le choix de la métrique principale est ici non trivial. L'accuracy (75\% pour un modèle naïf) est trompeuse sur données déséquilibrées~\cite{japkowicz2002}. Le F1-score pénalise également les faux positifs et les faux négatifs --- utile, mais ne rend pas compte du classement des individus par probabilité de risque. L'\textbf{AUC-ROC}~\cite{james2021} est la métrique centrale~: elle mesure la capacité à ordonner correctement les individus (un malade a-t-il un score supérieur à un non-malade~?) indépendamment du seuil de décision. AUC~$= 0.5$ = hasard pur, AUC~$= 1$ = discrimination parfaite.
 
-\textbf{Note sur le SVM~:} le SVM a été écarté en raison de sa \textbf{complexité algorithmique}. La complexité d'un algorithme décrit comment son temps de calcul augmente avec la taille des données $n$. Le SVM nécessite de calculer des distances entre paires d'observations, ce qui donne une complexité en $\mathcal{O}(n^2)$ à $\mathcal{O}(n^3)$~: doubler $n$ multiplie le temps par 4 (voire 8). Concrètement~: sur 5~000 individus, l'entraînement prend quelques secondes. Sur 100~000 individus, le même calcul représenterait $100^2 = 10~000$ fois plus d'opérations, soit plusieurs heures sans infrastructure dédiée. Un test sur 5~000 individus a confirmé des performances similaires aux autres modèles (AUC~$\approx 0.5$)~: l'exclure ne prive pas l'analyse de résultats utiles.
+\textbf{Note sur le SVM~:} le SVM a été écarté pour sa complexité $\mathcal{O}(n^2)$ à $\mathcal{O}(n^3)$, incompatible avec 100~000 observations sans infrastructure dédiée. Un test sur 5~000 individus a confirmé AUC~$\approx 0.5$~: son exclusion ne prive pas l'analyse d'un résultat différenciant.
 
 \textbf{Note sur le classifieur naïf de Bayes~:} fondé sur l'hypothèse d'indépendance conditionnelle des variables étant donné la classe~\cite{james2021}, ce classifieur est précisément adapté à notre dataset~--- les variables ont justement été générées indépendamment. Son absence constitue une \textbf{limite du choix de modèles}~: il aurait été pertinent de l'inclure, et l'on anticipe un résultat identique (AUC~$\approx 0.5$), l'absence de signal ne dépendant pas du classifieur choisi.
 

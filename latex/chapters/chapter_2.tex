@@ -8,13 +8,6 @@ Le jeu de données contient \textbf{100~000 observations} décrites par \textbf{
 
 \subsection{Statistiques descriptives}
 
-Pour chaque variable continue $X = \{x_1, \ldots, x_n\}$ avec $n = 100\,000$, j'ai calculé la moyenne et l'écart-type~\cite{james2021}~:
-
-\begin{equation}
-\bar{x} = \frac{1}{n}\sum_{i=1}^{n} x_i, \qquad
-s = \sqrt{\frac{1}{n-1}\sum_{i=1}^{n}(x_i - \bar{x})^2}
-\end{equation}
-
 \begin{table}[h]
 \centering
 \caption{Statistiques descriptives des variables continues}
@@ -40,13 +33,7 @@ Variable & Moyenne & Écart-type & Min & Max \\
 
 \subsection{Distribution des variables}
 
-Le coefficient d'asymétrie (\textit{skewness}) mesure la symétrie d'une distribution~\cite{james2021}~:
-
-\begin{equation}
-\text{Skew}(X) = \frac{1}{n}\sum_{i=1}^{n}\left(\frac{x_i - \bar{x}}{s}\right)^3
-\end{equation}
-
-Je l'utilise pour décider si une transformation est nécessaire avant modélisation~: une distribution très asymétrique (skewness $> 1$ par exemple) peut biaiser les modèles linéaires et nécessite souvent une transformation logarithmique pour être "redressée". Ici, toutes les variables continues affichent un skewness inférieur à $|0.02|$~: distributions \textbf{quasi-uniformes}, ce qui s'explique directement par la génération synthétique aléatoire des données~\cite{chawla2002}. Aucune transformation n'est donc nécessaire.
+Toutes les variables continues affichent un skewness inférieur à $|0.02|$ --- distributions \textbf{quasi-uniformes}, signature directe de la génération synthétique aléatoire. Une distribution réelle de l'IMC ou du cholestérol présenterait une asymétrie droite (valeurs extrêmes plus fréquentes vers le haut), ce qui nécessiterait une transformation logarithmique avant modélisation. L'absence d'asymétrie ici est donc un premier signal de la nature artificielle des données, pas une propriété favorable de la population.
 
 \begin{figure}[h]
 \centering
@@ -65,13 +52,6 @@ La variable cible présente un \textbf{déséquilibre des classes} (\textit{clas
 \end{figure}
 
 \subsection{Analyse des corrélations}
-
-Le coefficient de corrélation de Pearson entre deux variables $X$ et $Y$~\cite{james2021}~:
-
-\begin{equation}
-r_{XY} = \frac{\sum_{i=1}^{n}(x_i - \bar{x})(y_i - \bar{y})}
-{\sqrt{\sum_{i=1}^{n}(x_i-\bar{x})^2 \cdot \sum_{i=1}^{n}(y_i-\bar{y})^2}}
-\end{equation}
 
 \begin{figure}[h]
 \centering
@@ -114,11 +94,7 @@ Classe cible & Déséquilibrée (75/25) & Utiliser F1-score, AUC-ROC, SMOTE \\
 \end{tabular}
 \end{table}
 
-\textbf{Méthode IQR pour la détection des outliers.} L'\textit{Interquartile Range} (écart interquartile) est la méthode standard de détection des valeurs aberrantes~\cite{james2021}. On calcule $Q_1$ (25\textsuperscript{e} percentile) et $Q_3$ (75\textsuperscript{e} percentile), puis~:
-\begin{equation}
-\text{IQR} = Q_3 - Q_1
-\end{equation}
-Tout point en dehors de l'intervalle $[Q_1 - 1{,}5 \times \text{IQR}\ ;\ Q_3 + 1{,}5 \times \text{IQR}]$ est considéré comme un outlier. Par exemple, pour \texttt{bmi}~: $Q_1 = 23{,}5$, $Q_3 = 34{,}5$, IQR $= 11$ → borne basse $= 7$, borne haute $= 51$. Toutes les valeurs de \texttt{bmi} (18 à 40) restent dans cet intervalle~: aucun outlier détecté. Ce résultat est cohérent sur l'ensemble des variables, ce qui confirme la régularité artificielle d'un dataset synthétique.
+\textbf{Méthode IQR pour la détection des outliers.} La règle $\pm 1.5 \times \text{IQR}$ appliquée à chaque variable continue ne détecte aucun outlier. Là encore, ce résultat s'explique par la génération synthétique~: toutes les valeurs se distribuent uniformément entre un minimum et un maximum fixés, sans queue de distribution. Sur des données réelles, des cas extrêmes (IMC~> 45, cholestérol~> 350~mg/dL) apparaîtraient systématiquement et nécessiteraient une décision explicite de traitement ou de conservation~\cite{james2021}.
 
 \section{Feature Engineering et préparation des données}
 

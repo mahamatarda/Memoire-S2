@@ -66,3 +66,39 @@ Les \textbf{méthodes post-hoc} s'appliquent après l'entraînement, sur n'impor
 où $F$ est l'ensemble des variables, $S$ un sous-ensemble ne contenant pas $j$, et $f(S)$ la prédiction du modèle avec uniquement les variables de $S$. Pour chaque individu, SHAP produit un score signé par variable~: positif si la variable pousse vers le risque, négatif sinon.
 
 Dans ce projet, je l'utilise comme \textbf{complément visuel}, aux côtés des feature importances (Random Forest, XGBoost) et des coefficients de la régression logistique --- qui restent les interprétations principales.
+
+\section{Approches récentes et limites de l'état de l'art (2020--2024)}
+
+Les méthodes présentées dans les sections précédentes --- régression régularisée, forêts aléatoires, XGBoost, K-Means --- constituent l'outillage classique du ML appliqué à la santé. Elles restent pertinentes et largement utilisées sur des données tabulaires structurées. Cependant, le paysage du machine learning en santé a connu des transformations profondes depuis 2020, qu'il est nécessaire de situer.
+
+\subsection{Transformers et modèles d'attention en santé}
+
+Les architectures \textit{transformer}~\cite{vaswani2017} --- initialement développées pour le traitement du langage naturel --- ont été adaptées au domaine médical avec des résultats notables. \textbf{ClinicalBERT}~\cite{alsentzer2019} et ses variantes sont entraînés sur des millions de notes cliniques et permettent d'extraire de l'information structurée à partir de textes médicaux non structurés, un verrou majeur en santé numérique. En imagerie médicale, les \textit{Vision Transformers} (ViT) rivalisent désormais avec les réseaux convolutifs (CNN) sur des tâches de classification radiologique~\cite{rajpurkar2022}.
+
+L'avantage fondamental des transformers réside dans leur mécanisme d'\textit{attention}~: le modèle apprend à pondérer dynamiquement les relations entre tous les éléments d'une entrée, sans hypothèse de localité (contrairement aux CNN) ni de séquentialité stricte (contrairement aux LSTM). Sur des données tabulaires hétérogènes --- mêlant variables continues, binaires et catégorielles comme dans notre dataset --- des architectures comme \textbf{TabTransformer}~\cite{huang2020} ou \textbf{FT-Transformer}~\cite{gorishniy2021} montrent des gains par rapport aux méthodes ensemblistes classiques, bien que XGBoost reste compétitif sur de nombreux benchmarks~\cite{grinsztajn2022}.
+
+\subsection{Foundation models et intelligence artificielle généraliste en médecine}
+
+Une rupture plus profonde est l'émergence des \textit{foundation models} --- de très grands modèles pré-entraînés sur des corpus massifs, adaptables à de nombreuses tâches par \textit{fine-tuning}. \textbf{Med-PaLM}~\cite{singhal2023} (Google, 2022) et \textbf{GPT-4}~\cite{openai2023} atteignent des niveaux de performance comparables à des cliniciens sur des questions médicales standardisées (USMLE). \textbf{BioMedLM}~\cite{bolton2022} est entraîné spécifiquement sur la littérature biomédicale PubMed.
+
+Ces modèles posent cependant des questions critiques~: leur performance sur des benchmarks académiques ne garantit pas leur fiabilité en contexte clinique réel, où les erreurs peuvent avoir des conséquences graves~\cite{singhal2023}. La question de la calibration --- est-ce que la confiance exprimée par le modèle reflète sa vraie précision~? --- reste ouverte, et constitue un enjeu de recherche actif.
+
+\subsection{Apprentissage fédéré~: apprendre sans centraliser les données}
+
+Le \textbf{federated learning}~\cite{rieke2020} est une approche distribuée où les modèles sont entraînés localement sur chaque institution (hôpital, cabinet), et seuls les gradients --- jamais les données brutes --- sont agrégés sur un serveur central. Cette architecture répond directement aux contraintes du RGPD~\cite{rgpd2016} et à la sensibilité des données de santé~: une donnée patient ne quitte jamais l'établissement qui la détient.
+
+En pratique, le federated learning introduit des défis propres~: la distribution des données peut différer entre institutions (\textit{non-IID setting}), ce qui complique la convergence du modèle agrégé. Des travaux comme FedAvg~\cite{mcmahan2017} et ses extensions abordent cette hétérogénéité. Dans le cadre de ce projet, les données sont centralisées et synthétiques~; mais toute transposition à des données épidémiologiques réelles multi-sites nécessiterait de considérer cette architecture.
+
+\subsection{Apprentissage causal~: aller au-delà de la corrélation}
+
+La limite fondamentale des méthodes de ML classiques --- y compris celles utilisées dans ce projet --- est qu'elles modélisent des \textbf{corrélations}, pas des \textbf{relations causales}. Or, en santé, la question qui importe est rarement "est-ce que A est corrélé à B~?" mais "est-ce que A cause B~?", et surtout "si on intervient sur A, qu'arrive-t-il à B~?".
+
+L'\textbf{inférence causale}~\cite{pearl2009} et l'\textbf{apprentissage causal}~\cite{scholkopf2021} répondent à cette question en modélisant explicitement des graphes causaux (\textit{DAG --- Directed Acyclic Graphs}) et en raisonnant sur des interventions ou des contrefactuels. Ces approches sont particulièrement pertinentes en épidémiologie~: identifier les vrais facteurs de risque d'une maladie chronique (et non de simples marqueurs corrélés) nécessite une modélisation causale.
+
+Dans le contexte de ce projet, l'absence de structure causale dans les données synthétiques est précisément ce qui rend toute inférence impossible~: les variables ont été générées indépendamment, il n'existe donc aucun graphe causal sous-jacent à découvrir. Ce constat renforce l'intérêt d'un dataset réel pour une étude de suivi.
+
+\subsection{Positionnement de ce projet dans l'état de l'art}
+
+Les méthodes mobilisées dans ce mémoire --- régression régularisée, méthodes ensemblistes, clustering, SHAP --- constituent une base solide et reconnue pour une première exploration de données tabulaires de santé. Elles permettent d'établir des \textit{baselines} interprétables et reproductibles, indispensables avant d'envisager des approches plus complexes.
+
+L'apport de ce projet n'est pas de surpasser l'état de l'art, mais de construire un \textbf{pipeline de diagnostic rigoureux} : détection du data leakage, identification des biais du dataset, validation croisée stratifiée, comparaison multi-méthodes d'interprétabilité. Ce pipeline est directement transposable à des données réelles, où les méthodes récentes (federated learning, apprentissage causal) prendront tout leur sens.

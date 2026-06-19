@@ -8,13 +8,7 @@ Le clustering est une méthode d'\textbf{apprentissage non supervisé}~: il n'y 
 
 \subsection{Préparation des données}
 
-Les 15 variables explicatives sont standardisées (z-score) avant d'appliquer les algorithmes. K-Means et CAH reposent sur la \textbf{distance euclidienne}~\cite{macqueen1967}~:
-\begin{equation}
-d(\mathbf{x}, \mathbf{y}) = \sqrt{\sum_{j=1}^{p}(x_j - y_j)^2}
-\end{equation}
-où $p$ est le nombre de variables (ici $p=15$), et $x_j$, $y_j$ sont les valeurs de la $j$-ième variable pour les individus $\mathbf{x}$ et $\mathbf{y}$.
-
-Cette distance est sensible aux échelles~: sans standardisation, \texttt{daily\_steps} (valeurs jusqu'à 20~000) dominerait \texttt{sleep\_hours} (valeurs entre 3 et 10) même si les deux variables sont médicalement aussi importantes --- la distance serait quasiment déterminée par \texttt{daily\_steps} seul, et le clustering ignorerait les autres variables~\cite{hastie2009}. Le z-score ramène chaque variable à une moyenne de 0 et un écart-type de 1, garantissant une contribution équitable de toutes les dimensions.
+Les 15 variables explicatives sont standardisées (z-score) avant d'appliquer les algorithmes. K-Means et CAH reposent sur la \textbf{distance euclidienne}~\cite{macqueen1967}~: sans standardisation, \texttt{daily\_steps} (valeurs jusqu'à 20~000) dominerait mécaniquement \texttt{sleep\_hours} (3 à 10), et le clustering serait réduit à une partition par cette seule variable. Le z-score garantit une contribution équitable de chacune des 15 dimensions~\cite{hastie2009}.
 
 La CAH étant de complexité $\mathcal{O}(n^2)$ (voir note sur le SVM au chapitre~3), elle est appliquée sur un sous-échantillon aléatoire de \textbf{5~000 individus} pour rester dans des temps de calcul raisonnables.
 
@@ -60,11 +54,7 @@ $k=3$ maximise la silhouette et correspond au coude de la courbe d'inertie. \tex
 
 \subsection{K-Means}
 
-L'algorithme K-Means~\cite{macqueen1967} alterne deux étapes~: affectation de chaque individu au centroïde le plus proche (selon la distance euclidienne), puis mise à jour de chaque centroïde comme la moyenne de ses membres~:
-\begin{equation}
-\boldsymbol{\mu}_j = \frac{1}{|C_j|}\sum_{\mathbf{x} \in C_j} \mathbf{x}
-\end{equation}
-où $|C_j|$ est le nombre d'individus dans le cluster $j$. Ces deux étapes se répètent jusqu'à convergence (stabilisation des affectations).
+L'algorithme K-Means~\cite{macqueen1967} alterne affectation au centroïde le plus proche et mise à jour des centroïdes~: $\boldsymbol{\mu}_j = \frac{1}{|C_j|}\sum_{\mathbf{x} \in C_j} \mathbf{x}$, jusqu'à convergence.
 
 \begin{table}[h]
 \centering
@@ -89,11 +79,11 @@ Cluster & Taille & IMC moyen & Syst. (mmHg) & Profil \\
 
 La CAH construit un \textbf{dendrogramme} en fusionnant progressivement les clusters les plus proches. Au départ, chaque individu est son propre cluster~; à chaque étape, on fusionne les deux clusters dont la fusion est la "moins coûteuse"~\cite{hastie2009}.
 
-La \textbf{méthode de liaison Ward} définit ce coût~: fusionner $A$ et $B$ augmente la variance intra-cluster d'une quantité~:
+La \textbf{méthode de liaison Ward} définit le coût de fusion de $A$ et $B$ comme l'augmentation de variance intra-cluster~:
 \begin{equation}
 \Delta(A, B) = \frac{|A|\cdot|B|}{|A|+|B|}\|\boldsymbol{\mu}_A - \boldsymbol{\mu}_B\|^2
 \end{equation}
-où $|A|$ et $|B|$ sont les tailles des clusters, et $\boldsymbol{\mu}_A$, $\boldsymbol{\mu}_B$ leurs centroïdes. On fusionne toujours les deux clusters qui minimisent $\Delta$~: Ward favorise ainsi des clusters \textbf{compacts et de tailles équilibrées}, contrairement à d'autres méthodes (liaison simple, liaison complète) qui peuvent produire des clusters très déséquilibrés.
+Ward minimise ce coût à chaque étape, favorisant des clusters \textbf{compacts et équilibrés}~--- d'où sa sensibilité aux sous-groupes comportementaux homogènes dans nos données.
 
 \begin{table}[h]
 \centering
@@ -165,11 +155,7 @@ Cette section pose une question précise~: \textbf{les outils d'interprétabilit
 
 \textbf{Coefficients des modèles linéaires}~: un coefficient $w_j > 0$ indique qu'une augmentation de la variable $j$ est associée à une augmentation de la prédiction~\cite{james2021}. Leur magnitude reflète l'importance relative de chaque variable --- sous réserve que les variables soient standardisées.
 
-\textbf{Feature Importance (impureté de Gini)}~\cite{breiman2001}~: pour les forêts aléatoires, l'importance de la variable $j$ mesure la réduction moyenne d'impureté qu'elle apporte dans tous les nœuds où elle est utilisée~:
-\begin{equation}
-\text{FI}(j) = \sum_{t \in \mathcal{T}_j}\frac{n_t}{n}\left[I(t) - \frac{n_{t_L}}{n_t}I(t_L) - \frac{n_{t_R}}{n_t}I(t_R)\right]
-\end{equation}
-où $\mathcal{T}_j$ est l'ensemble des nœuds qui utilisent la variable $j$, $n_t$ le nombre d'observations au nœud $t$, $n$ l'effectif total, $I(t)$ l'impureté au nœud $t$ (critère de Gini), et $t_L$, $t_R$ les nœuds fils gauche et droit.
+\textbf{Feature Importance (impureté de Gini)}~\cite{breiman2001}~: pour les forêts aléatoires, l'importance de la variable $j$ agrège la réduction d'impureté de Gini qu'elle apporte à travers tous les nœuds de tous les arbres. Plus une variable est utilisée haut dans les arbres pour des décisions qui séparent bien les classes, plus son importance est élevée. La limite connue de cet indicateur~: il favorise les variables à haute cardinalité ou grande variance --- ce qui, dans notre cas, explique que \texttt{systolic\_bp} domine systématiquement.
 
 \textbf{SHAP}~: défini au chapitre~1 (formule des valeurs de Shapley) et utilisé ici comme complément visuel, il attribue à chaque variable une contribution signée à chaque prédiction individuelle. Les formules ne sont pas redéfinies ici.
 
