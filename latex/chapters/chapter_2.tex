@@ -63,9 +63,17 @@ La variable cible présente un \textbf{déséquilibre des classes} (\textit{clas
 \begin{quote}
 \textbf{Résultat central~:} Les corrélations calculées sur le dataset (notebook 01\_EDA) sont toutes inférieures à $|0.01|$. La variable la plus corrélée avec \texttt{disease\_risk} est \texttt{resting\_hr} avec $r = 0.01$ --- statistiquement non significatif sur 100~000 individus. Cela confirme que la variable cible a été générée indépendamment des autres variables.
 
-\textbf{Limites de la corrélation de Pearson et exploration non-linéaire.} La corrélation de Pearson ne détecte que les relations \textit{linéaires}~: deux variables peuvent être fortement liées de façon non-linéaire (relation en U, effet seuil, interaction) avec Pearson~$= 0$. Face à ce constat, plusieurs approches complémentaires auraient pu être mobilisées~: le \textbf{coefficient de Spearman} (corrélation des rangs, capte les relations monotones non-linéaires), la \textbf{mutual information} (\texttt{mutual\_info\_classif} dans scikit-learn, mesure toute dépendance statistique quelle que soit sa forme), et des \textbf{nuages de points} (\textit{scatter plots} ou \textit{pairplot}) pour visualiser visuellement d'éventuelles structures non-linéaires.
+\textbf{Au-delà de Pearson~: trois analyses complémentaires.} Pearson ne détecte que les relations \textit{linéaires}. Trois approches ont été appliquées pour explorer les dépendances non-linéaires~:
 
-Toutefois, l'utilisation de \textbf{Random Forest et XGBoost} dans les chapitres suivants constitue une réponse plus directe à cette question~: ces algorithmes sont capables de capturer \textit{n'importe quelle} relation non-linéaire, y compris des interactions d'ordre élevé~\cite{breiman2001}. Leur échec ($R^2 \approx 0$, AUC~$\approx 0.5$) démontre que même les dépendances non-linéaires sont absentes~--- résultat plus fort qu'un test de Spearman, car il exploite toute la puissance des méthodes ensemblistes. En pratique, même ces méthodes échouent ici~--- ce qui confirme l'absence totale de signal, linéaire comme non-linéaire.
+\begin{enumerate}
+  \item \textbf{Corrélation de Spearman} (corrélation des rangs)~: capte toute relation monotone non-linéaire. Résultat~: corrélations de Spearman inférieures à $|0.01|$ pour toutes les paires, identiques aux corrélations de Pearson (Figure~\ref{fig:pearson_vs_spearman}). Aucune relation monotone non-linéaire n'est présente.
+
+  \item \textbf{Information Mutuelle} (\texttt{mutual\_info\_classif} / \texttt{mutual\_info\_regression} de scikit-learn)~: mesure \textit{toute} dépendance statistique, quelle que soit sa forme. Résultat~: MI~$\approx 0$ pour toutes les features vis-à-vis de \texttt{disease\_risk} et de \texttt{cholesterol} (Figure~\ref{fig:mutual_information}). Aucune dépendance, même non-linéaire, non-monotone, ou de type interaction.
+
+  \item \textbf{Nuages de points et tests non-paramétriques}~: les scatter plots (Figure~\ref{fig:scatter_chol}) montrent des nuages uniformes sans structure visible. Le test de Mann-Whitney U (non-paramétrique, sans hypothèse de normalité) confirme des différences négligeables entre groupes~: taille d'effet $r < 0.01$ pour toutes les variables.
+\end{enumerate}
+
+Ces trois analyses convergent avec les résultats des modèles non-linéaires (Random Forest, XGBoost, chapitres suivants)~: l'absence de signal est robuste, quelle que soit la méthode utilisée pour le chercher~\cite{breiman2001}.
 \end{quote}
 
 \begin{figure}[h]
@@ -73,6 +81,34 @@ Toutefois, l'utilisation de \textbf{Random Forest et XGBoost} dans les chapitres
 \includegraphics[width=0.75\textwidth]{correlations_target.png}
 \caption{Corrélations de chaque variable avec la cible \texttt{disease\_risk}}
 \label{fig:corr_target}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{pearson_vs_spearman.png}
+\caption{Pearson vs Spearman sur \texttt{disease\_risk} et \texttt{cholesterol} --- les deux méthodes donnent des valeurs quasi-nulles}
+\label{fig:pearson_vs_spearman}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{mutual_information.png}
+\caption{Information Mutuelle des features avec \texttt{disease\_risk} et \texttt{cholesterol} --- MI~$\approx 0$ confirme l'absence de toute dépendance statistique}
+\label{fig:mutual_information}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{scatter_vs_cholesterol.png}
+\caption{Nuages de points~: variables vs \texttt{cholesterol} (n=5~000) --- la ligne de tendance est quasi-plate pour toutes les variables}
+\label{fig:scatter_chol}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{boxplots_by_risk.png}
+\caption{Distribution des variables selon \texttt{disease\_risk}~: les deux groupes sont quasi-indiscernables}
+\label{fig:boxplots_risk}
 \end{figure}
 
 \subsection{Bilan de l'EDA}
