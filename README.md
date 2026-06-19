@@ -32,7 +32,7 @@ Le PDF compilé est disponible dans ce dépôt : [`latex/Memoire_M1_ARDACHAM_Mah
 
 - [`Support Mahamat - Memoire.pdf`](Support%20Mahamat%20-%20Memoire.pdf) — Présentation 28 slides (PDF)
 - [`Support Mahamat - Memoire.pptx`](Support%20Mahamat%20-%20Memoire.pptx) — Présentation modifiable (PPTX)
-- [`script_oral_complet.txt`](script_oral_complet.txt) — Script oral intégral : Partie A (15 min slide par slide) + Partie B (36 Q&R thématiques)
+- [`script_oral_complet.txt`](script_oral_complet.txt) — Script oral intégral : Partie A (15 min slide par slide) + Partie B (48 Q&R thématiques)
 
 ---
 
@@ -42,7 +42,7 @@ Le PDF compilé est disponible dans ce dépôt : [`latex/Memoire_M1_ARDACHAM_Mah
 Memoire/
 ├── Support Mahamat - Memoire.pdf     # Présentation soutenance (28 slides)
 ├── Support Mahamat - Memoire.pptx    # Présentation modifiable
-├── script_oral_complet.txt           # Script oral + 36 Q&R
+├── script_oral_complet.txt           # Script oral + 48 Q&R
 ├── notebooks/
 │   ├── 01_EDA.ipynb                  # Analyse exploratoire
 │   ├── 02_feature_engineering.ipynb  # Encodage, variables métier, standardisation
@@ -53,16 +53,16 @@ Memoire/
 ├── latex/
 │   ├── Memoire_M1_ARDACHAM_Mahamat_Teguene_2026.tex   # Document principal
 │   ├── Memoire_M1_ARDACHAM_Mahamat_Teguene_2026.pdf   # PDF compilé (tectonic)
-│   ├── references.bib                # 25 sources bibliographiques
+│   ├── references.bib                # ~40 sources bibliographiques
 │   ├── front_page.tex
 │   ├── chapters/
 │   │   ├── abstract.tex              # Résumé
 │   │   ├── introduction.tex          # Introduction + Contexte (data science + métier)
-│   │   ├── chapter_1.tex             # État de l'art (ML santé, SMOTE, SHAP)
+│   │   ├── chapter_1.tex             # État de l'art (ML santé, SMOTE, SHAP) + approches récentes 2020+ (transformers, foundation models, federated learning, causal ML)
 │   │   ├── chapter_2.tex             # EDA + Feature engineering
 │   │   ├── chapter_3.tex             # Régression + Classification
 │   │   ├── chapter_4.tex             # Clustering + Interprétabilité
-│   │   ├── chapter_5.tex             # Méthodologie, retour d'expérience, perspectives
+│   │   ├── chapter_5.tex             # Méthodologie, biais éthiques, retour d'expérience, perspectives
 │   │   ├── conclusion.tex
 │   │   ├── abbreviations.tex
 │   │   ├── lexique.tex
@@ -103,6 +103,8 @@ Memoire/
 - **ACP** : 24.3% de variance expliquée en 2D — forme rectangulaire due aux variables discrètes (`bmi_cat` sur PC1, `hypertension` binaire sur PC2)
 - **Interprétabilité** : divergence entre les 5 méthodes — elle-même un résultat analytique sur données sans signal
 - **Corrélations non-linéaires** : Pearson ≤ 0.01 ; RF/XGBoost (non-linéaires) échouent aussi → absence de signal confirmée même au-delà du linéaire
+- **Approches récentes (2020+)** : état de l'art étendu aux transformers en santé (ClinicalBERT, TabTransformer), foundation models (Med-PaLM, BioMedLM), federated learning (FedAvg) et apprentissage causal (Pearl, Schölkopf)
+- **Biais et enjeux éthiques** : 4 biais identifiés — représentation (synthétique ≠ réel), conception (absence de structure causale), fairness algorithmique (Obermeyer 2019), risques de déploiement (AUC=0.5 avec illusion scientifique)
 
 ---
 
