@@ -6,7 +6,12 @@
 
 On cherche à prédire le taux de cholestérol (\texttt{cholesterol}, en mg/dL) à partir des habitudes de vie et indicateurs biologiques. Ce choix est médicalement motivé~: le cholestérol est un facteur de risque cardiovasculaire reconnu~\cite{ncep2002}.
 
-\textbf{Variables utilisées pour la prédiction.} Le dataset final compte 18 variables. Pour la régression, 16 d'entre elles servent de features (18 totales $-$ \texttt{cholesterol} qui est la cible $-$ \texttt{disease\_risk} non pertinente ici)~: \texttt{age}, \texttt{bmi}, \texttt{daily\_steps}, \texttt{sleep\_hours}, \texttt{water\_intake\_l}, \texttt{calories\_consumed}, \texttt{smoker}, \texttt{alcohol}, \texttt{resting\_hr}, \texttt{systolic\_bp}, \texttt{diastolic\_bp}, \texttt{family\_history}, \texttt{gender\_enc}, \texttt{bmi\_cat}, \texttt{hypertension}, \texttt{lifestyle\_score}. La variable \texttt{cholesterol} est la cible (exclue des features), \texttt{disease\_risk} n'est pas pertinente ici, et \texttt{hypercholesterol} est exclue pour la raison suivante.
+\textbf{Variables utilisées pour la prédiction.} Pour la régression, 16 des 18 variables servent de features (\texttt{cholesterol} est la cible, \texttt{disease\_risk} non pertinente ici)~:
+\begin{center}
+\texttt{age}, \texttt{bmi}, \texttt{daily\_steps}, \texttt{sleep\_hours}, \texttt{water\_intake\_l}, \texttt{calories\_consumed}, \texttt{smoker}, \texttt{alcohol},\\
+\texttt{resting\_hr}, \texttt{systolic\_bp}, \texttt{diastolic\_bp}, \texttt{family\_history}, \texttt{gender\_enc}, \texttt{bmi\_cat}, \texttt{hypertension}, \texttt{lifestyle\_score}.
+\end{center}
+La variable \texttt{hypercholesterol} est exclue pour la raison suivante.
 
 \textbf{Note sur le data leakage~:} la variable \texttt{hypercholesterol} ($= 1$ si cholestérol $> 200$~mg/dL) a été créée temporairement dans ce notebook pour démontrer l'effet du leakage. Elle est directement dérivée de la variable cible~: l'inclure comme feature revient à donner la réponse au modèle pendant l'entraînement~--- c'est un \textit{data leakage}~\cite{kaufman2012} qui gonfle artificiellement le $R^2$ à 0.675. Une fois retirée, le $R^2$ chute à $\approx 0$ pour tous les modèles. Cette variable n'a été utilisée dans aucun autre notebook.
 
@@ -63,11 +68,13 @@ Contrairement aux méthodes linéaires, RF capture n'importe quelle relation non
 \end{equation}
 XGBoost est généralement plus performant que RF sur données tabulaires~\cite{grinsztajn2022}. Ici, $R^2 = 0.0001$ (tuné) contre $R^2 = -0.005$ pour RF non-contraint~: une nuance sans signification pratique.
 
-\textbf{Tuning par RandomizedSearchCV}~\cite{bergstra2012}~: les hyperparamètres ($\lambda$, \texttt{max\_depth}, \texttt{learning\_rate}\ldots) ne peuvent pas être appris depuis les données~--- ils doivent être fixés avant l'entraînement. "Tuné" signifie que leur valeur optimale a été trouvée \textit{automatiquement} par RandomizedSearchCV~: à chaque itération, une combinaison aléatoire d'hyperparamètres est tirée et évaluée par validation croisée. Avec \texttt{n\_iter=20}, on explore 20 combinaisons aléatoires --- beaucoup plus rapide que GridSearch qui testerait toutes les combinaisons possibles, tout en couvrant suffisamment l'espace des paramètres~\cite{bergstra2012}.
+\begin{sloppypar}
+\textbf{Tuning par RandomizedSearchCV}~\cite{bergstra2012}~: les hyperparamètres ($\lambda$, \texttt{max\_depth}, \texttt{learning\_rate}\ldots) sont fixés avant l'entraînement et ne peuvent pas être appris depuis les données. L'algorithme tire aléatoirement \texttt{n\_iter=20} combinaisons d'hyperparamètres et les évalue par validation croisée~: bien plus rapide que la grille exhaustive, pour une couverture suffisante~\cite{bergstra2012}.
+\end{sloppypar}
 
 \subsection{Résultats et analyse critique}
 
-\begin{table}[h]
+\begin{table}[htbp]
 \centering
 \caption{Résultats de régression (variable cible~: \texttt{cholesterol})}
 \label{tab:regression_results}
@@ -127,7 +134,7 @@ Le choix de la métrique principale est ici non trivial. L'accuracy (75\% pour u
 
 \subsection{Résultats et analyse critique}
 
-\begin{table}[h]
+\begin{table}[htbp]
 \centering
 \caption{Résultats de classification (variable cible~: \texttt{disease\_risk})}
 \label{tab:classif_results}
@@ -145,14 +152,14 @@ XGBoost              & 0.525 & 0.246 & 0.441 & 0.316 & 0.499 \\
 
 \small\textit{$^*$ La précision du modèle naïf est indéfinie~: ce modèle prédit toujours 0, donc il n'émet jamais de prédiction positive ($TP = 0$, $FP = 0$), ce qui conduit à une division par zéro dans la formule $\frac{TP}{TP+FP}$.}
 
-\begin{figure}[h]
+\begin{figure}[t]
 \centering
 \includegraphics[width=0.75\textwidth]{roc_curves.png}
 \caption{Courbes ROC des trois modèles de classification (AUC $\approx$ 0.5 pour tous)}
 \label{fig:roc}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[t]
 \centering
 \includegraphics[width=\textwidth]{confusion_matrices.png}
 \caption{Matrices de confusion des trois modèles de classification}

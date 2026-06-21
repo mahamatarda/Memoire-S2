@@ -50,11 +50,13 @@ L'enjeu est donc double~: comprendre comment les habitudes de vie se traduisent 
 
 Le projet s'appuie sur le \textit{Health \& Lifestyle Dataset}, un jeu de données synthétique disponible sur Kaggle, composé de \textbf{100~000 individus} décrits par \textbf{15 variables}~:
 
+\begin{sloppypar}
 \begin{itemize}
   \item \textbf{Habitudes de vie}~: \texttt{daily\_steps}, \texttt{sleep\_hours}, \texttt{water\_intake\_l}, \texttt{calories\_consumed}, \texttt{smoker}, \texttt{alcohol}.
   \item \textbf{Indicateurs biologiques}~: \texttt{bmi}, \texttt{resting\_hr}, \texttt{systolic\_bp}, \texttt{diastolic\_bp}, \texttt{cholesterol}.
   \item \textbf{Caractéristiques personnelles}~: \texttt{age}, \texttt{gender}, \texttt{family\_history}.
 \end{itemize}
+\end{sloppypar}
 
 La variable cible principale est \texttt{disease\_risk}, un indicateur binaire (0/1) indiquant si un individu est considéré à risque de maladie. Bien que synthétique, ce dataset respecte des distributions statistiquement réalistes~\cite{chawla2002}. Les données synthétiques sont générées algorithmiquement et ne correspondent à aucun individu réel~: elles permettent de développer et tester des méthodes sans risque de ré-identification, contrairement aux données médicales réelles qui sont soumises au Règlement Général sur la Protection des Données (RGPD)~\cite{rgpd2016}.
 

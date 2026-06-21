@@ -4,11 +4,19 @@
 
 \subsection{Présentation générale du dataset}
 
-Le jeu de données contient \textbf{100~000 observations} décrites par \textbf{15 variables} (l'identifiant \texttt{id} est exclu). On distingue trois types~: variables continues --- \texttt{age} (âge), \texttt{bmi} (IMC), \texttt{daily\_steps} (nombre de pas quotidiens), \texttt{sleep\_hours} (heures de sommeil), \texttt{cholesterol} (cholestérol), \texttt{systolic\_bp} et \texttt{diastolic\_bp} (pressions artérielles), \texttt{resting\_hr} (fréquence cardiaque au repos) --- variables binaires (\texttt{smoker}, \texttt{alcohol}, \texttt{family\_history}, \texttt{disease\_risk}), et une variable catégorielle (\texttt{gender}). \textbf{Aucune valeur manquante} n'est détectée, ce qui s'explique par la nature synthétique des données.
+Le jeu de données contient \textbf{100~000 observations} décrites par \textbf{15 variables} (l'identifiant \texttt{id} est exclu), réparties en trois types~:
+\begin{sloppypar}
+\begin{itemize}
+  \item \textbf{Variables continues~:} \texttt{age}, \texttt{bmi}, \texttt{daily\_steps}, \texttt{sleep\_hours}, \texttt{cholesterol}, \texttt{resting\_hr}, \texttt{systolic\_bp}, \texttt{diastolic\_bp} (pressions artérielles).
+  \item \textbf{Variables binaires~:} \texttt{smoker}, \texttt{alcohol}, \texttt{family\_history}, \texttt{disease\_risk}.
+  \item \textbf{Variable catégorielle~:} \texttt{gender}.
+\end{itemize}
+\end{sloppypar}
+\textbf{Aucune valeur manquante} n'est détectée, ce qui s'explique par la nature synthétique des données.
 
 \subsection{Statistiques descriptives}
 
-\begin{table}[h]
+\begin{table}[htbp]
 \centering
 \caption{Statistiques descriptives des variables continues}
 \label{tab:desc_stats}
@@ -35,7 +43,7 @@ Variable & Moyenne & Écart-type & Min & Max \\
 
 Toutes les variables continues affichent un skewness inférieur à $|0.02|$ --- distributions \textbf{quasi-uniformes}, signature directe de la génération synthétique aléatoire. Une distribution réelle de l'IMC ou du cholestérol présenterait une asymétrie droite (valeurs extrêmes plus fréquentes vers le haut), ce qui nécessiterait une transformation logarithmique avant modélisation. L'absence d'asymétrie ici est donc un premier signal de la nature artificielle des données, pas une propriété favorable de la population.
 
-\begin{figure}[h]
+\begin{figure}[t]
 \centering
 \includegraphics[width=\textwidth]{distributions_continues.png}
 \caption{Distributions des variables continues du dataset}
@@ -44,7 +52,7 @@ Toutes les variables continues affichent un skewness inférieur à $|0.02|$ --- 
 
 La variable cible présente un \textbf{déséquilibre des classes} (\textit{class imbalance problem}~\cite{japkowicz2002})~: 75~179 individus (75.2\%) sont sans risque contre seulement 24~821 (24.8\%) à risque. Le problème concret est le suivant~: un modèle naïf qui prédit \textit{toujours} "sans risque" obtient déjà 75\% d'accuracy --- sans avoir rien appris. L'accuracy seule est donc une métrique trompeuse~: elle ne distingue pas un bon modèle d'un modèle inutile. C'est pourquoi on privilégie le F1-score, la précision, le rappel et l'AUC-ROC, qui mesurent réellement la capacité à détecter les deux classes~\cite{sokolova2009}.
 
-\begin{figure}[h]
+\begin{figure}[t]
 \centering
 \includegraphics[width=0.55\textwidth]{disease_risk_distribution.png}
 \caption{Distribution de la variable cible \texttt{disease\_risk} (déséquilibre 75/25)}
@@ -53,58 +61,54 @@ La variable cible présente un \textbf{déséquilibre des classes} (\textit{clas
 
 \subsection{Analyse des corrélations}
 
-\begin{figure}[h]
+\begin{figure}[t]
 \centering
 \includegraphics[width=0.8\textwidth]{correlation_matrix.png}
 \caption{Matrice de corrélation de Pearson entre toutes les variables du dataset}
 \label{fig:corr_matrix}
 \end{figure}
 
-\begin{quote}
-\textbf{Résultat central~:} Les corrélations calculées sur le dataset (notebook 01\_EDA) sont toutes inférieures à $|0.01|$. La variable la plus corrélée avec \texttt{disease\_risk} est \texttt{resting\_hr} avec $r = 0.01$ --- statistiquement non significatif sur 100~000 individus. Cela confirme que la variable cible a été générée indépendamment des autres variables.
+\begin{sloppypar}
+\textbf{Résultat central~:} Les corrélations calculées sur le dataset sont toutes inférieures à $|0.01|$. La variable la plus corrélée avec \texttt{disease\_risk} est \texttt{resting\_hr} avec $r = 0.01$ --- statistiquement non significatif sur 100~000 individus. Cela confirme que la variable cible a été générée indépendamment des autres variables.
 
-\textbf{Au-delà de Pearson~: trois analyses complémentaires.} Pearson ne détecte que les relations \textit{linéaires}. Trois approches ont été appliquées pour explorer les dépendances non-linéaires~:
-
+\textbf{Au-delà de Pearson~: trois analyses complémentaires.} Pearson ne détecte que les relations linéaires. Trois approches ont été appliquées pour explorer les dépendances non-linéaires~:
 \begin{enumerate}
-  \item \textbf{Corrélation de Spearman} (corrélation des rangs)~: capte toute relation monotone non-linéaire. Résultat~: corrélations de Spearman inférieures à $|0.01|$ pour toutes les paires, identiques aux corrélations de Pearson (Figure~\ref{fig:pearson_vs_spearman}). Aucune relation monotone non-linéaire n'est présente.
-
-  \item \textbf{Information Mutuelle} (\texttt{mutual\_info\_classif} / \texttt{mutual\_info\_regression} de scikit-learn)~: mesure \textit{toute} dépendance statistique, quelle que soit sa forme. Résultat~: MI~$\approx 0$ pour toutes les features vis-à-vis de \texttt{disease\_risk} et de \texttt{cholesterol} (Figure~\ref{fig:mutual_information}). Aucune dépendance, même non-linéaire, non-monotone, ou de type interaction.
-
-  \item \textbf{Nuages de points et tests non-paramétriques}~: les scatter plots (Figure~\ref{fig:scatter_chol}) montrent des nuages uniformes sans structure visible. Le test de Mann-Whitney U (non-paramétrique, sans hypothèse de normalité) confirme des différences négligeables entre groupes~: taille d'effet $r < 0.01$ pour toutes les variables.
+  \item \textbf{Corrélation de Spearman}~: corrélations inférieures à $|0.01|$ pour toutes les paires, identiques à Pearson (Figure~\ref{fig:pearson_vs_spearman}). Aucune relation monotone non-linéaire détectée.
+  \item \textbf{Information Mutuelle} (\texttt{mutual\_info\_classif} et \texttt{mutual\_info\_regression})~: MI~$\approx 0$ pour toutes les features vis-à-vis des deux cibles (Figure~\ref{fig:mutual_information}). Aucune dépendance statistique, quelle que soit sa forme.
+  \item \textbf{Nuages de points et Mann-Whitney U}~: nuages uniformes sans structure (Figure~\ref{fig:scatter_chol}), taille d'effet $r < 0.01$ pour toutes les variables.
 \end{enumerate}
+Ces trois analyses convergent avec les résultats des modèles non-linéaires (chapitres suivants)~: l'absence de signal est robuste quelle que soit la méthode~\cite{breiman2001}.
+\end{sloppypar}
 
-Ces trois analyses convergent avec les résultats des modèles non-linéaires (Random Forest, XGBoost, chapitres suivants)~: l'absence de signal est robuste, quelle que soit la méthode utilisée pour le chercher~\cite{breiman2001}.
-\end{quote}
-
-\begin{figure}[h]
+\begin{figure}[t]
 \centering
 \includegraphics[width=0.75\textwidth]{correlations_target.png}
 \caption{Corrélations de chaque variable avec la cible \texttt{disease\_risk}}
 \label{fig:corr_target}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[t]
 \centering
 \includegraphics[width=\textwidth]{pearson_vs_spearman.png}
 \caption{Pearson vs Spearman sur \texttt{disease\_risk} et \texttt{cholesterol} --- les deux méthodes donnent des valeurs quasi-nulles}
 \label{fig:pearson_vs_spearman}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[t]
 \centering
 \includegraphics[width=\textwidth]{mutual_information.png}
 \caption{Information Mutuelle des features avec \texttt{disease\_risk} et \texttt{cholesterol} --- MI~$\approx 0$ confirme l'absence de toute dépendance statistique}
 \label{fig:mutual_information}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[t]
 \centering
 \includegraphics[width=\textwidth]{scatter_vs_cholesterol.png}
 \caption{Nuages de points~: variables vs \texttt{cholesterol} (n=5~000) --- la ligne de tendance est quasi-plate pour toutes les variables}
 \label{fig:scatter_chol}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[t]
 \centering
 \includegraphics[width=\textwidth]{boxplots_by_risk.png}
 \caption{Distribution des variables selon \texttt{disease\_risk}~: les deux groupes sont quasi-indiscernables}
@@ -113,10 +117,11 @@ Ces trois analyses convergent avec les résultats des modèles non-linéaires (R
 
 \subsection{Bilan de l'EDA}
 
-\begin{table}[h]
+\begin{table}[htbp]
 \centering
 \caption{Bilan de l'analyse exploratoire}
 \label{tab:eda_bilan}
+\resizebox{\textwidth}{!}{%
 \begin{tabular}{lll}
 \toprule
 Point & Constat & Implication \\
@@ -127,7 +132,7 @@ Outliers & Aucun (méthode IQR) & Pas de traitement nécessaire \\
 Corrélations & Quasi-nulles ($< 0.01$) & Privilégier modèles non-linéaires \\
 Classe cible & Déséquilibrée (75/25) & Utiliser F1-score, AUC-ROC, SMOTE \\
 \bottomrule
-\end{tabular}
+\end{tabular}}
 \end{table}
 
 \textbf{Méthode IQR pour la détection des outliers.} La règle $\pm 1.5 \times \text{IQR}$ appliquée à chaque variable continue ne détecte aucun outlier. Là encore, ce résultat s'explique par la génération synthétique~: toutes les valeurs se distribuent uniformément entre un minimum et un maximum fixés, sans queue de distribution. Sur des données réelles, des cas extrêmes (IMC~> 45, cholestérol~> 350~mg/dL) apparaîtraient systématiquement et nécessiteraient une décision explicite de traitement ou de conservation~\cite{james2021}.

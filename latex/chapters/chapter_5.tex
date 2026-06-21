@@ -8,10 +8,11 @@ Ce projet a été conduit en suivant le cycle \textbf{CRISP-DM}~\cite{chapman200
 
 \subsection{Outils et environnement technique}
 
-\begin{table}[h]
+\begin{table}[htbp]
 \centering
 \caption{Stack technique du projet}
 \label{tab:tech_stack}
+\resizebox{\textwidth}{!}{%
 \begin{tabular}{lll}
 \toprule
 Catégorie & Outil & Usage \\
@@ -25,15 +26,16 @@ Réduction de dim.    & scikit-learn (PCA)        & Visualisation clustering \\
 Versionnement        & Git / GitHub              & Suivi des notebooks et du rapport \\
 Rédaction            & \LaTeX                    & Mémoire \\
 \bottomrule
-\end{tabular}
+\end{tabular}}
 \end{table}
 
 \subsection{Compétences mobilisées}
 
-\begin{table}[h]
+\begin{table}[htbp]
 \centering
 \caption{Lien entre enseignements MIASHS et applications projet}
 \label{tab:competences}
+\resizebox{\textwidth}{!}{%
 \begin{tabular}{ll}
 \toprule
 Enseignement M1 & Application dans le projet \\
@@ -48,7 +50,7 @@ Régularisation \& optimisation     & Ridge, Lasso, ElasticNet \\
 Déséquilibre de classes            & class\_weight, SMOTE (imbalanced-learn) \\
 Python                             & Ensemble du pipeline de data science \\
 \bottomrule
-\end{tabular}
+\end{tabular}}
 \end{table}
 
 \section{Difficultés rencontrées et retour d'expérience}
@@ -59,14 +61,14 @@ Python                             & Ensemble du pipeline de data science \\
 
 \textbf{La détection du data leakage} sur \texttt{hypercholesterol}~\cite{kaufman2012} est une difficulté classique en ML, rarement rencontrée dans les travaux académiques. Le $R^2$ artificiel de 0.675 aurait pu passer inaperçu sans une analyse rigoureuse des feature importances.
 
-\textbf{Le coût computationnel}~: un premier essai de Random Forest sans \texttt{max\_depth} ni \texttt{n\_jobs=-1} a conduit à un entraînement de plus de 3 heures interrompu avant convergence. Ça m'a forcé à comprendre les paramètres internes de l'algorithme. Le SVM a été écarté pour la même raison, sa complexité en $\mathcal{O}(n^2)$ étant incompatible avec 100~000 observations.
+\textbf{Le coût computationnel}~: un premier essai de Random Forest sans contraintes de profondeur ni parallélisation a conduit à un entraînement de plus de 3 heures interrompu avant convergence. Cela m'a forcé à comprendre les paramètres internes (\texttt{max\_depth}, \texttt{n\_jobs}). Le SVM a été écarté pour la même raison~: complexité $\mathcal{O}(n^2)$ incompatible avec 100~000 observations.
 
 \subsection{Compétences acquises}
 
 \begin{itemize}
   \item \textbf{Détection et correction du data leakage}~\cite{kaufman2012}~: piège courant non systématiquement couvert en cours théoriques.
   \item \textbf{RandomizedSearchCV}~\cite{bergstra2012}~: logique de l'exploration aléatoire vs exhaustive des hyperparamètres.
-  \item \textbf{Gestion du déséquilibre de classes}~: comparaison concrète entre \texttt{class\_weight='balanced'} et SMOTE~\cite{chawla2002}, et compréhension de la différence entre accuracy, F1-score et AUC-ROC~\cite{sokolova2009}.
+  \item \textbf{Gestion du déséquilibre de classes}~: comparaison concrète entre ajustement des poids (\texttt{class\_weight}) et SMOTE~\cite{chawla2002}, et maîtrise de la différence entre accuracy, F1-score et AUC-ROC~\cite{sokolova2009}.
   \item \textbf{Interprétabilité multi-méthodes}~: la divergence entre outils est elle-même informative~\cite{rudin2019}.
   \item \textbf{Analyse critique d'un résultat négatif}~: savoir diagnostiquer pourquoi un modèle échoue est aussi précieux que d'en construire un qui réussit.
 \end{itemize}
