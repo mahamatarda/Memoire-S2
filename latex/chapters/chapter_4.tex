@@ -26,7 +26,7 @@ s(i) = \frac{b(i) - a(i)}{\max(a(i),\, b(i))}
 \end{equation}
 où $a(i)$ est la distance moyenne de l'individu $i$ aux autres membres de son cluster, et $b(i)$ la distance moyenne au cluster voisin le plus proche. Une valeur proche de 1 indique une bonne séparation.
 
-\begin{table}[htbp]
+\begin{table}[H]
 \centering
 \caption{Inertie et silhouette selon $k$ (K-Means)}
 \label{tab:kmeans_k}
@@ -45,7 +45,7 @@ $k$ & Inertie & Silhouette \\
 
 $k=3$ maximise la silhouette et correspond au coude de la courbe d'inertie. \textbf{$k=3$ est retenu.}
 
-\begin{figure}[t]
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.85\textwidth]{kmeans_selection_k.png}
 \caption{Inertie intra-cluster et coefficient de silhouette selon $k$ (K-Means)}
@@ -58,7 +58,7 @@ $k=3$ maximise la silhouette et correspond au coude de la courbe d'inertie. \tex
 
 L'algorithme K-Means~\cite{macqueen1967} alterne affectation au centroïde le plus proche et mise à jour des centroïdes~: $\boldsymbol{\mu}_j = \frac{1}{|C_j|}\sum_{\mathbf{x} \in C_j} \mathbf{x}$, jusqu'à convergence.
 
-\begin{table}[htbp]
+\begin{table}[H]
 \centering
 \caption{Profils des clusters K-Means ($k=3$)}
 \label{tab:kmeans_profiles}
@@ -89,7 +89,7 @@ La \textbf{méthode de liaison Ward} définit le coût de fusion de $A$ et $B$ c
 \end{equation}
 Ward minimise ce coût à chaque étape, favorisant des clusters \textbf{compacts et équilibrés}~--- d'où sa sensibilité aux sous-groupes comportementaux homogènes dans nos données.
 
-\begin{table}[htbp]
+\begin{table}[H]
 \centering
 \caption{Profils des clusters CAH ($k=3$, $n=5~000$)}
 \label{tab:cah_profiles}
@@ -126,7 +126,7 @@ DB = \frac{1}{k}\sum_{i=1}^{k}\max_{j \neq i}\left(\frac{\sigma_i + \sigma_j}{d(
 \end{equation}
 où $\sigma_i$ est la dispersion moyenne des points du cluster $i$ autour de son centroïde, et $d(\boldsymbol{\mu}_i, \boldsymbol{\mu}_j)$ la distance entre les centroïdes $i$ et $j$. \textbf{Un DB proche de 0 est idéal}~: les clusters sont compacts (faible $\sigma$) et bien séparés (grande distance). Un DB élevé indique des clusters éparpillés ou trop proches les uns des autres. Contrairement à la silhouette qui évalue chaque point individuellement, Davies-Bouldin évalue chaque paire de clusters~: les deux métriques sont complémentaires.
 
-\begin{table}[htbp]
+\begin{table}[H]
 \centering
 \caption{Comparaison K-Means vs CAH}
 \label{tab:clustering_eval}
@@ -143,7 +143,7 @@ Variance ACP (2D) & \multicolumn{2}{c}{24.3\%} & Projection insuffisante (15 dim
 
 Malgré des silhouettes faibles ($\approx 0.10$), les deux méthodes révèlent des structures interprétables médicalement~\cite{booth2012, who2000}~: obèse hypertendu (K-Means), fumeurs intenses + hypertendus (CAH). La faible silhouette reflète l'absence de groupes naturels francs dans des données synthétiques générées sans structure causale --- pas une erreur méthodologique.
 
-\begin{figure}[t]
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.85\textwidth]{kmeans_pca.png}
 \caption{Visualisation des clusters K-Means ($k=3$) par projection ACP (2 composantes, 24.3\% de variance)}
@@ -185,7 +185,7 @@ Sur des données avec un signal réel, on verrait un gradient net~: par exemple,
 
 Le tableau suivant synthétise la présence de chaque variable dans le top~5 des cinq méthodes~:
 
-\begin{table}[htbp]
+\begin{table}[H]
 \centering
 \caption{Variables dans le top 5 de chaque méthode d'interprétabilité}
 \label{tab:interpretability}
@@ -201,21 +201,21 @@ Variable & LR & RF & XGB & SHAP & Ridge & Score \\
 \end{tabular}
 \end{table}
 
-\begin{figure}[t]
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.75\textwidth]{lr_coefficients.png}
 \caption{Coefficients de la régression logistique (variables standardisées)}
 \label{fig:lr_coef}
 \end{figure}
 
-\begin{figure}[t]
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.75\textwidth]{rf_feature_importance.png}
 \caption{Feature importances (impureté de Gini) du Random Forest}
 \label{fig:rf_fi}
 \end{figure}
 
-\begin{figure}[t]
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.85\textwidth]{shap_summary.png}
 \caption{SHAP summary plot (XGBoost) --- complément visuel d'interprétabilité}

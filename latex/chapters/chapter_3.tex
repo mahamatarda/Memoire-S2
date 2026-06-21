@@ -74,7 +74,7 @@ XGBoost est généralement plus performant que RF sur données tabulaires~\cite{
 
 \subsection{Résultats et analyse critique}
 
-\begin{table}[htbp]
+\begin{table}[H]
 \centering
 \caption{Résultats de régression (variable cible~: \texttt{cholesterol})}
 \label{tab:regression_results}
@@ -136,7 +136,7 @@ Le choix de la métrique principale est ici non trivial. L'accuracy (75\% pour u
 
 \subsection{Résultats et analyse critique}
 
-\begin{table}[htbp]
+\begin{table}[H]
 \centering
 \caption{Résultats de classification (variable cible~: \texttt{disease\_risk})}
 \label{tab:classif_results}
@@ -154,14 +154,14 @@ XGBoost              & 0.525 & 0.246 & 0.441 & 0.316 & 0.499 \\
 
 \small\textit{$^*$ La précision du modèle naïf est indéfinie~: ce modèle prédit toujours 0, donc il n'émet jamais de prédiction positive ($TP = 0$, $FP = 0$), ce qui conduit à une division par zéro dans la formule $\frac{TP}{TP+FP}$.}
 
-\begin{figure}[t]
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.75\textwidth]{roc_curves.png}
 \caption{Courbes ROC des trois modèles de classification (AUC $\approx$ 0.5 pour tous)}
 \label{fig:roc}
 \end{figure}
 
-\begin{figure}[t]
+\begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{confusion_matrices.png}
 \caption{Matrices de confusion des trois modèles de classification}

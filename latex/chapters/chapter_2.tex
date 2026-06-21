@@ -16,7 +16,7 @@ Le jeu de données contient \textbf{100~000 observations} décrites par \textbf{
 
 \subsection{Statistiques descriptives}
 
-\begin{table}[htbp]
+\begin{table}[H]
 \centering
 \caption{Statistiques descriptives des variables continues}
 \label{tab:desc_stats}
@@ -45,14 +45,14 @@ Toutes les variables continues affichent un skewness inférieur à $|0.02|$ --- 
 
 La variable cible présente un \textbf{déséquilibre des classes} (\textit{class imbalance problem}~\cite{japkowicz2002})~: 75~179 individus (75.2\%) sont sans risque contre seulement 24~821 (24.8\%) à risque. Le problème concret est le suivant~: un modèle naïf qui prédit \textit{toujours} "sans risque" obtient déjà 75\% d'accuracy --- sans avoir rien appris. L'accuracy seule est donc une métrique trompeuse~: elle ne distingue pas un bon modèle d'un modèle inutile. C'est pourquoi on privilégie le F1-score, la précision, le rappel et l'AUC-ROC, qui mesurent réellement la capacité à détecter les deux classes~\cite{sokolova2009}.
 
-\begin{figure}[t]
+\begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{distributions_continues.png}
 \caption{Distributions des variables continues du dataset}
 \label{fig:distributions}
 \end{figure}
 
-\begin{figure}[t]
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.55\textwidth]{disease_risk_distribution.png}
 \caption{Distribution de la variable cible \texttt{disease\_risk} (déséquilibre 75/25)}
@@ -75,42 +75,42 @@ La variable cible présente un \textbf{déséquilibre des classes} (\textit{clas
 Ces trois analyses convergent avec les résultats des modèles non-linéaires (chapitres suivants)~: l'absence de signal est robuste quelle que soit la méthode~\cite{breiman2001}.
 \end{sloppypar}
 
-\begin{figure}[t]
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.8\textwidth]{correlation_matrix.png}
 \caption{Matrice de corrélation de Pearson entre toutes les variables du dataset}
 \label{fig:corr_matrix}
 \end{figure}
 
-\begin{figure}[t]
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.75\textwidth]{correlations_target.png}
 \caption{Corrélations de chaque variable avec la cible \texttt{disease\_risk}}
 \label{fig:corr_target}
 \end{figure}
 
-\begin{figure}[t]
+\begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{pearson_vs_spearman.png}
 \caption{Pearson vs Spearman sur \texttt{disease\_risk} et \texttt{cholesterol} --- les deux méthodes donnent des valeurs quasi-nulles}
 \label{fig:pearson_vs_spearman}
 \end{figure}
 
-\begin{figure}[t]
+\begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{mutual_information.png}
 \caption{Information Mutuelle des features avec \texttt{disease\_risk} et \texttt{cholesterol} --- MI~$\approx 0$ confirme l'absence de toute dépendance statistique}
 \label{fig:mutual_information}
 \end{figure}
 
-\begin{figure}[t]
+\begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{scatter_vs_cholesterol.png}
 \caption{Nuages de points~: variables vs \texttt{cholesterol} (n=5~000) --- la ligne de tendance est quasi-plate pour toutes les variables}
 \label{fig:scatter_chol}
 \end{figure}
 
-\begin{figure}[t]
+\begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{boxplots_by_risk.png}
 \caption{Distribution des variables selon \texttt{disease\_risk}~: les deux groupes sont quasi-indiscernables}
@@ -121,7 +121,7 @@ Ces trois analyses convergent avec les résultats des modèles non-linéaires (c
 
 \subsection{Bilan de l'EDA}
 
-\begin{table}[htbp]
+\begin{table}[H]
 \centering
 \caption{Bilan de l'analyse exploratoire}
 \label{tab:eda_bilan}
