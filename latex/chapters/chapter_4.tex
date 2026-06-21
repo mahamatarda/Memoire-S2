@@ -52,6 +52,8 @@ $k=3$ maximise la silhouette et correspond au coude de la courbe d'inertie. \tex
 \label{fig:kmeans_k}
 \end{figure}
 
+\FloatBarrier
+
 \subsection{K-Means}
 
 L'algorithme K-Means~\cite{macqueen1967} alterne affectation au centroïde le plus proche et mise à jour des centroïdes~: $\boldsymbol{\mu}_j = \frac{1}{|C_j|}\sum_{\mathbf{x} \in C_j} \mathbf{x}$, jusqu'à convergence.
@@ -74,6 +76,8 @@ Cluster & Taille & IMC moyen & Syst. (mmHg) & Profil \\
 \begin{quote}
 \textbf{Interprétation~:} K-Means partitionne la population selon l'\textbf{IMC} et la \textbf{pression artérielle systolique}. Ce résultat s'explique par la sensibilité de K-Means aux variables à grande variance~: dans notre dataset, \texttt{bmi} (écart-type = 6.3) et \texttt{systolic\_bp} (écart-type = 26.0) ont les dispersions les plus larges après standardisation, ce qui les rend naturellement "dominantes" pour la distance euclidienne. Le cluster~1 regroupe les individus les plus sains (surpoids mais normotendus), tandis que les clusters~0 et~2 correspondent à deux profils à risque cardiovasculaire distincts selon la classification OMS~\cite{who2000} et ESC~\cite{esc2018}.
 \end{quote}
+
+\FloatBarrier
 
 \subsection{Classification Hiérarchique Ascendante (CAH)}
 
@@ -103,6 +107,8 @@ Cluster & Taille & Fumeurs & Syst. (mmHg) & Profil \\
 \begin{quote}
 \textbf{Interprétation~:} La CAH isole un \textbf{cluster de fumeurs intenses} (100\% de fumeurs + hypertendus). Ce résultat s'explique par la nature de l'algorithme~: Ward cherche des sous-groupes \textit{homogènes}, y compris sur des variables binaires comme \texttt{smoker}. K-Means, guidé par les grandes variances numériques, n'aurait pas isolé ce groupe de 665 individus --- il les aurait dilués dans les clusters dominés par l'IMC et la pression. Les deux méthodes sont donc \textbf{complémentaires}~: K-Means donne une vue globale par dimensions biologiques continues, la CAH révèle des sous-groupes comportementaux fins. Le profil tabagisme + hypertension est un double facteur de risque cardiovasculaire bien documenté~\cite{booth2012}.
 \end{quote}
+
+\FloatBarrier
 
 \subsection{Évaluation et visualisation}
 
@@ -135,6 +141,8 @@ Variance ACP (2D) & \multicolumn{2}{c}{24.3\%} & Projection insuffisante (15 dim
 \end{tabular}
 \end{table}
 
+Malgré des silhouettes faibles ($\approx 0.10$), les deux méthodes révèlent des structures interprétables médicalement~\cite{booth2012, who2000}~: obèse hypertendu (K-Means), fumeurs intenses + hypertendus (CAH). La faible silhouette reflète l'absence de groupes naturels francs dans des données synthétiques générées sans structure causale --- pas une erreur méthodologique.
+
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.85\textwidth]{kmeans_pca.png}
@@ -142,7 +150,7 @@ Variance ACP (2D) & \multicolumn{2}{c}{24.3\%} & Projection insuffisante (15 dim
 \label{fig:kmeans_pca}
 \end{figure}
 
-Malgré des silhouettes faibles ($\approx 0.10$), les deux méthodes révèlent des structures interprétables médicalement~\cite{booth2012, who2000}~: obèse hypertendu (K-Means), fumeurs intenses + hypertendus (CAH). La faible silhouette reflète l'absence de groupes naturels francs dans des données synthétiques générées sans structure causale --- pas une erreur méthodologique.
+\FloatBarrier
 
 % ─────────────────────────────────────────────────────────────
 \section{Interprétabilité des modèles}
@@ -169,27 +177,6 @@ Les cinq méthodes d'interprétabilité (coefficients LR, Ridge, feature importa
 Sur des données réelles~\cite{booth2012, who2000}, on s'attendrait à voir la pression artérielle, le cholestérol LDL, le tabagisme, l'IMC et l'activité physique dominer clairement les classements, avec des coefficients significativement différents de zéro.
 \end{quote}
 
-\begin{figure}[t]
-\centering
-\includegraphics[width=0.75\textwidth]{lr_coefficients.png}
-\caption{Coefficients de la régression logistique (variables standardisées)}
-\label{fig:lr_coef}
-\end{figure}
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=0.75\textwidth]{rf_feature_importance.png}
-\caption{Feature importances (impureté de Gini) du Random Forest}
-\label{fig:rf_fi}
-\end{figure}
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=0.85\textwidth]{shap_summary.png}
-\caption{SHAP summary plot (XGBoost) --- complément visuel d'interprétabilité}
-\label{fig:shap}
-\end{figure}
-
 \begin{quote}
 \textbf{Comment lire le SHAP summary plot~?} Chaque \textbf{ligne} correspond à une variable, triée de haut en bas par importance décroissante (impact moyen en valeur absolue). Sur chaque ligne, chaque \textbf{point} représente un individu. L'\textbf{axe horizontal} indique l'impact SHAP sur la prédiction~: un point à droite ($x > 0$) signifie que la variable pousse la prédiction vers 1 (\texttt{disease\_risk} élevé)~; un point à gauche ($x < 0$) la pousse vers 0~; en $x = 0$, aucun impact. La \textbf{couleur} encode la valeur réelle de la variable~: rouge = valeur élevée, bleu = valeur faible.
 
@@ -213,3 +200,26 @@ Variable & LR & RF & XGB & SHAP & Ridge & Score \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.75\textwidth]{lr_coefficients.png}
+\caption{Coefficients de la régression logistique (variables standardisées)}
+\label{fig:lr_coef}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.75\textwidth]{rf_feature_importance.png}
+\caption{Feature importances (impureté de Gini) du Random Forest}
+\label{fig:rf_fi}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.85\textwidth]{shap_summary.png}
+\caption{SHAP summary plot (XGBoost) --- complément visuel d'interprétabilité}
+\label{fig:shap}
+\end{figure}
+
+\FloatBarrier

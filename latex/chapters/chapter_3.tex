@@ -98,6 +98,8 @@ XGBoost (tuné)               & 0.0001  & 43.33 & 37.59 & $\approx 0$ \\
 
 \textbf{Quel est le meilleur modèle en régression~?} Aucun ne peut être retenu. Les différences entre modèles sont négligeables ($R^2$ entre $-0.005$ et $0.0001$)~: le \og meilleur \fg{} sur le jeu de test (XGBoost tuné, $R^2=0.0001$) n'est pas statistiquement différent de la baseline linéaire. Sélectionner un modèle ici n'aurait aucun sens~--- tous prédisent essentiellement la moyenne du cholestérol (224.3~mg/dL) pour chaque individu.
 
+\FloatBarrier
+
 % ─────────────────────────────────────────────────────────────
 \section{Classification~: prédire le risque de maladie}
 
@@ -165,6 +167,8 @@ XGBoost              & 0.525 & 0.246 & 0.441 & 0.316 & 0.499 \\
 \caption{Matrices de confusion des trois modèles de classification}
 \label{fig:confusion}
 \end{figure}
+
+\FloatBarrier
 
 \begin{quote}
 \textbf{Analyse critique~:} La colonne \textbf{AUC-ROC} est la métrique centrale~: tous les modèles affichent AUC~$\approx 0.5$, ce qui signifie qu'aucun ne discrimine mieux qu'un tirage aléatoire~\cite{james2021}. L'accuracy seule est trompeuse~: Random Forest affiche 56.8\% d'accuracy mais une AUC de \textbf{0.494~--- inférieure au modèle naïf} (0.500). En pratique, un Random Forest à 56.8\% d'accuracy est pire qu'un modèle qui dit toujours "sans risque", en termes de capacité à distinguer les deux classes. Cela illustre pourquoi l'accuracy seule est dangereuse sur des données déséquilibrées~\cite{sokolova2009}~: elle peut masquer un modèle inutile derrière un chiffre élevé.

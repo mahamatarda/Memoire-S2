@@ -13,6 +13,8 @@ Ce qui m'intéresse ici, c'est cette idée que les maladies chroniques ne tomben
 \label{fig:ml_overview}
 \end{figure}
 
+\FloatBarrier
+
 \section{Régression~: prédire des indicateurs biologiques}
 
 La régression linéaire reste l'une des méthodes les plus utilisées en statistique appliquée à la santé~\cite{james2021}. Mais elle a des hypothèses fortes, d'où le développement de variantes plus robustes. La régression Ridge~\cite{hoerl1970} ajoute une pénalité $\lambda \|\mathbf{w}\|_2^2$ qui réduit les coefficients sans jamais les annuler --- utile quand les variables sont peu informatives. La régression Lasso~\cite{tibshirani1996} utilise une pénalisation $L_1$ qui force certains coefficients exactement à zéro, ce qui revient à une \textbf{sélection automatique de variables} --- c'est une propriété vraiment pratique.

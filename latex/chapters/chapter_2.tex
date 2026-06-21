@@ -43,14 +43,14 @@ Variable & Moyenne & Écart-type & Min & Max \\
 
 Toutes les variables continues affichent un skewness inférieur à $|0.02|$ --- distributions \textbf{quasi-uniformes}, signature directe de la génération synthétique aléatoire. Une distribution réelle de l'IMC ou du cholestérol présenterait une asymétrie droite (valeurs extrêmes plus fréquentes vers le haut), ce qui nécessiterait une transformation logarithmique avant modélisation. L'absence d'asymétrie ici est donc un premier signal de la nature artificielle des données, pas une propriété favorable de la population.
 
+La variable cible présente un \textbf{déséquilibre des classes} (\textit{class imbalance problem}~\cite{japkowicz2002})~: 75~179 individus (75.2\%) sont sans risque contre seulement 24~821 (24.8\%) à risque. Le problème concret est le suivant~: un modèle naïf qui prédit \textit{toujours} "sans risque" obtient déjà 75\% d'accuracy --- sans avoir rien appris. L'accuracy seule est donc une métrique trompeuse~: elle ne distingue pas un bon modèle d'un modèle inutile. C'est pourquoi on privilégie le F1-score, la précision, le rappel et l'AUC-ROC, qui mesurent réellement la capacité à détecter les deux classes~\cite{sokolova2009}.
+
 \begin{figure}[t]
 \centering
 \includegraphics[width=\textwidth]{distributions_continues.png}
 \caption{Distributions des variables continues du dataset}
 \label{fig:distributions}
 \end{figure}
-
-La variable cible présente un \textbf{déséquilibre des classes} (\textit{class imbalance problem}~\cite{japkowicz2002})~: 75~179 individus (75.2\%) sont sans risque contre seulement 24~821 (24.8\%) à risque. Le problème concret est le suivant~: un modèle naïf qui prédit \textit{toujours} "sans risque" obtient déjà 75\% d'accuracy --- sans avoir rien appris. L'accuracy seule est donc une métrique trompeuse~: elle ne distingue pas un bon modèle d'un modèle inutile. C'est pourquoi on privilégie le F1-score, la précision, le rappel et l'AUC-ROC, qui mesurent réellement la capacité à détecter les deux classes~\cite{sokolova2009}.
 
 \begin{figure}[t]
 \centering
@@ -59,14 +59,9 @@ La variable cible présente un \textbf{déséquilibre des classes} (\textit{clas
 \label{fig:disease_risk}
 \end{figure}
 
-\subsection{Analyse des corrélations}
+\FloatBarrier
 
-\begin{figure}[t]
-\centering
-\includegraphics[width=0.8\textwidth]{correlation_matrix.png}
-\caption{Matrice de corrélation de Pearson entre toutes les variables du dataset}
-\label{fig:corr_matrix}
-\end{figure}
+\subsection{Analyse des corrélations}
 
 \begin{sloppypar}
 \textbf{Résultat central~:} Les corrélations calculées sur le dataset sont toutes inférieures à $|0.01|$. La variable la plus corrélée avec \texttt{disease\_risk} est \texttt{resting\_hr} avec $r = 0.01$ --- statistiquement non significatif sur 100~000 individus. Cela confirme que la variable cible a été générée indépendamment des autres variables.
@@ -79,6 +74,13 @@ La variable cible présente un \textbf{déséquilibre des classes} (\textit{clas
 \end{enumerate}
 Ces trois analyses convergent avec les résultats des modèles non-linéaires (chapitres suivants)~: l'absence de signal est robuste quelle que soit la méthode~\cite{breiman2001}.
 \end{sloppypar}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.8\textwidth]{correlation_matrix.png}
+\caption{Matrice de corrélation de Pearson entre toutes les variables du dataset}
+\label{fig:corr_matrix}
+\end{figure}
 
 \begin{figure}[t]
 \centering
@@ -115,6 +117,8 @@ Ces trois analyses convergent avec les résultats des modèles non-linéaires (c
 \label{fig:boxplots_risk}
 \end{figure}
 
+\FloatBarrier
+
 \subsection{Bilan de l'EDA}
 
 \begin{table}[htbp]
@@ -136,6 +140,8 @@ Classe cible & Déséquilibrée (75/25) & Utiliser F1-score, AUC-ROC, SMOTE \\
 \end{table}
 
 \textbf{Méthode IQR pour la détection des outliers.} La règle $\pm 1.5 \times \text{IQR}$ appliquée à chaque variable continue ne détecte aucun outlier. Là encore, ce résultat s'explique par la génération synthétique~: toutes les valeurs se distribuent uniformément entre un minimum et un maximum fixés, sans queue de distribution. Sur des données réelles, des cas extrêmes (IMC~> 45, cholestérol~> 350~mg/dL) apparaîtraient systématiquement et nécessiteraient une décision explicite de traitement ou de conservation~\cite{james2021}.
+
+\FloatBarrier
 
 \section{Feature Engineering et préparation des données}
 
